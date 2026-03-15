@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 import os
+import threading
+import time
+import requests
 from supabase import Client, create_client
 from flask import Flask, request, render_template, flash, jsonify, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -20,6 +23,20 @@ ADMIN_PASSWORD = "admin"
 db = SQLAlchemy(app)
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx'}
+
+# ── KEEP-ALIVE (prevents Render free tier from sleeping) ──────────────────
+APP_URL = "https://unex.onrender.com"  # ← replace with your Render URL when deployed
+
+def keep_alive():
+    while True:
+        time.sleep(840)  # ping every 14 minutes (Render sleeps after 15)
+        try:
+            requests.get(APP_URL)
+        except Exception:
+            pass
+
+threading.Thread(target=keep_alive, daemon=True).start()
+# ─────────────────────────────────────────────────────────────────────────
 
 
 # ── MODELS ────────────────────────────────────────────────────────────────
@@ -498,4 +515,4 @@ def sponsors_page():
     return render_template('sponsors.html')
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
