@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ note.course_code }} • {{ note.academic_year or 'N/A' }} • {{ note.semester or 'N/A' }} • U-NEX</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #f97316;
+      --dark: #111827;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --accent: #10b981;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 40px 5vw;
+    }
+
+    .note-detail {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    .meta {
+      color: var(--gray);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 32px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 20px;
+    }
+
+    .meta strong {
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .meta span {
+      margin: 0 12px;
+      color: #d1d5db;
+    }
+
+    .meta .key-info {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      margin-bottom: 48px;
+    }
+
+    .description h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      color: var(--dark);
+    }
+
+    .description div {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #374151;
+    }
+
+    .file-section {
+      margin-top: 32px;
+    }
+
+    .btn-read {
+      background: var(--primary);
+      color: white;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .btn-read:hover {
+      background: #ea580c;
+      transform: translateY(-2px);
+    }
+
+    .file-render {
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 80vh;
+      min-height: 600px;
+      background: #f8fafc;
+    }
+
+    .placeholder {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .note-detail { padding: 24px; }
+      h1 { font-size: 2rem; }
+      .meta { font-size: 0.95rem; }
+      .meta .key-info { margin-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="note-detail">
+    <h1>{{ note.course_code }} - {{ note.course_title or 'Untitled' }}</h1>
+
+    <div class="meta">
+      <div class="key-info">
+        <strong>Academic Year:</strong> {{ note.academic_year or 'Not specified' }}
+        <span>•</span>
+        <strong>Semester:</strong> {{ note.semester or 'Not specified' }}
+      </div>
+      <div>
+        <strong>Department:</strong> {{ note.department }}
+        <span>•</span>
+        <strong>Level:</strong> {{ note.level }}<br>
+        <strong>Lecturer:</strong> {{ note.lecturer_name }}
+        <span>•</span>
+        <strong>Weeks:</strong> {{ note.weeks or 'N/A' }}
+        <span>•</span>
+        <strong>Uploaded:</strong> {{ note.created_at_dt.strftime('%b %d, %Y') if note.created_at_dt else 'N/A' }}
+        <span>•</span>
+        <strong>Downloadable:</strong>
+        <span style="color: {% if note.downloadable %}var(--accent){% else %}#dc2626{% endif %}">
+          {{ 'Yes' if note.downloadable else 'No' }}
+        </span>
+      </div>
+    </div>
+
+    {% if note.description %}
+    <div class="description">
+      <h2>Description</h2>
+      <div>{{ note.description | safe }}</div>
+    </div>
+    {% endif %}
+
+    <div class="file-section">
+      <button class="btn-read" onclick="renderFile()">
+        <span class="material-icons">visibility</span> Read / View Note
+      </button>
+
+      <div class="file-render" id="file-render">
+        <div class="placeholder">
+          Click "Read / View Note" to load the file content
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function renderFile() {
+      const renderDiv = document.getElementById('file-render');
+      renderDiv.innerHTML = '<div class="placeholder">Loading...</div>';
+
+      const fileUrl = '{{ note.file_url | safe }}';
+      const fileType = fileUrl.split('.').pop().toLowerCase();
+
+      if (fileType === 'pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.src = fileUrl;
+        iframe.width = '100%';
+        iframe.height = '100%';
+        iframe.style.border = 'none';
+        renderDiv.innerHTML = '';
+        renderDiv.appendChild(iframe);
+      } else {
+        fetch(`/user/render-file/{{ note.id }}`)
+          .then(response => {
+            if (!response.ok) throw new Error('Failed to load');
+            return response.text();
+          })
+          .then(html => {
+            renderDiv.innerHTML = html;
+          })
+          .catch(err => {
+            renderDiv.innerHTML = `
+              <div class="placeholder" style="color:#dc2626;">
+                Error loading file content<br>
+                <small style="color:#6b7280;">${err.message}</small>
+              </div>
+            `;
+          });
+      }
+    }
+  </script>
+</body>
+</html>

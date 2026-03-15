@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Course Codes - U-NEX Admin</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #f97316;
+      --dark: #111827;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --sidebar-bg: #1f2937;
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 80px;
+      --danger: #dc2626;
+      --success: #10b981;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      transition: width 0.3s ease;
+    }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .nav-list { padding: 20px 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      color: #d1d5db;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .nav-item .material-icons {
+      margin-right: 16px;
+      font-size: 1.4rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.3s ease;
+      padding: 40px 5vw;
+    }
+
+    .main-content.collapsed {
+      margin-left: var(--sidebar-collapsed);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+    }
+
+    h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .subtitle { font-size: 1.1rem; color: var(--gray); margin-bottom: 32px; }
+
+    .flash-message {
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .flash-success { background: #d1fae5; color: #065f46; }
+    .flash-error   { background: #fee2e2; color: #991b1b; }
+
+    .add-form {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 280px;
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-add {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-add:hover { background: #ea580c; }
+
+    .code-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .code-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .code-row .code {
+      font-size: 1.15rem;
+      color: var(--dark);
+    }
+
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+    }
+    .btn-delete:hover { background: #b91c1c; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--gray);
+      padding: 60px 20px;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-collapsed); }
+      .main-content { margin-left: var(--sidebar-collapsed); }
+      .nav-item span:not(.material-icons) { display: none; }
+      .sidebar-header { font-size: 1.1rem; padding: 16px; }
+      .add-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">U-NEX Admin</div>
+    <nav class="nav-list">
+      <a href="{{ url_for('admin_dashboard_page') }}" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('add_notes') }}" class="nav-item">
+        <span class="material-icons">upload_file</span>
+        <span>Add Notes</span>
+      </a>
+      <a href="{{ url_for('edit_notes') }}" class="nav-item active">
+        <span class="material-icons">edit</span>
+        <span>Edit Notes</span>
+      </a>
+      <a href="{{ url_for('register_code') }}" class="nav-item">
+        <span class="material-icons">school</span>
+        <span>Course Codes</span>
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="nav-item">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="card">
+      <h1>Manage Course Codes</h1>
+      <p class="subtitle">
+        Add or remove valid course codes that lecturers and students can use when uploading or searching notes.
+      </p>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message flash-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Add new code form -->
+      <form class="add-form" method="POST" action="{{ url_for('register_code') }}">
+        <input type="text" name="course_name" placeholder="Enter new course code (e.g. CSC101, PHY202)" required maxlength="20">
+        <button type="submit" class="btn btn-add">
+          <span class="material-icons">add</span>
+          Add Course Code
+        </button>
+      </form>
+
+      <!-- List of existing codes -->
+      <div class="code-list">
+        <h3 style="margin: 32px 0 16px; font-size: 1.4rem;">Existing Course Codes</h3>
+
+        {% if existing_codes %}
+          {% for code in existing_codes %}
+          <div class="code-row">
+            <span class="code">{{ code.code }}</span>
+            <form method="POST" action="{{ url_for('register_code') }}" style="display:inline;">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="code" value="{{ code.code }}">
+              <button type="submit" class="btn btn-delete" onclick="return confirm('Delete {{ code.code }}? This cannot be undone.');">
+                <span class="material-icons">delete</span>
+                Delete
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            No course codes added yet.<br>
+            Start by adding one above.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+<script>
+  // Show "Processing..." on form submit
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      // Only affect add & delete forms (not sidebar links etc.)
+      if (this.querySelector('button[type="submit"]')) {
+        const btn = this.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">autorenew</span> Processing...';
+
+        // Optional: re-enable after 10s if something hangs (safety)
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }, 10000);
+      }
+    });
+  });
+
+  // Simple spinning animation for the icon
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

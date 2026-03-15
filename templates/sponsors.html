@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sponsors • U-NEX</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      line-height: 1.65;
+    }
+
+    /* Topbar – same style as main site */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+    }
+
+    .logo {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -1.6px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logo span {
+      color: #f97316;
+    }
+
+    /* Main content */
+    .main-content {
+      margin-top: 100px;
+      padding: 40px 5vw;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 0.8rem;
+      color: #111827;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.3rem;
+      color: #4b5563;
+      margin-bottom: 4rem;
+    }
+
+    .sponsor-card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto 60px;
+    }
+
+    .sponsor-logo {
+      font-size: 5.5rem;
+      font-weight: 900;
+      letter-spacing: -3px;
+      margin-bottom: 1.5rem;
+      color: #f97316;
+    }
+
+    .sponsor-name {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #111827;
+    }
+
+    .sponsor-tag {
+      font-size: 1.3rem;
+      color: #f97316;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .sponsor-text {
+      font-size: 1.25rem;
+      color: #374151;
+      line-height: 1.8;
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .highlight {
+      color: #f97316;
+      font-weight: 600;
+    }
+
+    .owner-info {
+      font-size: 1.15rem;
+      color: #4b5563;
+      margin-top: 2rem;
+      font-style: italic;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 3rem;
+      color: #f97316;
+      font-weight: 600;
+      font-size: 1.15rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #ea580c;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 5vw 40px;
+      color: #9ca3af;
+      font-size: 0.95rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.6rem; }
+      .sponsor-name { font-size: 2.4rem; }
+      .sponsor-logo { font-size: 4.5rem; }
+      .sponsor-card { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <nav class="topbar">
+    <a href="/" class="logo"><span>U</span>-NEX</a>
+  </nav>
+
+  <main class="main-content">
+    <h1>Our Sponsor</h1>
+    <p class="subtitle">Powered by vision. Built with purpose.</p>
+
+    <div class="sponsor-card">
+      <div class="sponsor-logo">V</div>
+      <h2 class="sponsor-name">Veltrawave</h2>
+      <div class="sponsor-tag">Empowerment Platform</div>
+
+      <p class="sponsor-text">
+        Veltrawave is an <span class="highlight">empowerment platform</span> dedicated to uplifting individuals and communities through technology, education, and opportunity.
+        <br><br>
+        From skill-building resources to real-world support systems, Veltrawave exists to help people turn potential into progress — one step, one skill, one connection at a time.
+      </p>
+
+      <p class="owner-info">
+        Founded & owned by <strong>Prosper Nwakanma Chibuike</strong><br>
+        Certified Python Programmer • NIIT Abuja Alumni
+      </p>
+
+      <a href="/" class="back-link">
+        <span class="material-icons">arrow_back</span>
+        Back to U-NEX Home
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <p>U-NEX is proudly supported by <span class="brand">Veltrawave</span></p>
+  </footer>
+
+</body>
+</html>

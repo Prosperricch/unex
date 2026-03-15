@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Unified Excellence – Student Platform</title>
+  <meta name="description" content="Connecting students worldwide. Organize universities for better academic life. Global network, notes, collaboration & more."/>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  /* Under Development Modal */
+    .modal-under-dev {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:2000; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-content {
+      background:white; border-radius:16px; max-width:480px; width:100%; padding:40px 32px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-icon { font-size:4.8rem; color:#f97316; margin-bottom:16px; }
+    .modal-title { font-size:1.85rem; font-weight:700; margin-bottom:12px; }
+    .modal-text { font-size:1.1rem; color:#4b5563; line-height:1.6; margin-bottom:28px; }
+    .modal-close-btn {
+      background:#111827; color:white; border:none; padding:14px 36px; border-radius:12px; font-weight:600; cursor:pointer;
+    }
+    .modal-close-btn:hover { background:#1f2937; }
+
+    @media (max-width: 1024px) {
+      .tools-grid { grid-template-columns:1fr; gap:4rem; }
+      .tools-text, .tools-image { order:initial; }
+      .tools-image { max-width:600px; margin:0 auto; }
+    }
+    @media (max-width: 768px) {
+      .section, .tools-section { padding:90px 6vw; }
+      h2 { font-size:2.8rem; }
+      .hero h1 { font-size:clamp(3.4rem,11vw,6.2rem); }
+    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f9fafb;
+    color: #111827;
+    line-height: 1.65;
+  }
+
+  /* ─── Top Navigation ──────────────────────────────────────────────── */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5vw;
+  }
+
+  .logo {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -1.6px;
+  }
+
+  .logo span {
+    color: #f97316;
+  }
+
+  .menu-toggle {
+    font-size: 1.9rem;
+    color: #374151;
+    background: none;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .menu-toggle:hover {
+    background: #f3f4f6;
+  }
+
+  /* ─── Mobile Menu ────────────────────────────────────────────── */
+  .sidemenu {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 320px;
+    height: 100%;
+    background: white;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.16);
+    transition: right 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidemenu.open {
+    right: 0;
+  }
+
+  .menu-header {
+    padding: 28px 32px;
+    display: flex;
+    justify-content: flex-end;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .close-btn {
+    font-size: 2.2rem;
+    color: #6b7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .menu-items {
+    flex: 1;
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1.18rem;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    padding: 14px 18px;
+    border-radius: 12px;
+    transition: all 0.2s;
+  }
+
+  .menu-link:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  .menu-link .material-icons {
+    font-size: 1.6rem;
+    color: #6b7280;
+  }
+
+  .signup-section {
+    margin-top: auto;
+    padding: 0 32px 56px;
+  }
+
+  .signup-btn {
+    width: 100%;
+    padding: 16px;
+    background: #f97316;
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+
+  .signup-btn:hover {
+    background: #ea580c;
+  }
+
+  /* ─── Hero ────────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 740px;
+    margin-top: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+    background-color: #1e2026;
+  }
+
+  .hero-bg-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 1;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55); /* increased opacity for better text contrast */
+    z-index: 2;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 980px;
+    padding: 0 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(4rem, 9.5vw, 8.5rem);
+    font-weight: 900;
+    letter-spacing: -2.8px;
+    line-height: 0.9;
+    margin-bottom: 2.2rem;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 1.1rem 2.8rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn-primary {
+    background: #f97316;
+    color: white;
+    border: 2px solid #f97316;
+  }
+
+  .btn-primary:hover {
+    background: #ea580c;
+    transform: translateY(-3px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+  }
+
+  .btn-outline:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-3px);
+  }
+
+  /* FIX: Remove underline from links in hero-buttons only */
+  .hero-buttons a {
+    text-decoration: none !important;
+    display: inline-block;
+    text-align: center;
+  }
+
+  /* Optional: subtle press effect */
+  .hero-buttons a:active {
+    transform: scale(0.97);
+    opacity: 0.95;
+  }
+
+  /* Scale up SVG on wider screens to feel larger */
+  @media (min-aspect-ratio: 16/9) {
+    .hero-bg-svg {
+      transform: scale(1.25);
+      transform-origin: center;
+    }
+  }
+
+  /* From Uiverse.io by Juanes200122 */
+  @keyframes bounce {
+    0%, 100% { translate: 0px 36px; }
+    50%      { translate: 0px 46px; }
+  }
+  @keyframes bounce2 {
+    0%, 100% { translate: 0px 46px; }
+    50%      { translate: 0px 56px; }
+  }
+  @keyframes umbral {
+    0%   { stop-color: #d3a5102e; }
+    50%  { stop-color: rgba(211, 165, 16, 0.519); }
+    100% { stop-color: #d3a5102e; }
+  }
+  @keyframes partciles {
+    0%, 100% { translate: 0px 16px; }
+    50%      { translate: 0px 6px; }
+  }
+
+  #particles     { animation: partciles 4s ease-in-out infinite; }
+  #animatedStop  { animation: umbral 4s infinite; }
+  #bounce        { animation: bounce 5s ease-in-out infinite; translate: 0px 36px; }
+  #bounce2       { animation: bounce2 5s ease-in-out infinite; translate: 0px 46px; animation-delay: 0.5s; }
+
+  /* ─── Content Sections ────────────────────────────────────────── */
+  .section {
+    padding: 140px 5vw;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .content-wrapper {
+    max-width: 620px;
+    margin-left: 0;
+    margin-right: auto;
+    text-align: left;
+  }
+
+  h2 {
+    font-size: 3.4rem;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 1.8rem;
+  }
+
+  .highlight {
+    color: #f97316;
+  }
+
+  p.lead {
+    font-size: 1.4rem;
+    color: #4b5563;
+    margin-bottom: 2.6rem;
+    line-height: 1.7;
+  }
+
+  .accent-line {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    color: #f97316;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+
+  .accent-line::before {
+    content: "";
+    width: 70px;
+    height: 5px;
+    background: #f97316;
+    border-radius: 3px;
+  }
+
+  /* Tools Section – Side-by-side layout */
+  .tools-section {
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 140px 5vw;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .tools-text {
+    order: 1;
+  }
+
+  .tools-image {
+    order: 2;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+
+  .tools-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .tools-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .tools-card h3 {
+    color: #f97316;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .tools-card h2 {
+    font-size: 3rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .tools-card h4 {
+    font-size: 2.2rem;
+    margin-bottom: 1.4rem;
+    color: #111827;
+  }
+
+  .tools-card p {
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 2.4rem;
+    line-height: 1.7;
+  }
+
+  .visit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 32px;
+    background: #111827;
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.25s;
+  }
+
+  .visit-btn:hover {
+    background: #1f2937;
+  }
+
+  /* Partners focus carousel */
+  .partners {
+    padding: 120px 5vw;
+    background: white;
+    overflow: hidden;
+  }
+
+  .partners h3 {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 3.5rem;
+  }
+
+  .carousel-container {
+    position: relative;
+    max-width: 1280px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 1s ease-in-out;
+  }
+
+  .partner-card {
+    flex: 0 0 280px;
+    margin: 0 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.6s ease;
+  }
+
+  .partner-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 50 / 50;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(0.4);
+    transition: filter 0.4s;
+  }
+
+  .partner-card.focused {
+    transform: translateY(-30px) scale(1.1);
+    z-index: 10;
+  }
+
+  .partner-card.focused img {
+    filter: grayscale(0);
+  }
+
+  /* Footer */
+  footer {
+    padding: 100px 5vw 60px;
+    text-align: center;
+    color: #9ca3af;
+    font-weight: 500;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  footer .brand {
+    color: #111827;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  @media (max-width: 1024px) {
+    .tools-grid {
+      grid-template-columns: 1fr;
+      gap: 4rem;
+    }
+    .tools-text, .tools-image {
+      order: initial;
+    }
+    .tools-image {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .section, .tools-section {
+      padding: 90px 6vw;
+    }
+    h2 {
+      font-size: 2.8rem;
+    }
+    .hero h1 {
+      font-size: clamp(3.4rem, 11vw, 6.2rem);
+    }
+    .partner-card {
+      flex: 0 0 240px;
+      margin: 0 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .topbar {
+      padding: 0 6vw;
+    }
+    .hero-buttons {
+      gap: 1rem;
+    }
+    .btn {
+      padding: 0.9rem 2rem;
+      font-size: 1.05rem;
+    }
+    .partner-card {
+      flex: 0 0 200px;
+      margin: 0 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+
+  <nav class="topbar">
+    <div class="logo"><span>U</span>-NEX</div>
+    <button class="menu-toggle" aria-label="Open menu" id="menuBtn"><span class="material-icons">menu</span></button>
+  </nav>
+
+
+  <aside class="sidemenu" id="sideMenu">
+    <div class="menu-header">
+      <button class="close-btn" id="closeBtn"><span class="material-icons">close</span></button>
+    </div>
+    <div class="menu-items">
+      <a href="{{ url_for('sponsors_page') }}" class="menu-link"><span class="material-icons">handshake</span> Sponsors</a>
+    </div>
+  </aside>
+
+  <section class="hero">
+    <svg
+      viewBox="0 0 200 200"
+      preserveAspectRatio="xMidYMid slice"
+      class="hero-bg-svg"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g style="order: -1;">
+        <polygon
+          transform="rotate(45 100 100)"
+          stroke-width="1"
+          stroke="#d3a410"
+          fill="none"
+          points="70,70 148,50 130,130 50,150"
+          id="bounce"
+        ></polygon>
+        <polygon
+          transform="rotate(45 100 100)"
+          stroke-width="1"
+          stroke="#d3a410"
+          fill="none"
+          points="70,70 148,50 130,130 50,150"
+          id="bounce2"
+        ></polygon>
+        <polygon
+          transform="rotate(45 100 100)"
+          stroke-width="2"
+          stroke=""
+          fill="#414750"
+          points="70,70 150,50 130,130 50,150"
+        ></polygon>
+        <polygon
+          stroke-width="2"
+          stroke=""
+          fill="url(#gradiente)"
+          points="100,70 150,100 100,130 50,100"
+        ></polygon>
+        <defs>
+          <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente">
+            <stop style="stop-color: #1e2026;stop-opacity:1" offset="20%"></stop>
+            <stop style="stop-color:#414750;stop-opacity:1" offset="60%"></stop>
+          </linearGradient>
+        </defs>
+        <polygon
+          transform="translate(20, 31)"
+          stroke-width="2"
+          stroke=""
+          fill="#b7870f"
+          points="80,50 80,75 80,99 40,75"
+        ></polygon>
+        <polygon
+          transform="translate(20, 31)"
+          stroke-width="2"
+          stroke=""
+          fill="url(#gradiente2)"
+          points="40,-40 80,-40 80,99 40,75"
+        ></polygon>
+        <defs>
+          <linearGradient y2="100%" x2="0%" y1="-17%" x1="10%" id="gradiente2">
+            <stop style="stop-color: #d3a51000;stop-opacity:1" offset="20%"></stop>
+            <stop
+              style="stop-color:#d3a51054;stop-opacity:1"
+              offset="100%"
+              id="animatedStop"
+            ></stop>
+          </linearGradient>
+        </defs>
+        <polygon
+          transform="rotate(180 100 100) translate(20, 20)"
+          stroke-width="2"
+          stroke=""
+          fill="#d3a410"
+          points="80,50 80,75 80,99 40,75"
+        ></polygon>
+        <polygon
+          transform="rotate(0 100 100) translate(60, 20)"
+          stroke-width="2"
+          stroke=""
+          fill="url(#gradiente3)"
+          points="40,-40 80,-40 80,85 40,110.2"
+        ></polygon>
+        <defs>
+          <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente3">
+            <stop style="stop-color: #d3a51000;stop-opacity:1" offset="20%"></stop>
+            <stop
+              style="stop-color:#d3a51054;stop-opacity:1"
+              offset="100%"
+              id="animatedStop"
+            ></stop>
+          </linearGradient>
+        </defs>
+        <polygon
+          transform="rotate(45 100 100) translate(80, 95)"
+          stroke-width="2"
+          stroke=""
+          fill="#ffe4a1"
+          points="5,0 5,5 0,5 0,0"
+          id="particles"
+        ></polygon>
+        <polygon
+          transform="rotate(45 100 100) translate(80, 55)"
+          stroke-width="2"
+          stroke=""
+          fill="#ccb069"
+          points="6,0 6,6 0,6 0,0"
+          id="particles"
+        ></polygon>
+        <polygon
+          transform="rotate(45 100 100) translate(70, 80)"
+          stroke-width="2"
+          stroke=""
+          fill="#fff"
+          points="2,0 2,2 0,2 0,0"
+          id="particles"
+        ></polygon>
+        <polygon
+          stroke-width="2"
+          stroke=""
+          fill="#292d34"
+          points="29.5,99.8 100,142 100,172 29.5,130"
+        ></polygon>
+        <polygon
+          transform="translate(50, 92)"
+          stroke-width="2"
+          stroke=""
+          fill="#1f2127"
+          points="50,50 120.5,8 120.5,35 50,80"
+        ></polygon>
+      </g>
+    </svg>
+
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>UNIFIED<br>EXCELLENCE</h1>
+      <div class="hero-buttons">
+        <a href="/user/notes" class="btn btn-primary">View Notes</a>
+        <a onclick="showUnderDevModal()"class="btn btn-outline">Signup</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Connecting students section -->
+  <section class="section">
+    <div class="content-wrapper">
+      <h2>Easing Student Life <span class="highlight">One Feature at a Time.</span></h2>
+      <p class="lead">
+        Ready lecture notes whenever you need them.<br>
+        Instant AI-generated quizzes to test yourself.<br>
+        Connect with students who share your goals.<br>
+        Tools that help you manage time, money and stress better.<br><br>
+        Less chaos. More focus. Real results.
+      </p>
+      <div class="accent-line">Empowering the next generation</div>
+    </div>
+  </section>
+
+
+  <section class="tools-section">
+    <div class="tools-grid">
+      <div class="tools-text">
+        <div class="tools-card">
+          <h3>Our Tools</h3>
+          <h2>Student Productivity Suite</h2>
+          <h4>Notes Management System</h4>
+          <p>
+            Organize your academic life with our powerful note-taking and management tool. Sync across devices and collaborate with peers seamlessly.
+          </p>
+          <a onclick="showUnderDevModal()" class="visit-btn">Visit <span class="material-icons" style="font-size:1.2rem;">arrow_forward</span></a>
+        </div>
+      </div>
+      <div class="tools-image">
+        <img src="https://setapp.com/cdn-cgi/image/quality=75,format=auto/https://cdn.setapp.com/blog/images/studies-note-taking.webp" alt="Clean student notes management interface on multiple devices">
+      </div>
+    </div>
+  </section>
+
+
+  <section class="partners">
+  <h3>Worked With</h3>
+  <div class="carousel-container">
+    <div class="carousel-track" id="carouselTrack">
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='v.jpg') }}" alt="Partner Removed">
+      </div>
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='muesa.webp') }}"  alt="Partner Images">
+      </div>
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='images.jpg') }}" alt="Partner V">
+      </div>
+
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='v.jpg') }}"  alt="Partner Removed">
+      </div>
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='muesa.webp') }}"  alt="Partner Images">
+      </div>
+      <div class="partner-card">
+        <img src="{{ url_for('static', filename='v.jpg') }}"  alt="Partner V">
+      </div>
+    </div>
+  </div>
+</section>
+
+  <div class="modal-under-dev" id="underDevModal">
+    <div class="modal-content">
+      <span class="material-icons modal-icon">construction</span>
+      <h2 class="modal-title">Feature Under Development</h2>
+      <p class="modal-text">
+        We're actively building this part of U-NEX to make student life easier.<br><br>
+        Full features (notes access, sign up, quizzes, connections & more) are coming very soon — stay tuned!
+      </p>
+      <button class="modal-close-btn" onclick="closeUnderDevModal()">Got It</button>
+    </div>
+  </div>
+
+
+
+  <footer>
+    <p>U-NEX powered by <span class="brand">veltrawave</span></p>
+  </footer>
+
+  <script>
+    function showUnderDevModal() {
+      document.getElementById('underDevModal').style.display = 'flex';
+    }
+    function closeUnderDevModal() {
+      document.getElementById('underDevModal').style.display = 'none';
+    }
+    document.getElementById('underDevModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('underDevModal')) closeUnderDevModal();
+    });
+  const menuBtn = document.getElementById('menuBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const sideMenu = document.getElementById('sideMenu');
+
+  menuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
+  closeBtn.addEventListener('click', () => sideMenu.classList.remove('open'));
+
+  // Carousel logic (keep this)
+  const track = document.getElementById('carouselTrack');
+  const cards = track.querySelectorAll('.partner-card');
+  const cardWidth = cards[0]?.offsetWidth + 40 || 320;
+  let currentIndex = 0;
+  const totalCards = cards.length / 2;
+
+  function slideCarousel() {
+    currentIndex++;
+    track.style.transition = 'transform 1s ease-in-out';
+    track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+
+    const focusIndex = (currentIndex + 2) % cards.length;
+    cards.forEach(card => card.classList.remove('focused'));
+    if (cards[focusIndex]) cards[focusIndex].classList.add('focused');
+
+    if (currentIndex >= totalCards) {
+      setTimeout(() => {
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(0)';
+        currentIndex = 0;
+      }, 1000);
+    }
+  }
+
+  setInterval(slideCarousel, 3000);
+  if (cards[2]) cards[2].classList.add('focused');
+</script>
+
+</body>
+</html>

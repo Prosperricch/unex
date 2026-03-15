@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bulk Upload Notes - U-NEX Admin</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Trix Editor CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trix@2.1.16/dist/trix.css">
+  <script src="https://cdn.jsdelivr.net/npm/trix@2.1.16/dist/trix.umd.min.js"></script>
+
+  <style>
+    .required {
+    color: var(--error);
+    font-size: 1.1rem;
+  }
+
+    select, input[type="text"], input[type="file"] {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
+    :root {
+      --primary: #f97316;
+      --dark: #111827;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --sidebar-bg: #1f2937;
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 80px;
+      --success: #10b981;
+      --error: #dc2626;
+      --info: #3b82f6;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); color: white; height: 100vh; position: fixed; overflow-y: auto; }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); }
+    .sidebar-header { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.5rem; font-weight: 700; color: var(--primary); text-align: center; }
+    .nav-list { padding: 20px 0; }
+    .nav-item { display: flex; align-items: center; padding: 14px 24px; color: #d1d5db; text-decoration: none; font-size: 1rem; transition: all 0.2s; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.08); color: white; }
+    .nav-item .material-icons { margin-right: 16px; font-size: 1.4rem; min-width: 24px; text-align: center; }
+
+    .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px 5vw; }
+    .card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); position: relative; }
+
+    h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .subtitle { font-size: 1.1rem; color: var(--gray); margin-bottom: 32px; }
+
+    label { display: block; margin: 20px 0 8px; font-weight: 600; }
+
+    input, select, textarea {
+      width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem;
+    }
+
+    trix-editor {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      min-height: 220px;
+      padding: 12px;
+      background: white;
+    }
+
+    .file-drop-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 50px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-drop-zone:hover { border-color: var(--primary); background: rgba(249,115,22,0.05); }
+
+    .file-preview { margin-top: 20px; max-height: 260px; overflow-y: auto; }
+    .file-item { padding: 10px; background: #f3f4f6; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; }
+
+    .btn-upload {
+      background: var(--primary);
+      color: white;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 24px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-upload:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .refresh-btn {
+      background: #4b5563;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .refresh-btn:hover { background: #374151; }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      border-radius: 16px;
+    }
+    .loading-spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast container */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 400px;
+    }
+    .toast {
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+    .toast.info { background: var(--info); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-collapsed); }
+      .main-content { margin-left: var(--sidebar-collapsed); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">U-NEX Admin</div>
+    <nav class="nav-list">
+      <a href="{{ url_for('admin_dashboard_page') }}" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('add_notes') }}" class="nav-item">
+        <span class="material-icons">upload_file</span>
+        <span>Add Notes</span>
+      </a>
+      <a href="{{ url_for('edit_notes') }}" class="nav-item active">
+        <span class="material-icons">edit</span>
+        <span>Edit Notes</span>
+      </a>
+      <a href="{{ url_for('register_code') }}" class="nav-item">
+        <span class="material-icons">school</span>
+        <span>Course Codes</span>
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="nav-item">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="card">
+      <h1>Bulk Upload Lecture Notes</h1>
+      <p class="subtitle">
+        Upload multiple files at once. All files will share the same course details.
+      </p>
+
+      <!-- Refresh Button -->
+      <button class="refresh-btn" onclick="refreshDropdowns()">
+        <span class="material-icons">refresh</span> Refresh Course & Department Lists
+      </button>
+
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('add_notes') }}" id="upload-form">
+
+  <!-- Course Code -->
+  <label for="course_code">Course Code <span class="required">*</span></label>
+  <select name="course_code" id="course_code" required>
+    <option value="">Select course code...</option>
+    {% for code in course_codes %}
+      <option value="{{ code }}">{{ code }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Academic Year -->
+  <label for="academic_year">Academic Session / Year <span class="required">*</span></label>
+  <select name="academic_year" id="academic_year" required>
+    <option value="">Select academic year...</option>
+    <option value="2025/2026">2025/2026</option>
+    <option value="2024/2025" selected>2024/2025</option>
+    <option value="2023/2024">2023/2024</option>
+    <option value="2022/2023">2022/2023</option>
+    <option value="2021/2022">2021/2022</option>
+    <option value="Other">Other (specify in description)</option>
+  </select>
+
+  <!-- Semester (NEW) -->
+  <label for="semester">Semester / Term <span class="required">*</span></label>
+  <select name="semester" id="semester" required>
+    <option value="">Select semester...</option>
+    <option value="1st Semester">1st Semester</option>
+    <option value="2nd Semester">2nd Semester</option>
+    <option value="Full Year">Full Year (both semesters)</option>
+  </select>
+
+  <!-- Department -->
+  <label for="department">Department <span class="required">*</span></label>
+  <select name="department" id="department" required>
+    <option value="">Select department...</option>
+    {% for dept in departments %}
+      <option value="{{ dept }}">{{ dept | title }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Level -->
+  <label for="level">Level <span class="required">*</span></label>
+  <select name="level" id="level" required>
+    <option value="">Select level...</option>
+    <option value="100 Level">100 Level</option>
+    <option value="200 Level">200 Level</option>
+    <option value="300 Level">300 Level</option>
+    <option value="400 Level">400 Level</option>
+    <option value="500 Level">500 Level (if applicable)</option>
+  </select>
+
+  <label for="lecturer_name">Lecturer Name <span class="required">*</span></label>
+  <input type="text" name="lecturer_name" id="lecturer_name" required placeholder="e.g. Dr. Adebayo Okonkwo">
+
+  <label for="weeks">Weeks Covered</label>
+  <input type="text" name="weeks" id="weeks" placeholder="e.g. 1–13, 7–10, Full Semester">
+
+  <!-- Rich Text Description -->
+  <label for="description">Description / Additional Notes</label>
+  <input type="hidden" name="description" id="description">
+  <trix-editor input="description" placeholder="Additional information, topics covered, special instructions..."></trix-editor>
+
+  <!-- Downloadable Checkbox -->
+  <div style="margin: 24px 0; display: flex; align-items: center; gap: 12px;">
+    <input type="checkbox" name="downloadable" id="downloadable" value="true">
+    <label for="downloadable" style="margin: 0; font-weight: 600; cursor: pointer;">
+      Allow students to download these files
+    </label>
+  </div>
+
+  <!-- Bulk File Upload -->
+  <label>Upload Files <span style="color:var(--gray); font-weight:normal;">(PDF, DOC, DOCX, PPT, PPTX)</span></label>
+  <div class="file-drop-zone" id="drop-zone">
+    <span class="material-icons" style="font-size:3.5rem;">cloud_upload</span>
+    <p>Drag & drop files here or click to select</p>
+    <p style="color:var(--gray); font-size:0.9rem; margin-top:8px;">
+      Multiple files allowed • Max size per file depends on server settings
+    </p>
+  </div>
+  <input type="file" id="file-input" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" style="display:none;">
+
+  <!-- Preview area -->
+  <div id="file-preview" class="file-preview"></div>
+
+  <!-- Submit Button -->
+  <button type="submit" class="btn-upload" id="upload-btn" disabled>
+    <span class="material-icons" id="upload-icon">upload</span>
+    <span id="upload-text">Upload All Notes</span>
+  </button>
+
+</form>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    // ── Dropdowns (unchanged) ──
+    async function loadDropdowns() {
+      try {
+        const response = await fetch('/api/dropdown-data');
+        if (!response.ok) throw new Error('Failed to load data');
+        const data = await response.json();
+        if (data.error) {
+          console.error('API error:', data.error);
+          return;
+        }
+        const courseSelect = document.getElementById('course_code');
+        courseSelect.innerHTML = '<option value="">Select course code...</option>';
+        data.course_codes.forEach(code => {
+          const option = document.createElement('option');
+          option.value = code;
+          option.textContent = code;
+          courseSelect.appendChild(option);
+        });
+        const deptSelect = document.getElementById('department');
+        deptSelect.innerHTML = '<option value="">Select department...</option>';
+        data.departments.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          deptSelect.appendChild(option);
+        });
+        console.log('Dropdowns loaded');
+      } catch (err) {
+        console.error('Failed to load dropdowns:', err);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      loadDropdowns();
+    });
+
+    function refreshDropdowns() {
+      loadDropdowns();
+    }
+
+    // ── File Preview (unchanged) ──
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('file-preview');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadText = document.getElementById('upload-text');
+    const uploadIcon = document.getElementById('upload-icon');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    function handleFiles(files) {
+      preview.innerHTML = '';
+      if (files.length === 0) {
+        preview.innerHTML = '<p style="color:#9ca3af;">No files selected yet.</p>';
+        uploadBtn.disabled = true;
+        return;
+      }
+      uploadBtn.disabled = false;
+
+      Array.from(files).forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `<span>${file.name} <small>(${(file.size/1024/1024).toFixed(2)} MB)</small></span>`;
+        preview.appendChild(div);
+      });
+    }
+
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      handleFiles(e.dataTransfer.files);
+    });
+
+    // ── Submit Handling: Loading State + Toast ──
+    const form = document.getElementById('upload-form');
+
+    form.addEventListener('submit', function(e) {
+      if (uploadBtn.disabled) return;
+
+      // Loading state
+      uploadBtn.disabled = true;
+      uploadIcon.innerHTML = 'autorenew';
+      uploadIcon.style.animation = 'spin 1.5s linear infinite';
+      uploadText.textContent = 'Uploading...';
+      loadingOverlay.style.display = 'flex';
+
+      // Show toast
+      showToast('Upload in progress... Please wait.', 'info');
+    });
+
+    // Toast function
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span class="material-icons">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span> ${message}`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+        setTimeout(() => toast.remove(), 500);
+      }, 6000);
+    }
+
+    // Show flash messages from server as toasts on load
+    window.addEventListener('load', () => {
+      loadDropdowns();
+      const flashes = document.querySelectorAll('.flash-message'); // add class="flash-message" to your flash divs
+      flashes.forEach(flash => {
+        const type = flash.classList.contains('flash-success') ? 'success' :
+                     flash.classList.contains('flash-error') ? 'error' : 'info';
+        showToast(flash.textContent.trim(), type);
+        flash.style.display = 'none';
+      });
+    });
+  </script>
+
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>

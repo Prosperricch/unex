@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard - U-NEX</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #f97316;
+      --dark: #111827;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --sidebar-bg: #1f2937;
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 80px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .nav-list {
+      padding: 20px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      color: #d1d5db;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .nav-item .material-icons {
+      margin-right: 16px;
+      font-size: 1.4rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* Main content */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.3s ease;
+      padding: 40px 5vw;
+    }
+
+    .main-content.collapsed {
+      margin-left: var(--sidebar-collapsed);
+    }
+
+    .welcome-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 16px;
+      color: var(--dark);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 32px;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      background: var(--primary);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #ea580c;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-collapsed); }
+      .main-content { margin-left: var(--sidebar-collapsed); }
+      .nav-item span:not(.material-icons) { display: none; }
+      .sidebar-header { font-size: 1.1rem; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">U-NEX Admin</div>
+    <nav class="nav-list">
+      <a href="{{ url_for('admin_dashboard_page') }}" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('add_notes') }}" class="nav-item">
+        <span class="material-icons">upload_file</span>
+        <span>Add Notes</span>
+      </a>
+      <a href="{{ url_for('edit_notes') }}" class="nav-item active">
+        <span class="material-icons">edit</span>
+        <span>Edit Notes</span>
+      </a>
+      <a href="{{ url_for('register_code') }}" class="nav-item">
+        <span class="material-icons">school</span>
+        <span>Course Codes</span>
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="nav-item">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="welcome-card">
+      <h1>Welcome to the Admin Dashboard</h1>
+      <p class="subtitle">
+        Manage your U-NEX notes platform here. Add new notes, edit existing content, or review uploads.
+      </p>
+
+      <div class="quick-actions">
+        <a href="/admin/add" class="action-btn">
+          <span class="material-icons">add_circle</span>
+          Add New Note
+        </a>
+        <a href="/admin/edit" class="action-btn" style="background: #4b5563;">
+          <span class="material-icons">edit</span>
+          Edit Existing Notes
+        </a>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>
