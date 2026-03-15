@@ -1,0 +1,12 @@
+# Core web framework
+Flask>=3.0.0
+
+# SQLAlchemy + PostgreSQL support for SQLAlchemy models
+Flask-SQLAlchemy>=3.0.0
+psycopg2-binary>=2.9.0          # PostgreSQL driver (binary version — easier on Windows/macOS)
+
+# Official Supabase Python client (database + storage)
+supabase>=2.0.0                 # Current major version as of 2025–2026
+
+# Optional but very useful in production / when using .env files
+python-dotenv>=1.0.0            # If you later move secrets to .env
