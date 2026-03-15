@@ -498,4 +498,4 @@ def sponsors_page():
     return render_template('sponsors.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
