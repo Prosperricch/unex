@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Log In</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange:      #f97316;
+      --orange-dk:   #ea580c;
+      --orange-glow: rgba(249,115,22,0.13);
+      --bg:          #f9fafb;
+      --white:       #ffffff;
+      --dark:        #111827;
+      --dark-mid:    #1e2026;
+      --border:      #e5e7eb;
+      --text:        #111827;
+      --muted:       #6b7280;
+      --muted-lt:    #9ca3af;
+      --gold:        #d3a410;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ══ BACKGROUND ══ */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-dark {
+      position: absolute;
+      inset: 0;
+      background: var(--dark-mid);
+    }
+
+    .bg-cut {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: calc(42% - 60px);
+      right: 0;
+      background: rgba(248,249,250,0.06);
+      clip-path: polygon(80px 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .bg-grain {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 48%;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── Orbit 1 — left panel ── */
+    .orbit-wrap {
+      position: absolute;
+      top: 50%; left: 21%;
+      transform: translate(-50%, -50%);
+      width: 380px; height: 380px;
+    }
+
+    /* ── Orbit 2 — right ghost ── */
+    .orbit-wrap-2 {
+      position: absolute;
+      top: 30%; left: 72%;
+      transform: translate(-50%, -50%);
+      width: 220px; height: 220px;
+      opacity: 0.55;
+    }
+    .orbit-wrap-2 .ring   { border-color: rgba(249,115,22,0.6); }
+    .orbit-wrap-2 .ring-2 { border-color: rgba(211,164,16,0.5); }
+    .orbit-wrap-2 .orb-core { width:28px; height:28px; box-shadow:0 0 18px rgba(249,115,22,0.5); }
+
+    /* rings */
+    .ring   { position:absolute; inset:0;    border-radius:50%; border:1px solid rgba(211,164,16,0.55); }
+    .ring-2 { position:absolute; inset:40px; border-radius:50%; border:1px solid rgba(249,115,22,0.45); }
+    .ring-3 { position:absolute; inset:90px; border-radius:50%; border:1px solid rgba(255,255,255,0.18); }
+
+    /* core orb */
+    .orb-core {
+      position: absolute;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      width:54px; height:54px;
+      border-radius:50%;
+      background: radial-gradient(circle at 35% 35%, #f97316, #b7870f 60%, #1e2026 100%);
+      box-shadow: 0 0 32px rgba(249,115,22,0.45), 0 0 80px rgba(211,164,16,0.18);
+    }
+
+    /* planet keyframes */
+    @keyframes orbit1 { from{transform:rotate(0deg)   translateX(189px) rotate(0deg)}   to{transform:rotate(360deg)  translateX(189px) rotate(-360deg)} }
+    @keyframes orbit2 { from{transform:rotate(120deg) translateX(129px) rotate(-120deg)} to{transform:rotate(480deg)  translateX(129px) rotate(-480deg)} }
+    @keyframes orbit3 { from{transform:rotate(240deg) translateX(189px) rotate(-240deg)} to{transform:rotate(600deg)  translateX(189px) rotate(-600deg)} }
+    @keyframes orbit4 { from{transform:rotate(60deg)  translateX(129px) rotate(-60deg)}  to{transform:rotate(420deg)  translateX(129px) rotate(-420deg)} }
+    @keyframes orbit5 { from{transform:rotate(310deg) translateX(189px) rotate(-310deg)} to{transform:rotate(670deg)  translateX(189px) rotate(-670deg)} }
+
+    .planet    { position:absolute; top:50%; left:50%; margin:-6px 0 0 -6px; width:12px; height:12px; border-radius:50%; }
+    .planet.sm { margin:-4px 0 0 -4px; width:8px;  height:8px;  }
+    .planet.xs { margin:-3px 0 0 -3px; width:6px;  height:6px;  }
+
+    .p1 { background:var(--gold);              box-shadow:0 0 10px rgba(211,164,16,0.6);  animation:orbit1 8s   linear infinite; }
+    .p2 { background:var(--orange);            box-shadow:0 0 8px  rgba(249,115,22,0.55); animation:orbit2 5.5s linear infinite; }
+    .p3 { background:rgba(255,255,255,0.55);                                              animation:orbit3 11s  linear infinite; }
+    .p4 { background:var(--orange);            box-shadow:0 0 6px  rgba(249,115,22,0.4);  animation:orbit4 7s   linear infinite; }
+    .p5 { background:var(--gold);              box-shadow:0 0 5px  rgba(211,164,16,0.4);  animation:orbit5 13s  linear infinite; }
+
+    /* ══ TOPBAR ══ */
+    .topbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+      z-index: 300;
+      background: rgba(19,21,26,0.6);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 900;
+      letter-spacing: -1.5px;
+      color: #fff; text-decoration: none;
+    }
+    .logo em { color: var(--orange); font-style: normal; }
+
+    .nav-signup {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.875rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .nav-signup:hover { color:#fff; border-color:rgba(255,255,255,0.28); background:rgba(255,255,255,0.12); }
+    .nav-signup .material-icons { font-size:1rem; line-height:1; }
+
+    /* ══ PAGE LAYOUT ══ */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: stretch;
+      padding-top: 72px;
+    }
+
+    /* ── left accent column ── */
+    .left-col {
+      flex: 0 0 42%;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 6% 80px 8%;
+    }
+
+    .lc-tag {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-size: 0.73rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 24px;
+    }
+    .lc-dot {
+      width:7px; height:7px; border-radius:50%;
+      background:var(--orange); box-shadow:0 0 8px var(--orange);
+      animation: dot-blink 2s ease-in-out infinite;
+    }
+    @keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .lc-h {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem,3.2vw,3.2rem);
+      font-weight: 900; line-height: 1.04; letter-spacing: -1.2px;
+      color: #fff; margin-bottom: 16px;
+    }
+    .lc-h span { color: var(--orange); }
+
+    .lc-p {
+      font-size: .95rem; color: rgba(255,255,255,0.48);
+      line-height: 1.75; margin-bottom: 48px; max-width: 340px;
+    }
+
+    .lc-stats { display:flex; flex-direction:column; gap:12px; }
+
+    .ls-item {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 18px; border-radius:13px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.07);
+      transition: border-color .25s, background .25s;
+    }
+    .ls-item:hover { background:rgba(255,255,255,0.08); border-color:rgba(249,115,22,0.3); }
+
+    .ls-ico {
+      width:36px; height:36px; border-radius:9px;
+      background:var(--orange-glow);
+      border:1px solid rgba(249,115,22,0.2);
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .ls-ico .material-icons { color:var(--orange); font-size:1rem; line-height:1; }
+    .ls-label { font-size:.73rem; color:rgba(255,255,255,0.38); margin-bottom:1px; }
+    .ls-val   { font-size:.92rem; font-weight:600; color:#fff; }
+
+    /* ── form column ── */
+    .form-col {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding: 52px 6vw 72px;
+      background: transparent;
+    }
+
+    .card {
+      width:100%; max-width:420px;
+      background:transparent; border:none; border-radius:20px;
+      padding:44px 40px 40px;
+      animation: card-in .55s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes card-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── card header ── */
+    .c-eye {
+      font-size:.72rem; font-weight:700;
+      letter-spacing:.13em; text-transform:uppercase;
+      color:var(--orange); margin-bottom:12px; display:block;
+    }
+    .c-title {
+      font-family:'Syne',sans-serif;
+      font-size:clamp(1.8rem,4vw,2.5rem);
+      font-weight:900; letter-spacing:-1px; line-height:1.12;
+      color:#ffffff; margin-bottom:10px;
+    }
+    .c-sub {
+      font-size:.93rem; color:rgba(255,255,255,0.55);
+      margin-bottom:28px; line-height:1.6;
+    }
+    .hr { height:1px; background:rgba(255,255,255,0.12); margin-bottom:28px; }
+
+    /* ── form fields ── */
+    .fgrid { display:flex; flex-direction:column; gap:16px; }
+
+    .fg      { display:flex; flex-direction:column; gap:6px; }
+
+    .fg label {
+      font-size:.72rem; font-weight:600;
+      letter-spacing:.07em; text-transform:uppercase;
+      color:rgba(255,255,255,0.5); padding-left:1px;
+    }
+
+    .iw { position:relative; display:flex; align-items:center; }
+
+    .iw .li {
+      position:absolute; left:12px; top:0; bottom:0;
+      display:flex; align-items:center;
+      pointer-events:none; z-index:2;
+      color:rgba(255,255,255,0.35);
+      transition:color .2s;
+    }
+    .iw .li .material-icons { font-size:.95rem; line-height:1; display:block; }
+
+    .iw .ti {
+      position:absolute; right:8px; top:0; bottom:0;
+      display:flex; align-items:center; z-index:2;
+    }
+    .iw .ti button {
+      background:none; border:none; cursor:pointer;
+      color:rgba(255,255,255,0.35);
+      display:flex; align-items:center;
+      padding:5px; border-radius:6px;
+      transition:color .15s, background .15s;
+    }
+    .iw .ti button:hover { color:rgba(255,255,255,0.8); background:rgba(255,255,255,0.08); }
+    .iw .ti button .material-icons { font-size:.95rem; line-height:1; display:block; }
+
+    input {
+      width:100%;
+      padding:12px 12px 12px 38px;
+      background:rgba(255,255,255,0.08);
+      border:1.5px solid rgba(255,255,255,0.14);
+      border-radius:10px;
+      font-family:'Outfit',sans-serif;
+      font-size:.9rem; font-weight:400;
+      color:#ffffff; outline:none;
+      -webkit-appearance:none; appearance:none;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    input.tr { padding-right:38px; }
+
+    input:focus {
+      border-color:var(--orange);
+      box-shadow:0 0 0 3px rgba(249,115,22,0.18);
+      background:rgba(255,255,255,0.12);
+    }
+    .iw:focus-within .li { color:var(--orange); }
+    input::placeholder { color:rgba(255,255,255,0.28); font-weight:300; }
+
+    /* ── forgot password link ── */
+    .forgot {
+      text-align:right; margin-top:-8px;
+    }
+    .forgot a {
+      font-size:.78rem; color:rgba(255,255,255,0.38);
+      text-decoration:none;
+      transition:color .2s;
+    }
+    .forgot a:hover { color:var(--orange); }
+
+    /* ── submit ── */
+    .sub-btn {
+      width:100%; margin-top:8px;
+      padding:14px 20px;
+      background:var(--orange);
+      color:#fff;
+      font-family:'Outfit',sans-serif;
+      font-size:.95rem; font-weight:700; letter-spacing:.02em;
+      border:none; border-radius:10px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:9px;
+      position:relative; overflow:hidden;
+      transition:background .2s, transform .15s, box-shadow .2s;
+    }
+    .sub-btn::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 55%);
+      pointer-events:none;
+    }
+    .sub-btn:hover {
+      background:var(--orange-dk);
+      transform:translateY(-2px);
+      box-shadow:0 10px 28px rgba(249,115,22,0.36);
+    }
+    .sub-btn:active { transform:translateY(0); box-shadow:none; }
+    .sub-btn .material-icons { font-size:1.05rem; line-height:1; }
+
+    /* ── divider ── */
+    .or-divider {
+      display:flex; align-items:center; gap:12px;
+      margin:22px 0 0;
+    }
+    .or-divider span {
+      font-size:.75rem; color:rgba(255,255,255,0.25);
+      white-space:nowrap;
+    }
+    .or-divider::before,
+    .or-divider::after {
+      content:''; flex:1;
+      height:1px; background:rgba(255,255,255,0.1);
+    }
+
+    /* ── signup nudge ── */
+    .nudge {
+      text-align:center; margin-top:16px;
+      font-size:.85rem; color:rgba(255,255,255,0.45);
+    }
+    .nudge a { color:var(--orange); font-weight:600; text-decoration:none; }
+    .nudge a:hover { color:var(--orange-dk); }
+
+    /* ══ TOAST — top right ══ */
+    .tw {
+      position:fixed; top:88px; right:24px;
+      z-index:9999;
+      display:flex; flex-direction:column; gap:10px;
+      pointer-events:none;
+      max-width:340px; width:calc(100% - 32px);
+    }
+
+    .toast {
+      position:relative; display:flex; align-items:flex-start; gap:12px;
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:14px 14px 18px 16px;
+      pointer-events:all; overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
+      animation:t-in .38s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast.t-hide { animation:t-out .28s ease forwards; }
+
+    @keyframes t-in  { from{opacity:0;transform:translateX(20px) scale(.96)} to{opacity:1;transform:translateX(0) scale(1)} }
+    @keyframes t-out { from{opacity:1;transform:translateX(0) scale(1)} to{opacity:0;transform:translateX(20px) scale(.96)} }
+
+    .toast::before {
+      content:''; position:absolute;
+      left:0; top:0; bottom:0; width:4px;
+      border-radius:13px 0 0 13px;
+    }
+    .toast.ts::before { background:#22c55e; }
+    .toast.te::before { background:#ef4444; }
+    .toast.ti::before { background:var(--orange); }
+
+    .t-ic .material-icons { font-size:1.1rem; line-height:1; margin-top:1px; }
+    .toast.ts .t-ic .material-icons { color:#22c55e; }
+    .toast.te .t-ic .material-icons { color:#ef4444; }
+    .toast.ti .t-ic .material-icons { color:var(--orange); }
+
+    .t-bd { flex:1; min-width:0; }
+    .t-tt { font-size:.87rem; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .t-ms { font-size:.78rem; color:var(--muted); line-height:1.45; }
+
+    .t-cl {
+      background:none; border:none; cursor:pointer;
+      color:var(--muted-lt);
+      display:flex; align-items:center;
+      padding:3px; border-radius:6px;
+      flex-shrink:0; margin-top:1px;
+      transition:color .15s, background .15s;
+    }
+    .t-cl:hover { color:var(--text); background:rgba(0,0,0,0.05); }
+    .t-cl .material-icons { font-size:.9rem; line-height:1; }
+
+    .t-bar {
+      position:absolute; bottom:0; left:0; height:3px;
+      animation:t-shrink var(--dur,3.5s) linear forwards;
+    }
+    .toast.ts .t-bar { background:#22c55e; }
+    .toast.te .t-bar { background:#ef4444; }
+    .toast.ti .t-bar { background:var(--orange); }
+    @keyframes t-shrink { from{width:100%} to{width:0} }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 900px) {
+      .left-col  { display:none; }
+      .bg-cut    { display:none; }
+      .bg-grain  { display:none; }
+      .orbit-wrap   { left:50%; top:50%; }
+      .orbit-wrap-2 { display:none; }
+      .topbar { background:rgba(19,21,26,0.75); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,0.08); }
+    }
+
+    @media (max-width: 560px) {
+      .form-col  { padding:32px 20px 60px; }
+      .card      { padding:32px 24px 28px; border-radius:16px; }
+      .c-title   { font-size:1.75rem; }
+      .tw        { top:80px; right:12px; left:12px; max-width:unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ BACKGROUND ══ -->
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-dark"></div>
+    <div class="bg-cut"></div>
+    <div class="bg-grain"></div>
+
+    <div class="orbit-wrap">
+      <div class="ring"></div>
+      <div class="ring-2"></div>
+      <div class="ring-3"></div>
+      <div class="orb-core"></div>
+      <div class="planet p1"></div>
+      <div class="planet sm p2"></div>
+      <div class="planet p3"></div>
+      <div class="planet sm p4"></div>
+      <div class="planet xs p5"></div>
+    </div>
+
+    <div class="orbit-wrap-2">
+      <div class="ring"></div>
+      <div class="ring-2"></div>
+      <div class="orb-core"></div>
+      <div class="planet p1"></div>
+      <div class="planet sm p2"></div>
+      <div class="planet p4"></div>
+    </div>
+  </div>
+
+  <!-- ══ TOPBAR ══ -->
+  <nav class="topbar">
+    <a href="{{ url_for('user_home') }}" class="logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('user_signup_page') }}" class="nav-signup">
+      <span class="material-icons">person_add</span>
+      Sign up
+    </a>
+  </nav>
+
+  <!-- flash messages for toast rendering -->
+  <div id="flash-data"
+       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
+       style="display:none"></div>
+
+  <!-- ══ PAGE ══ -->
+  <div class="page">
+
+    <!-- left column -->
+    <aside class="left-col">
+      <p class="lc-tag"><span class="lc-dot"></span>Student Platform</p>
+      <h2 class="lc-h">Welcome<br><span>back.</span></h2>
+      <p class="lc-p">Your notes, quizzes and progress are waiting. Log in and pick up right where you left off.</p>
+
+      <div class="lc-stats">
+        <div class="ls-item">
+          <div class="ls-ico"><span class="material-icons">menu_book</span></div>
+          <div>
+            <div class="ls-label">Notes library</div>
+            <div class="ls-val">All semesters covered</div>
+          </div>
+        </div>
+        <div class="ls-item">
+          <div class="ls-ico"><span class="material-icons">quiz</span></div>
+          <div>
+            <div class="ls-label">Quiz engine</div>
+            <div class="ls-val">AI-generated · 70 questions</div>
+          </div>
+        </div>
+        <div class="ls-item">
+          <div class="ls-ico"><span class="material-icons">insights</span></div>
+          <div>
+            <div class="ls-label">Progress tracking</div>
+            <div class="ls-val">Personal score history</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- form column -->
+    <main class="form-col">
+      <div class="card">
+
+        <p class="c-eye">Student Login</p>
+        <h1 class="c-title">Log in to<br>U-NEX.</h1>
+        <p class="c-sub">Enter your credentials to continue.</p>
+
+        <div class="hr"></div>
+
+        <form id="loginForm" method="POST" action="{{ url_for('user_login') }}" novalidate>
+
+          <div class="fgrid">
+
+            <div class="fg">
+              <label for="email">Email Address</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">mail_outline</span></span>
+                <input type="email" id="email" name="email"
+                       placeholder="you@university.edu"
+                       autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label for="password">Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_outline</span></span>
+                <input type="password" id="pw1" name="password"
+                       placeholder="Your password" class="tr"
+                       autocomplete="current-password" required>
+                <span class="ti">
+                  <button type="button" data-t="pw1" aria-label="Show password">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <button type="submit" class="sub-btn">
+            <span class="material-icons">login</span>
+            Log In
+          </button>
+
+          <div class="or-divider"><span>don't have an account?</span></div>
+
+          <p class="nudge">
+            <a href="{{ url_for('user_signup_page') }}">Create one for free →</a>
+          </p>
+
+        </form>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ══ TOAST WRAP ══ -->
+  <div class="tw" id="tw"></div>
+
+  <script>
+    /* password toggle */
+    document.querySelectorAll('[data-t]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inp  = document.getElementById(btn.dataset.t);
+        const icon = btn.querySelector('.material-icons');
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        icon.textContent = show ? 'visibility_off' : 'visibility';
+      });
+    });
+
+    /* toast engine */
+    const ICONS = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const CLS   = { success:'ts', error:'te', info:'ti' };
+
+    function showToast({ cat, msg, dur=4200 }) {
+      const k    = CLS[cat]   || 'ti';
+      const icon = ICONS[cat] || ICONS.info;
+      const wrap = document.getElementById('tw');
+      const el   = document.createElement('div');
+      el.className = `toast ${k}`;
+      el.style.setProperty('--dur', dur + 'ms');
+      el.innerHTML = `
+        <div class="t-ic"><span class="material-icons">${icon}</span></div>
+        <div class="t-bd"><div class="t-tt">${msg}</div></div>
+        <button class="t-cl" aria-label="Dismiss">
+          <span class="material-icons">close</span>
+        </button>
+        <div class="t-bar"></div>`;
+      el.querySelector('.t-cl').addEventListener('click', () => hide(el));
+      wrap.appendChild(el);
+      const timer = setTimeout(() => hide(el), dur);
+      el._t = timer;
+    }
+
+    function hide(el) {
+      if (!el || el.classList.contains('t-hide')) return;
+      clearTimeout(el._t);
+      el.classList.add('t-hide');
+      el.addEventListener('animationend', () => el.remove(), { once:true });
+    }
+
+    /* render server flash messages as toasts on load */
+    (function() {
+      try {
+        const messages = JSON.parse(
+          document.getElementById('flash-data').dataset.messages
+        );
+        messages.forEach(([cat, msg], i) => {
+          setTimeout(() => showToast({ cat, msg }), i * 300);
+        });
+      } catch(e) {}
+    })();
+  </script>
+
+</body>
+</html>
