@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 import os
@@ -514,5 +515,181 @@ def admin_logout():
 def sponsors_page():
     return render_template('sponsors.html')
 
+# ── STUDENT DECORATOR  (mirrors admin_required) ─────────────────────
+def student_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('student_logged_in'):
+            flash("Please log in to continue", "error")
+            return redirect(url_for('user_login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# ── SIGNUP ──────────────────────────────────────────────────────────
+@app.route('/user/signup', methods=['GET'])
+def user_signup_page():
+    # if already logged in, go straight to dashboard
+    if session.get('student_logged_in'):
+        return redirect(url_for('user_dashboard'))
+    return render_template('user_signup.html')
+
+
+@app.route('/user/signup', methods=['POST'])
+def user_signup():
+    full_name     = request.form.get('full_name', '').strip()
+    email         = request.form.get('email', '').strip().lower()
+    matric_number = request.form.get('matric_number', '').strip().upper()
+    department    = request.form.get('department', '').strip()
+    level         = request.form.get('level', '').strip()
+    password      = request.form.get('password', '')
+    confirm_pw    = request.form.get('confirm_password', '')
+
+    # ── server-side validation ───────────────────────────────────────
+    errors = []
+
+    if not full_name:
+        errors.append("Full name is required.")
+    if not email or '@' not in email:
+        errors.append("A valid email address is required.")
+    if not matric_number:
+        errors.append("Matric number is required.")
+    if not department:
+        errors.append("Please select your department.")
+    if not level:
+        errors.append("Please select your level.")
+    if len(password) < 8:
+        errors.append("Password must be at least 8 characters.")
+    if password != confirm_pw:
+        errors.append("Passwords do not match.")
+
+    if errors:
+        for msg in errors:
+            flash(msg, 'error')
+        return redirect(url_for('user_signup_page'))
+
+    # ── check duplicates ─────────────────────────────────────────────
+    try:
+        email_check = supabase.table('users').select('id').eq('email', email).execute()
+        if email_check.data:
+            flash("An account with that email already exists.", 'error')
+            return redirect(url_for('user_signup_page'))
+
+        matric_check = supabase.table('users').select('id').eq('matric_number', matric_number).execute()
+        if matric_check.data:
+            flash("That matric number is already registered.", 'error')
+            return redirect(url_for('user_signup_page'))
+
+    except Exception as e:
+        flash(f"Could not verify account details: {str(e)}", 'error')
+        return redirect(url_for('user_signup_page'))
+
+    # ── create user ──────────────────────────────────────────────────
+    try:
+        password_hash = generate_password_hash(password)
+
+        result = supabase.table('users').insert({
+            "full_name":     full_name,
+            "email":         email,
+            "matric_number": matric_number,
+            "department":    department,
+            "level":         level,
+            "password_hash": password_hash,
+            "is_active":     True,
+            "created_at":    "now()",
+            "updated_at":    "now()"
+        }).execute()
+
+        # log the student in immediately after signup
+        user = result.data[0]
+        session['student_logged_in'] = True
+        session['student_id']        = user['id']
+        session['student_name']      = user['full_name']
+        session['student_email']     = user['email']
+        session['student_dept']      = user['department']
+        session['student_level']     = user['level']
+
+        flash(f"Welcome to U-NEX, {full_name.split()[0]}! Your account is ready.", 'success')
+        return redirect(url_for('user_dashboard'))
+
+    except Exception as e:
+        flash(f"Could not create account: {str(e)}", 'error')
+        return redirect(url_for('user_signup_page'))
+
+
+# ── LOGIN ────────────────────────────────────────────────────────────
+@app.route('/user/login', methods=['GET'])
+def user_login_page():
+    if session.get('student_logged_in'):
+        return redirect(url_for('user_dashboard'))
+    return render_template('user_login.html')
+
+
+@app.route('/user/login', methods=['POST'])
+def user_login():
+    email    = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')
+
+    if not email or not password:
+        flash("Email and password are required.", 'error')
+        return redirect(url_for('user_login_page'))
+
+    try:
+        result = supabase.table('users').select('*').eq('email', email).execute()
+
+        if not result.data:
+            flash("No account found with that email.", 'error')
+            return redirect(url_for('user_login_page'))
+
+        user = result.data[0]
+
+        if not check_password_hash(user['password_hash'], password):
+            flash("Incorrect password. Please try again.", 'error')
+            return redirect(url_for('user_login_page'))
+
+        if not user.get('is_active', True):
+            flash("Your account has been deactivated. Contact support.", 'error')
+            return redirect(url_for('user_login_page'))
+
+        # set session
+        session['student_logged_in'] = True
+        session['student_id']        = user['id']
+        session['student_name']      = user['full_name']
+        session['student_email']     = user['email']
+        session['student_dept']      = user['department']
+        session['student_level']     = user['level']
+
+        flash(f"Welcome back, {user['full_name'].split()[0]}!", 'success')
+        return redirect(url_for('user_dashboard'))
+
+    except Exception as e:
+        flash(f"Login error: {str(e)}", 'error')
+        return redirect(url_for('user_login_page'))
+
+
+# ── LOGOUT ───────────────────────────────────────────────────────────
+@app.route('/user/logout', methods=['GET', 'POST'])
+@student_required
+def user_logout():
+    session.pop('student_logged_in', None)
+    session.pop('student_id',        None)
+    session.pop('student_name',      None)
+    session.pop('student_email',     None)
+    session.pop('student_dept',      None)
+    session.pop('student_level',     None)
+    flash("You've been logged out.", 'success')
+    return redirect(url_for('user_login_page'))
+
+
+# ── DASHBOARD (stub — expand later) ─────────────────────────────────
+@app.route('/user/dashboard')
+@student_required
+def user_dashboard():
+    return render_template(
+        'user_dashboard.html',
+        student_name  = session.get('student_name'),
+        student_dept  = session.get('student_dept'),
+        student_level = session.get('student_level'),
+    )
 if __name__ == '__main__':
     app.run(debug=True)
