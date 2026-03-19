@@ -518,7 +518,7 @@ def sponsors_page():
 
 
 #----------new part -------------
-
+# ── STUDENT DECORATOR  (mirrors admin_required) ─────────────────────
 def student_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -628,6 +628,7 @@ def user_signup():
         session['student_email']     = user['email']
         session['student_dept']      = user['department']
         session['student_level']     = user['level']
+        session['student_matric']    = user['matric_number']
  
         flash(f"Welcome to U-NEX, {full_name.split()[0]}! Your account is ready.", 'success')
         return redirect(url_for('user_dashboard'))
@@ -678,6 +679,7 @@ def user_login():
         session['student_email']     = user['email']
         session['student_dept']      = user['department']
         session['student_level']     = user['level']
+        session['student_matric']    = user['matric_number']
  
         flash(f"Welcome back, {user['full_name'].split()[0]}!", 'success')
         return redirect(url_for('user_dashboard'))
@@ -697,20 +699,55 @@ def user_logout():
     session.pop('student_email',     None)
     session.pop('student_dept',      None)
     session.pop('student_level',     None)
+    session.pop('student_matric',    None)
     flash("You've been logged out.", 'success')
     return redirect(url_for('user_login_page'))
  
  
-# ── DASHBOARD (stub — expand later) ─────────────────────────────────
+# ── DASHBOARD ───────────────────────────────────────────────────────
 @app.route('/user/dashboard')
 @student_required
 def user_dashboard():
+    from datetime import datetime as _dt
+ 
+    # time-based greeting
+    hour = _dt.now().hour
+    if hour < 12:
+        greeting = 'morning'
+    elif hour < 17:
+        greeting = 'afternoon'
+    else:
+        greeting = 'evening'
+ 
+    # fetch notes count for the student's dept/level from DB
+    try:
+        notes_res = supabase.table('notes') \
+            .select('id', count='exact') \
+            .eq('department', session.get('student_dept', '')) \
+            .eq('level', session.get('student_level', '')) \
+            .execute()
+        notes_count = notes_res.count if notes_res.count is not None else 0
+    except Exception:
+        notes_count = 0
+ 
+    # quiz stats — placeholder until quiz tables are populated
+    quiz_count = 0
+    best_score = '—'
+ 
     return render_template(
         'user_dashboard.html',
-        student_name  = session.get('student_name'),
-        student_dept  = session.get('student_dept'),
-        student_level = session.get('student_level'),
+        student_name   = session.get('student_name', ''),
+        student_email  = session.get('student_email', ''),
+        student_dept   = session.get('student_dept', ''),
+        student_level  = session.get('student_level', ''),
+        student_matric = session.get('student_matric', ''),
+        time_greeting  = greeting,
+        now            = _dt.now(),
+        notes_count    = notes_count,
+        quiz_count     = quiz_count,
+        best_score     = best_score,
     )
+ 
  
 if __name__ == '__main__':
     app.run(debug=True)
