@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Dashboard</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange:       #f97316;
+      --orange-dk:    #ea580c;
+      --orange-glow:  rgba(249,115,22,0.15);
+      --orange-dim:   rgba(249,115,22,0.08);
+      --gold:         #d3a410;
+      --gold-dim:     rgba(211,164,16,0.12);
+      --bg:           #0f1117;
+      --surface:      #161a23;
+      --surface2:     #1c2130;
+      --surface3:     #222840;
+      --border:       rgba(255,255,255,0.07);
+      --border-light: rgba(255,255,255,0.12);
+      --text:         #f1f5f9;
+      --muted:        rgba(241,245,249,0.45);
+      --muted2:       rgba(241,245,249,0.25);
+      --green:        #22c55e;
+      --green-dim:    rgba(34,197,94,0.12);
+      --blue:         #3b82f6;
+      --blue-dim:     rgba(59,130,246,0.12);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════
+       SUBTLE BACKGROUND TEXTURE
+    ═══════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 20%, rgba(249,115,22,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(211,164,16,0.05) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 60% at 50% 50%, rgba(59,130,246,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════
+       LAYOUT SHELL
+    ═══════════════════════════════════ */
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════ */
+    .sidebar {
+      width: 72px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 28px;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: width 0.3s cubic-bezier(.22,1,.36,1);
+    }
+
+    .sidebar:hover { width: 200px; }
+
+    .sb-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--text);
+      text-decoration: none;
+      margin-bottom: 36px;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 100%;
+      padding: 0 20px;
+    }
+    .sb-logo em { color: var(--orange); font-style: normal; }
+    .sb-logo .sb-full { opacity: 0; transition: opacity 0.2s; }
+    .sidebar:hover .sb-full { opacity: 1; }
+
+    .sb-nav {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 8px;
+    }
+
+    .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: background .2s, color .2s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sb-item:hover   { background: rgba(255,255,255,0.05); color: var(--text); }
+    .sb-item.active  { background: var(--orange-dim); color: var(--orange); }
+    .sb-item .material-icons { font-size: 1.25rem; flex-shrink: 0; }
+    .sb-label { opacity: 0; transition: opacity 0.15s; }
+    .sidebar:hover .sb-label { opacity: 1; }
+
+    .sb-bottom {
+      width: 100%;
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ═══════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════ */
+    .main {
+      flex: 1;
+      margin-left: 72px;
+      padding: 32px 36px 60px;
+      max-width: 1200px;
+    }
+
+    /* ═══════════════════════════════════
+       TOPBAR ROW
+    ═══════════════════════════════════ */
+    .toprow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .toprow-left h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .toprow-left h1 span { color: var(--orange); }
+    .toprow-left p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .toprow-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--orange), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .notif-btn {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      transition: color .2s, border-color .2s;
+    }
+    .notif-btn:hover { color: var(--text); border-color: var(--border-light); }
+    .notif-btn .material-icons { font-size: 1.1rem; }
+
+    /* ═══════════════════════════════════
+       HERO IDENTITY CARD
+    ═══════════════════════════════════ */
+    .hero-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    /* geometric background pattern */
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          45deg,
+          rgba(249,115,22,0.03) 0px,
+          rgba(249,115,22,0.03) 1px,
+          transparent 1px,
+          transparent 28px
+        );
+      pointer-events: none;
+    }
+
+    /* glowing orb top-right */
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
+
+    .hero-greeting {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 8px;
+    }
+
+    .hero-name {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .tag.orange { background: var(--orange-dim); border-color: rgba(249,115,22,0.25); color: #fb923c; }
+    .tag.gold   { background: var(--gold-dim);   border-color: rgba(211,164,16,0.25); color: #f0c040; }
+    .tag.blue   { background: var(--blue-dim);   border-color: rgba(59,130,246,0.25); color: #60a5fa; }
+    .tag .material-icons { font-size: 0.8rem; }
+
+    /* right — decorative orbit mini */
+    .hero-orbit {
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      width: 120px; height: 120px;
+      display: none;
+    }
+    @media (min-width: 640px) { .hero-orbit { display: block; } }
+
+    .ho-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(211,164,16,0.35);
+      animation: ho-spin 12s linear infinite;
+    }
+    .ho-ring-2 {
+      position: absolute; inset: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(249,115,22,0.3);
+      animation: ho-spin 8s linear infinite reverse;
+    }
+    .ho-core {
+      position: absolute; top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f97316, #b7870f 60%, #1e2026);
+      box-shadow: 0 0 20px rgba(249,115,22,0.5);
+    }
+    .ho-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 8px;
+      margin: -4px 0 0 -4px;
+      border-radius: 50%;
+    }
+    .ho-d1 {
+      background: var(--gold);
+      box-shadow: 0 0 8px rgba(211,164,16,0.7);
+      animation: ho-orbit1 12s linear infinite;
+    }
+    .ho-d2 {
+      background: var(--orange);
+      box-shadow: 0 0 6px rgba(249,115,22,0.6);
+      animation: ho-orbit2 8s linear infinite reverse;
+    }
+
+    @keyframes ho-spin   { to { transform: rotate(360deg); } }
+    @keyframes ho-orbit1 { from{transform:rotate(0deg)   translateX(58px) rotate(0deg)}   to{transform:rotate(360deg)  translateX(58px) rotate(-360deg)} }
+    @keyframes ho-orbit2 { from{transform:rotate(180deg) translateX(38px) rotate(-180deg)} to{transform:rotate(-180deg) translateX(38px) rotate(180deg)} }
+
+    /* ═══════════════════════════════════
+       STATS ROW
+    ═══════════════════════════════════ */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .2s;
+    }
+    .stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+
+    /* corner accent shape */
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; right: -20px;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      opacity: 0.07;
+    }
+    .stat-card.c-orange::after { background: var(--orange); }
+    .stat-card.c-gold::after   { background: var(--gold); }
+    .stat-card.c-blue::after   { background: var(--blue); }
+
+    .stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .c-orange .stat-icon { background: var(--orange-dim); }
+    .c-gold   .stat-icon { background: var(--gold-dim); }
+    .c-blue   .stat-icon { background: var(--blue-dim); }
+
+    .c-orange .stat-icon .material-icons { color: var(--orange); font-size: 1.1rem; }
+    .c-gold   .stat-icon .material-icons { color: #f0c040;        font-size: 1.1rem; }
+    .c-blue   .stat-icon .material-icons { color: var(--blue);    font-size: 1.1rem; }
+
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .c-orange .stat-val { color: var(--orange); }
+    .c-gold   .stat-val { color: #f0c040; }
+    .c-blue   .stat-val { color: var(--blue); }
+
+    .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+
+    /* ═══════════════════════════════════
+       SECTION TITLES
+    ═══════════════════════════════════ */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px; height: 18px;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    /* ═══════════════════════════════════
+       TOOLS GRID
+    ═══════════════════════════════════ */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition: border-color .25s, transform .2s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .tool-card:hover {
+      border-color: rgba(249,115,22,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+
+    /* diagonal stripe pattern */
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -55deg,
+        transparent 0px, transparent 18px,
+        rgba(255,255,255,0.018) 18px, rgba(255,255,255,0.018) 19px
+      );
+      pointer-events: none;
+    }
+
+    /* glow blob */
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      opacity: 0.12;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+    .tool-card:hover::after { opacity: 0.2; }
+    .tool-card.tc-notes::after  { background: radial-gradient(circle, var(--orange), transparent 70%); }
+    .tool-card.tc-quiz::after   { background: radial-gradient(circle, var(--gold), transparent 70%); }
+
+    .tc-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tc-ico {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tc-notes .tc-ico { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.2); }
+    .tc-quiz  .tc-ico { background: var(--gold-dim);   border: 1px solid rgba(211,164,16,0.2); }
+
+    .tc-notes .tc-ico .material-icons { color: var(--orange); font-size: 1.3rem; }
+    .tc-quiz  .tc-ico .material-icons { color: #f0c040;        font-size: 1.3rem; }
+
+    .tc-arrow {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .tool-card:hover .tc-arrow {
+      background: var(--orange-dim);
+      border-color: rgba(249,115,22,0.3);
+      color: var(--orange);
+    }
+    .tc-arrow .material-icons { font-size: 1rem; }
+
+    .tc-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+      position: relative; z-index: 1;
+    }
+    .tc-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+      position: relative; z-index: 1;
+    }
+
+    /* ═══════════════════════════════════
+       PROFILE DETAILS CARD
+    ═══════════════════════════════════ */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* dot-grid pattern */
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    .pc-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      position: relative; z-index: 1;
+    }
+
+    .pc-avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--orange), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+    }
+
+    .pc-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    .pc-email {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .pc-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative; z-index: 1;
+    }
+
+    .pc-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .pc-key {
+      font-size: 0.73rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+    .pc-val {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ═══════════════════════════════════
+       QUICK ACTIONS CARD
+    ═══════════════════════════════════ */
+    .quick-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* chevron grid pattern */
+    .quick-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, transparent 1px),
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .qc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative; z-index: 1;
+    }
+
+    .qc-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: background .2s, border-color .2s, transform .15s;
+      cursor: pointer;
+    }
+    .qc-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--border-light);
+      transform: translateX(4px);
+    }
+
+    .qc-ico {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .qc-ico .material-icons { font-size: 1rem; }
+
+    .qc-ico.i-orange { background: var(--orange-dim); }
+    .qc-ico.i-orange .material-icons { color: var(--orange); }
+    .qc-ico.i-gold   { background: var(--gold-dim); }
+    .qc-ico.i-gold   .material-icons { color: #f0c040; }
+    .qc-ico.i-green  { background: var(--green-dim); }
+    .qc-ico.i-green  .material-icons { color: var(--green); }
+    .qc-ico.i-blue   { background: var(--blue-dim); }
+    .qc-ico.i-blue   .material-icons { color: var(--blue); }
+
+    .qc-label { flex: 1; }
+    .qc-arrow .material-icons { font-size: 0.9rem; color: var(--muted2); }
+
+    /* ── logout at bottom of quick ── */
+    .qc-logout {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      background: rgba(239,68,68,0.06);
+      border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 12px;
+      color: #f87171;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      position: relative; z-index: 1;
+    }
+    .qc-logout:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.28); }
+    .qc-logout .material-icons { font-size: 1rem; }
+
+    /* ═══════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════ */
+    @media (max-width: 900px) {
+      .main { padding: 24px 20px 60px; }
+      .stats-row { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .bottom-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .sidebar { width: 56px; }
+      .sidebar:hover { width: 56px; }
+      .sb-label { display: none; }
+      .main { margin-left: 56px; padding: 20px 16px 56px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+      .hero-card { padding: 22px 20px; }
+    }
+
+    /* ═══════════════════════════════════
+       FLASH TOASTS — top right
+    ═══════════════════════════════════ */
+    .tw {
+      position: fixed;
+      top: 20px; right: 20px;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+      pointer-events: none;
+      max-width: 320px;
+      width: calc(100% - 32px);
+    }
+    .toast {
+      position: relative; display: flex; align-items: flex-start; gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 14px 14px 18px 16px;
+      pointer-events: all; overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      animation: t-in .38s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast.t-hide { animation: t-out .28s ease forwards; }
+    @keyframes t-in  { from{opacity:0;transform:translateX(20px) scale(.96)} to{opacity:1;transform:none} }
+    @keyframes t-out { from{opacity:1;transform:none} to{opacity:0;transform:translateX(20px) scale(.96)} }
+    .toast::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; border-radius:13px 0 0 13px; }
+    .toast.ts::before { background:#22c55e; }
+    .toast.te::before { background:#ef4444; }
+    .toast.ti::before { background:var(--orange); }
+    .t-ic .material-icons { font-size:1.1rem; line-height:1; margin-top:1px; }
+    .toast.ts .t-ic .material-icons { color:#22c55e; }
+    .toast.te .t-ic .material-icons { color:#ef4444; }
+    .toast.ti .t-ic .material-icons { color:var(--orange); }
+    .t-bd { flex:1; min-width:0; }
+    .t-tt { font-size:.87rem; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .t-ms { font-size:.78rem; color:var(--muted); line-height:1.45; }
+    .t-cl { background:none; border:none; cursor:pointer; color:var(--muted); display:flex; align-items:center; padding:3px; border-radius:6px; flex-shrink:0; margin-top:1px; transition:color .15s; }
+    .t-cl:hover { color:var(--text); }
+    .t-cl .material-icons { font-size:.9rem; line-height:1; }
+    .t-bar { position:absolute; bottom:0; left:0; height:3px; animation:t-shrink var(--dur,3.5s) linear forwards; }
+    .toast.ts .t-bar { background:#22c55e; }
+    .toast.te .t-bar { background:#ef4444; }
+    .toast.ti .t-bar { background:var(--orange); }
+    @keyframes t-shrink { from{width:100%} to{width:0} }
+
+    /* ═══════════════════════════════════
+       PAGE LOAD ANIMATIONS
+    ═══════════════════════════════════ */
+    .anim { opacity: 0; transform: translateY(18px); animation: fade-up .5s cubic-bezier(.22,1,.36,1) forwards; }
+    .anim-d1 { animation-delay: .05s; }
+    .anim-d2 { animation-delay: .12s; }
+    .anim-d3 { animation-delay: .19s; }
+    .anim-d4 { animation-delay: .26s; }
+    .anim-d5 { animation-delay: .33s; }
+    @keyframes fade-up { to { opacity:1; transform:none; } }
+  </style>
+</head>
+<body>
+
+  <!-- flash data for toasts -->
+  <div id="flash-data"
+       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
+       style="display:none"></div>
+
+  <div class="shell">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <a href="{{ url_for('user_home') }}" class="sb-logo">
+        <em>U</em><span class="sb-full">-NEX</span>
+      </a>
+
+      <nav class="sb-nav">
+        <a class="sb-item active" href="{{ url_for('user_dashboard') }}">
+          <span class="material-icons">dashboard</span>
+          <span class="sb-label">Dashboard</span>
+        </a>
+        <a class="sb-item" href="{{ url_for('user_notes') }}">
+          <span class="material-icons">menu_book</span>
+          <span class="sb-label">Notes</span>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="material-icons">quiz</span>
+          <span class="sb-label">Quizzes</span>
+        </a>
+        <a class="sb-item" href="#">
+          <span class="material-icons">insights</span>
+          <span class="sb-label">Progress</span>
+        </a>
+      </nav>
+
+      <div class="sb-bottom">
+        <a class="sb-item" href="#">
+          <span class="material-icons">settings</span>
+          <span class="sb-label">Settings</span>
+        </a>
+        <a class="sb-item" href="{{ url_for('user_logout') }}"
+           style="color:#f87171"
+           onclick="return confirm('Log out of U-NEX?')">
+          <span class="material-icons">logout</span>
+          <span class="sb-label">Log out</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="main">
+
+      <!-- top row -->
+      <div class="toprow anim anim-d1">
+        <div class="toprow-left">
+          <h1>Good {{ time_greeting }}, <span>{{ student_name.split()[0] }}</span> 👋</h1>
+          <p>{{ now.strftime('%A, %d %B %Y') }}</p>
+        </div>
+        <div class="toprow-right">
+          <div class="notif-btn">
+            <span class="material-icons">notifications_none</span>
+          </div>
+          <div class="avatar">{{ student_name[0] | upper }}</div>
+        </div>
+      </div>
+
+      <!-- hero identity card -->
+      <div class="hero-card anim anim-d2">
+        <div class="hero-left">
+          <p class="hero-greeting">Student Profile</p>
+          <h2 class="hero-name">{{ student_name }}</h2>
+          <div class="hero-tags">
+            <span class="tag orange">
+              <span class="material-icons">school</span>
+              {{ student_dept | title }}
+            </span>
+            <span class="tag gold">
+              <span class="material-icons">layers</span>
+              Level {{ student_level }}
+            </span>
+            <span class="tag blue">
+              <span class="material-icons">badge</span>
+              {{ student_matric }}
+            </span>
+          </div>
+        </div>
+        <div class="hero-orbit">
+          <div class="ho-ring"></div>
+          <div class="ho-ring-2"></div>
+          <div class="ho-core"></div>
+          <div class="ho-dot ho-d1"></div>
+          <div class="ho-dot ho-d2"></div>
+        </div>
+      </div>
+
+      <!-- stats row -->
+      <div class="stats-row anim anim-d3">
+        <div class="stat-card c-orange">
+          <div class="stat-icon"><span class="material-icons">menu_book</span></div>
+          <div class="stat-val">{{ notes_count if notes_count is defined else '—' }}</div>
+          <div class="stat-label">Notes Available</div>
+        </div>
+        <div class="stat-card c-gold">
+          <div class="stat-icon"><span class="material-icons">quiz</span></div>
+          <div class="stat-val">{{ quiz_count if quiz_count is defined else '0' }}</div>
+          <div class="stat-label">Quizzes Taken</div>
+        </div>
+        <div class="stat-card c-blue">
+          <div class="stat-icon"><span class="material-icons">emoji_events</span></div>
+          <div class="stat-val">{{ best_score if best_score is defined else '—' }}</div>
+          <div class="stat-label">Best Score</div>
+        </div>
+      </div>
+
+      <!-- tools -->
+      <p class="section-title anim anim-d4">Your Tools</p>
+      <div class="tools-grid anim anim-d4">
+
+        <a class="tool-card tc-notes" href="{{ url_for('user_notes') }}">
+          <div class="tc-head">
+            <div class="tc-ico"><span class="material-icons">menu_book</span></div>
+            <div class="tc-arrow"><span class="material-icons">arrow_forward</span></div>
+          </div>
+          <div class="tc-title">Lecture Notes</div>
+          <div class="tc-sub">
+            Browse past and current notes for your courses — organised by semester and course code.
+          </div>
+        </a>
+
+        <a class="tool-card tc-quiz" href="#">
+          <div class="tc-head">
+            <div class="tc-ico"><span class="material-icons">quiz</span></div>
+            <div class="tc-arrow"><span class="material-icons">arrow_forward</span></div>
+          </div>
+          <div class="tc-title">Take a Quiz</div>
+          <div class="tc-sub">
+            AI-generated questions from your actual lecture notes. 70 questions. Set your own time.
+          </div>
+        </a>
+
+      </div>
+
+      <!-- profile details + quick actions -->
+      <div class="bottom-row anim anim-d5">
+
+        <!-- profile card -->
+        <div class="profile-card">
+          <p class="section-title" style="margin-bottom:20px">Account Details</p>
+          <div class="pc-header">
+            <div class="pc-avatar">{{ student_name[0] | upper }}</div>
+            <div>
+              <div class="pc-name">{{ student_name }}</div>
+              <div class="pc-email">{{ student_email }}</div>
+            </div>
+          </div>
+          <div class="pc-fields">
+            <div class="pc-row">
+              <span class="pc-key">Matric No.</span>
+              <span class="pc-val">{{ student_matric }}</span>
+            </div>
+            <div class="pc-row">
+              <span class="pc-key">Department</span>
+              <span class="pc-val">{{ student_dept | title }}</span>
+            </div>
+            <div class="pc-row">
+              <span class="pc-key">Level</span>
+              <span class="pc-val">{{ student_level }}L</span>
+            </div>
+            <div class="pc-row">
+              <span class="pc-key">Status</span>
+              <span class="pc-val" style="color:var(--green)">● Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- quick actions -->
+        <div class="quick-card">
+          <p class="section-title" style="margin-bottom:20px">Quick Actions</p>
+          <div class="qc-list">
+            <a class="qc-item" href="{{ url_for('user_notes') }}">
+              <div class="qc-ico i-orange"><span class="material-icons">menu_book</span></div>
+              <span class="qc-label">Browse Notes</span>
+              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
+            </a>
+            <a class="qc-item" href="#">
+              <div class="qc-ico i-gold"><span class="material-icons">quiz</span></div>
+              <span class="qc-label">Start a Quiz</span>
+              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
+            </a>
+            <a class="qc-item" href="#">
+              <div class="qc-ico i-green"><span class="material-icons">insights</span></div>
+              <span class="qc-label">View My Progress</span>
+              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
+            </a>
+            <a class="qc-item" href="#">
+              <div class="qc-ico i-blue"><span class="material-icons">settings</span></div>
+              <span class="qc-label">Account Settings</span>
+              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
+            </a>
+          </div>
+          <a class="qc-logout" href="{{ url_for('user_logout') }}"
+             onclick="return confirm('Log out of U-NEX?')">
+            <span class="material-icons">logout</span>
+            Log out
+          </a>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- toast wrap -->
+  <div class="tw" id="tw"></div>
+
+  <script>
+    /* toast engine */
+    const ICONS = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const CLS   = { success:'ts', error:'te', info:'ti' };
+
+    function showToast({ cat, msg, dur=4000 }) {
+      const k = CLS[cat] || 'ti';
+      const wrap = document.getElementById('tw');
+      const el = document.createElement('div');
+      el.className = `toast ${k}`;
+      el.style.setProperty('--dur', dur + 'ms');
+      el.innerHTML = `
+        <div class="t-ic"><span class="material-icons">${ICONS[cat] || ICONS.info}</span></div>
+        <div class="t-bd"><div class="t-tt">${msg}</div></div>
+        <button class="t-cl" aria-label="Dismiss"><span class="material-icons">close</span></button>
+        <div class="t-bar"></div>`;
+      el.querySelector('.t-cl').addEventListener('click', () => hide(el));
+      wrap.appendChild(el);
+      const t = setTimeout(() => hide(el), dur);
+      el._t = t;
+    }
+
+    function hide(el) {
+      if (!el || el.classList.contains('t-hide')) return;
+      clearTimeout(el._t);
+      el.classList.add('t-hide');
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+    }
+
+    /* render server flash messages */
+    (function() {
+      try {
+        const msgs = JSON.parse(document.getElementById('flash-data').dataset.messages);
+        msgs.forEach(([cat, msg], i) => setTimeout(() => showToast({ cat, msg }), i * 300));
+      } catch(e) {}
+    })();
+  </script>
+
+</body>
+</html>
