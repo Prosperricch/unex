@@ -5,1044 +5,856 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U-NEX • Dashboard</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
   <style>
     :root {
-      --orange:       #f97316;
-      --orange-dk:    #ea580c;
-      --orange-glow:  rgba(249,115,22,0.15);
-      --orange-dim:   rgba(249,115,22,0.08);
-      --gold:         #d3a410;
-      --gold-dim:     rgba(211,164,16,0.12);
-      --bg:           #0f1117;
-      --surface:      #161a23;
-      --surface2:     #1c2130;
-      --surface3:     #222840;
-      --border:       rgba(255,255,255,0.07);
-      --border-light: rgba(255,255,255,0.12);
-      --text:         #f1f5f9;
-      --muted:        rgba(241,245,249,0.45);
-      --muted2:       rgba(241,245,249,0.25);
-      --green:        #22c55e;
-      --green-dim:    rgba(34,197,94,0.12);
-      --blue:         #3b82f6;
-      --blue-dim:     rgba(59,130,246,0.12);
+      --orange:     #f97316;
+      --orange-dk:  #ea580c;
+      --orange-dim: rgba(249,115,22,0.10);
+      --orange-bd:  rgba(249,115,22,0.22);
+      --gold:       #d4a017;
+      --gold-dim:   rgba(212,160,23,0.10);
+      --gold-bd:    rgba(212,160,23,0.22);
+      --green:      #22c55e;
+      --green-dim:  rgba(34,197,94,0.10);
+      --blue:       #60a5fa;
+      --blue-dim:   rgba(96,165,250,0.10);
+      --bg:         #0c0e14;
+      --s1:         #13161f;
+      --s2:         #191d28;
+      --s3:         #1e2333;
+      --bd:         rgba(255,255,255,0.06);
+      --bd2:        rgba(255,255,255,0.10);
+      --txt:        #eef0f6;
+      --txt2:       rgba(238,240,246,0.55);
+      --txt3:       rgba(238,240,246,0.28);
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--txt);
       min-height: 100vh;
-      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ═══════════════════════════════════
-       SUBTLE BACKGROUND TEXTURE
-    ═══════════════════════════════════ */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── ambient background ─── */
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 80% 50% at 10% 20%, rgba(249,115,22,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(211,164,16,0.05) 0%, transparent 55%),
-        radial-gradient(ellipse 40% 60% at 50% 50%, rgba(59,130,246,0.03) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(212,160,23,0.055) 0%, transparent 60%);
     }
 
-    /* ═══════════════════════════════════
-       LAYOUT SHELL
-    ═══════════════════════════════════ */
-    .shell {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ═══════════════════════════════════
-       SIDEBAR
-    ═══════════════════════════════════ */
-    .sidebar {
-      width: 72px;
-      flex-shrink: 0;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0 28px;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 100;
-      transition: width 0.3s cubic-bezier(.22,1,.36,1);
-    }
-
-    .sidebar:hover { width: 200px; }
-
-    .sb-logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 900;
-      letter-spacing: -1px;
-      color: var(--text);
-      text-decoration: none;
-      margin-bottom: 36px;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 100%;
-      padding: 0 20px;
-    }
-    .sb-logo em { color: var(--orange); font-style: normal; }
-    .sb-logo .sb-full { opacity: 0; transition: opacity 0.2s; }
-    .sidebar:hover .sb-full { opacity: 1; }
-
-    .sb-nav {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 0 8px;
-    }
-
-    .sb-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px;
-      border-radius: 12px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      transition: background .2s, color .2s;
-      cursor: pointer;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-    }
-    .sb-item:hover   { background: rgba(255,255,255,0.05); color: var(--text); }
-    .sb-item.active  { background: var(--orange-dim); color: var(--orange); }
-    .sb-item .material-icons { font-size: 1.25rem; flex-shrink: 0; }
-    .sb-label { opacity: 0; transition: opacity 0.15s; }
-    .sidebar:hover .sb-label { opacity: 1; }
-
-    .sb-bottom {
-      width: 100%;
-      padding: 0 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* ═══════════════════════════════════
-       MAIN CONTENT
-    ═══════════════════════════════════ */
-    .main {
-      flex: 1;
-      margin-left: 72px;
-      padding: 32px 36px 60px;
-      max-width: 1200px;
-    }
-
-    /* ═══════════════════════════════════
-       TOPBAR ROW
-    ═══════════════════════════════════ */
-    .toprow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 36px;
-    }
-
-    .toprow-left h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
-    }
-    .toprow-left h1 span { color: var(--orange); }
-    .toprow-left p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .toprow-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .avatar {
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--orange), var(--gold));
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem; font-weight: 900;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .notif-btn {
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      color: var(--muted);
-      transition: color .2s, border-color .2s;
-    }
-    .notif-btn:hover { color: var(--text); border-color: var(--border-light); }
-    .notif-btn .material-icons { font-size: 1.1rem; }
-
-    /* ═══════════════════════════════════
-       HERO IDENTITY CARD
-    ═══════════════════════════════════ */
-    .hero-card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 36px;
-      margin-bottom: 28px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-    }
-
-    /* geometric background pattern */
-    .hero-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(
-          45deg,
-          rgba(249,115,22,0.03) 0px,
-          rgba(249,115,22,0.03) 1px,
-          transparent 1px,
-          transparent 28px
-        );
-      pointer-events: none;
-    }
-
-    /* glowing orb top-right */
-    .hero-card::after {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 220px; height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-left { position: relative; z-index: 1; }
-
-    .hero-greeting {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--orange);
-      margin-bottom: 8px;
-    }
-
-    .hero-name {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
-      font-weight: 900;
-      letter-spacing: -0.8px;
-      line-height: 1.05;
-      color: var(--text);
-      margin-bottom: 14px;
-    }
-
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 100px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: 1px solid;
-    }
-    .tag.orange { background: var(--orange-dim); border-color: rgba(249,115,22,0.25); color: #fb923c; }
-    .tag.gold   { background: var(--gold-dim);   border-color: rgba(211,164,16,0.25); color: #f0c040; }
-    .tag.blue   { background: var(--blue-dim);   border-color: rgba(59,130,246,0.25); color: #60a5fa; }
-    .tag .material-icons { font-size: 0.8rem; }
-
-    /* right — decorative orbit mini */
-    .hero-orbit {
-      position: relative;
-      z-index: 1;
-      flex-shrink: 0;
-      width: 120px; height: 120px;
-      display: none;
-    }
-    @media (min-width: 640px) { .hero-orbit { display: block; } }
-
-    .ho-ring {
-      position: absolute; inset: 0;
-      border-radius: 50%;
-      border: 1px solid rgba(211,164,16,0.35);
-      animation: ho-spin 12s linear infinite;
-    }
-    .ho-ring-2 {
-      position: absolute; inset: 20px;
-      border-radius: 50%;
-      border: 1px solid rgba(249,115,22,0.3);
-      animation: ho-spin 8s linear infinite reverse;
-    }
-    .ho-core {
-      position: absolute; top:50%; left:50%;
-      transform: translate(-50%,-50%);
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #f97316, #b7870f 60%, #1e2026);
-      box-shadow: 0 0 20px rgba(249,115,22,0.5);
-    }
-    .ho-dot {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 8px; height: 8px;
-      margin: -4px 0 0 -4px;
-      border-radius: 50%;
-    }
-    .ho-d1 {
-      background: var(--gold);
-      box-shadow: 0 0 8px rgba(211,164,16,0.7);
-      animation: ho-orbit1 12s linear infinite;
-    }
-    .ho-d2 {
-      background: var(--orange);
-      box-shadow: 0 0 6px rgba(249,115,22,0.6);
-      animation: ho-orbit2 8s linear infinite reverse;
-    }
-
-    @keyframes ho-spin   { to { transform: rotate(360deg); } }
-    @keyframes ho-orbit1 { from{transform:rotate(0deg)   translateX(58px) rotate(0deg)}   to{transform:rotate(360deg)  translateX(58px) rotate(-360deg)} }
-    @keyframes ho-orbit2 { from{transform:rotate(180deg) translateX(38px) rotate(-180deg)} to{transform:rotate(-180deg) translateX(38px) rotate(180deg)} }
-
-    /* ═══════════════════════════════════
-       STATS ROW
-    ═══════════════════════════════════ */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    /* ══════════════════════════════════
+       TOP NAVBAR
+    ══════════════════════════════════ */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 62px;
+      background: rgba(12,14,20,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--bd);
+      display: flex; align-items: center;
+      padding: 0 28px;
       gap: 16px;
-      margin-bottom: 28px;
     }
 
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px 24px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .25s, transform .2s;
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem; font-weight: 900;
+      letter-spacing: -1.2px; color: var(--txt);
+      margin-right: auto;
     }
-    .stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+    .nav-logo em { color: var(--orange); font-style: normal; }
 
-    /* corner accent shape */
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: -20px; right: -20px;
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      opacity: 0.07;
-    }
-    .stat-card.c-orange::after { background: var(--orange); }
-    .stat-card.c-gold::after   { background: var(--gold); }
-    .stat-card.c-blue::after   { background: var(--blue); }
-
-    .stat-icon {
+    .nav-notif {
       width: 36px; height: 36px;
       border-radius: 10px;
+      border: 1px solid var(--bd2);
+      background: var(--s1);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+      cursor: pointer; color: var(--txt2);
+      transition: color .2s, border-color .2s;
     }
-    .c-orange .stat-icon { background: var(--orange-dim); }
-    .c-gold   .stat-icon { background: var(--gold-dim); }
-    .c-blue   .stat-icon { background: var(--blue-dim); }
+    .nav-notif:hover { color: var(--txt); border-color: var(--bd2); }
+    .nav-notif .material-icons { font-size: 1.05rem; }
 
-    .c-orange .stat-icon .material-icons { color: var(--orange); font-size: 1.1rem; }
-    .c-gold   .stat-icon .material-icons { color: #f0c040;        font-size: 1.1rem; }
-    .c-blue   .stat-icon .material-icons { color: var(--blue);    font-size: 1.1rem; }
-
-    .stat-val {
+    .nav-avatar {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 4px;
+      font-size: 0.95rem; font-weight: 900; color: #fff;
+      cursor: pointer; flex-shrink: 0;
     }
-    .c-orange .stat-val { color: var(--orange); }
-    .c-gold   .stat-val { color: #f0c040; }
-    .c-blue   .stat-val { color: var(--blue); }
 
-    .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+    /* burger */
+    .burger {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--bd2);
+      background: var(--s1);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--txt2);
+      transition: color .2s, background .2s;
+      flex-shrink: 0;
+    }
+    .burger:hover { color: var(--txt); background: var(--s2); }
+    .burger .material-icons { font-size: 1.1rem; }
 
-    /* ═══════════════════════════════════
-       SECTION TITLES
-    ═══════════════════════════════════ */
-    .section-title {
+    /* ── Drawer menu ── */
+    .drawer-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+    }
+    .drawer-backdrop.open { display: block; }
+
+    .drawer {
+      position: fixed; top: 0; right: -300px; bottom: 0;
+      width: 280px; z-index: 400;
+      background: var(--s1);
+      border-left: 1px solid var(--bd2);
+      display: flex; flex-direction: column;
+      padding: 24px 0 32px;
+      transition: right .38s cubic-bezier(.22,1,.36,1);
+    }
+    .drawer.open { right: 0; }
+
+    .drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px 20px;
+      border-bottom: 1px solid var(--bd);
+    }
+    .drawer-title {
       font-family: 'Syne', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 1rem; font-weight: 800; letter-spacing: -0.3px;
     }
-    .section-title::before {
-      content: '';
-      width: 4px; height: 18px;
-      background: var(--orange);
-      border-radius: 2px;
+    .drawer-close {
+      width: 32px; height: 32px;
+      border-radius: 8px; background: var(--s2);
+      border: 1px solid var(--bd); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--txt2); transition: color .2s;
+    }
+    .drawer-close:hover { color: var(--txt); }
+    .drawer-close .material-icons { font-size: 1rem; }
+
+    .drawer-nav {
+      flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px;
     }
 
-    /* ═══════════════════════════════════
-       TOOLS GRID
-    ═══════════════════════════════════ */
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .tool-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-      text-decoration: none;
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      transition: border-color .25s, transform .2s, box-shadow .2s;
+    .d-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 14px; border-radius: 11px;
+      font-size: 0.9rem; font-weight: 500;
+      color: var(--txt2);
+      transition: background .18s, color .18s;
       cursor: pointer;
     }
-    .tool-card:hover {
-      border-color: rgba(249,115,22,0.35);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    .d-item:hover   { background: var(--s2); color: var(--txt); }
+    .d-item.active  { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-bd); }
+    .d-item .material-icons { font-size: 1.1rem; flex-shrink: 0; }
+
+    .drawer-divider { height: 1px; background: var(--bd); margin: 8px 12px; }
+
+    .drawer-foot { padding: 0 12px; }
+    .d-logout {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 14px; border-radius: 11px;
+      font-size: 0.9rem; font-weight: 500;
+      color: #f87171;
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.14);
+      cursor: pointer; transition: background .18s;
+    }
+    .d-logout:hover { background: rgba(239,68,68,0.13); }
+    .d-logout .material-icons { font-size: 1.1rem; }
+
+    /* ══════════════════════════════════
+       PAGE CONTENT
+    ══════════════════════════════════ */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 80px;
     }
 
-    /* diagonal stripe pattern */
-    .tool-card::before {
+    /* ── greeting row ── */
+    .greet-row {
+      margin-bottom: 32px;
+    }
+    .greet-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 6px;
+    }
+    .greet-name {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+      font-weight: 900; letter-spacing: -1px; line-height: 1.08;
+    }
+    .greet-name span { color: var(--orange); }
+    .greet-date {
+      font-size: 0.83rem; color: var(--txt2);
+      margin-top: 5px; font-weight: 400;
+    }
+
+    /* ── identity card ── */
+    .id-card {
+      position: relative; overflow: hidden;
+      background: var(--s1);
+      border: 1px solid var(--bd2);
+      border-radius: 18px;
+      padding: 28px 30px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 24px;
+    }
+
+    /* subtle diagonal hatch */
+    .id-card::before {
       content: '';
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background-image: repeating-linear-gradient(
-        -55deg,
-        transparent 0px, transparent 18px,
-        rgba(255,255,255,0.018) 18px, rgba(255,255,255,0.018) 19px
+        48deg,
+        transparent 0, transparent 24px,
+        rgba(249,115,22,0.025) 24px, rgba(249,115,22,0.025) 25px
       );
       pointer-events: none;
     }
 
-    /* glow blob */
-    .tool-card::after {
+    /* glow blob top-right */
+    .id-card::after {
       content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 140px; height: 140px;
-      border-radius: 50%;
-      opacity: 0.12;
-      transition: opacity .3s;
-      pointer-events: none;
-    }
-    .tool-card:hover::after { opacity: 0.2; }
-    .tool-card.tc-notes::after  { background: radial-gradient(circle, var(--orange), transparent 70%); }
-    .tool-card.tc-quiz::after   { background: radial-gradient(circle, var(--gold), transparent 70%); }
-
-    .tc-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .tc-ico {
-      width: 46px; height: 46px;
-      border-radius: 13px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .tc-notes .tc-ico { background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.2); }
-    .tc-quiz  .tc-ico { background: var(--gold-dim);   border: 1px solid rgba(211,164,16,0.2); }
-
-    .tc-notes .tc-ico .material-icons { color: var(--orange); font-size: 1.3rem; }
-    .tc-quiz  .tc-ico .material-icons { color: #f0c040;        font-size: 1.3rem; }
-
-    .tc-arrow {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--muted);
-      transition: background .2s, color .2s, border-color .2s;
-    }
-    .tool-card:hover .tc-arrow {
-      background: var(--orange-dim);
-      border-color: rgba(249,115,22,0.3);
-      color: var(--orange);
-    }
-    .tc-arrow .material-icons { font-size: 1rem; }
-
-    .tc-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      margin-bottom: 6px;
-      position: relative; z-index: 1;
-    }
-    .tc-sub {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.5;
-      position: relative; z-index: 1;
-    }
-
-    /* ═══════════════════════════════════
-       PROFILE DETAILS CARD
-    ═══════════════════════════════════ */
-    .bottom-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .profile-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* dot-grid pattern */
-    .profile-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
-      background-size: 22px 22px;
+      position: absolute; top: -50px; right: -50px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.14) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    .pc-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 24px;
-      position: relative; z-index: 1;
-    }
-
-    .pc-avatar {
-      width: 52px; height: 52px;
-      border-radius: 14px;
+    .id-ava {
+      flex-shrink: 0;
+      width: 58px; height: 58px; border-radius: 16px;
       background: linear-gradient(135deg, var(--orange), var(--gold));
       display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
-      font-size: 1.3rem; font-weight: 900;
-      color: #fff;
-      flex-shrink: 0;
-      box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+      font-size: 1.5rem; font-weight: 900; color: #fff;
+      position: relative; z-index: 1;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.3);
     }
 
-    .pc-name {
+    .id-info { flex: 1; position: relative; z-index: 1; min-width: 0; }
+    .id-name {
       font-family: 'Syne', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: -0.3px;
+      font-size: 1.25rem; font-weight: 900;
+      letter-spacing: -0.4px; margin-bottom: 10px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .pc-email {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 2px;
+    .id-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 100px;
+      font-size: 0.74rem; font-weight: 600;
+      border: 1px solid;
+    }
+    .pill .material-icons { font-size: 0.72rem; }
+    .pill-o { background: var(--orange-dim); border-color: var(--orange-bd); color: #fb923c; }
+    .pill-g { background: var(--gold-dim);   border-color: var(--gold-bd);   color: #f0c030; }
+    .pill-b { background: var(--blue-dim);   border-color: rgba(96,165,250,0.22); color: var(--blue); }
+
+    /* ── 3-col stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 14px;
+      margin-bottom: 32px;
     }
 
-    .pc-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative; z-index: 1;
+    .sc {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      padding: 22px 20px;
+      position: relative; overflow: hidden;
+      transition: border-color .22s, transform .18s;
     }
+    .sc:hover { border-color: var(--bd2); transform: translateY(-2px); }
 
-    .pc-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-    .pc-key {
-      font-size: 0.73rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted2);
-    }
-    .pc-val {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    /* ═══════════════════════════════════
-       QUICK ACTIONS CARD
-    ═══════════════════════════════════ */
-    .quick-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* chevron grid pattern */
-    .quick-card::before {
+    .sc::after {
       content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, transparent 1px),
-        repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0px, transparent 1px);
-      background-size: 28px 28px;
-      pointer-events: none;
+      position: absolute; bottom: -24px; right: -24px;
+      width: 90px; height: 90px; border-radius: 50%;
+      pointer-events: none; opacity: 0.08;
     }
+    .sc-o::after { background: var(--orange); }
+    .sc-g::after { background: var(--gold); }
+    .sc-b::after { background: var(--blue); }
 
-    .qc-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative; z-index: 1;
-    }
-
-    .qc-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 13px 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      text-decoration: none;
-      color: var(--text);
-      font-size: 0.88rem;
-      font-weight: 500;
-      transition: background .2s, border-color .2s, transform .15s;
-      cursor: pointer;
-    }
-    .qc-item:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: var(--border-light);
-      transform: translateX(4px);
-    }
-
-    .qc-ico {
-      width: 32px; height: 32px;
-      border-radius: 9px;
+    .sc-ico {
+      width: 34px; height: 34px; border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      margin-bottom: 14px;
     }
-    .qc-ico .material-icons { font-size: 1rem; }
+    .sc-o .sc-ico { background: var(--orange-dim); }
+    .sc-g .sc-ico { background: var(--gold-dim); }
+    .sc-b .sc-ico { background: var(--blue-dim); }
 
-    .qc-ico.i-orange { background: var(--orange-dim); }
-    .qc-ico.i-orange .material-icons { color: var(--orange); }
-    .qc-ico.i-gold   { background: var(--gold-dim); }
-    .qc-ico.i-gold   .material-icons { color: #f0c040; }
-    .qc-ico.i-green  { background: var(--green-dim); }
-    .qc-ico.i-green  .material-icons { color: var(--green); }
-    .qc-ico.i-blue   { background: var(--blue-dim); }
-    .qc-ico.i-blue   .material-icons { color: var(--blue); }
+    .sc-o .sc-ico .material-icons { color: var(--orange); font-size: 1rem; }
+    .sc-g .sc-ico .material-icons { color: #f0c030; font-size: 1rem; }
+    .sc-b .sc-ico .material-icons { color: var(--blue); font-size: 1rem; }
 
-    .qc-label { flex: 1; }
-    .qc-arrow .material-icons { font-size: 0.9rem; color: var(--muted2); }
+    .sc-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 900; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .sc-o .sc-num { color: var(--orange); }
+    .sc-g .sc-num { color: #f0c030; }
+    .sc-b .sc-num { color: var(--blue); }
 
-    /* ── logout at bottom of quick ── */
-    .qc-logout {
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
+    .sc-lbl { font-size: 0.78rem; color: var(--txt2); font-weight: 400; }
+
+    /* ── section heading ── */
+    .sh {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 800;
+      letter-spacing: -0.1px;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .sh::before {
+      content: '';
+      width: 3px; height: 16px;
+      background: var(--orange); border-radius: 2px;
+    }
+
+    /* ── tool cards ── */
+    .tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 14px;
-      padding: 13px 16px;
-      background: rgba(239,68,68,0.06);
-      border: 1px solid rgba(239,68,68,0.15);
-      border-radius: 12px;
-      color: #f87171;
-      font-size: 0.88rem;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s, border-color .2s;
+      margin-bottom: 32px;
+    }
+
+    .tc {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      padding: 24px 22px;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color .22s, transform .2s, box-shadow .2s;
+    }
+    .tc:hover {
+      border-color: rgba(249,115,22,0.28);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    }
+
+    /* stripe pattern */
+    .tc::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        -52deg, transparent 0, transparent 20px,
+        rgba(255,255,255,0.016) 20px, rgba(255,255,255,0.016) 21px
+      );
+      pointer-events: none;
+    }
+
+    /* glow */
+    .tc::after {
+      content: '';
+      position: absolute; top: -36px; right: -36px;
+      width: 120px; height: 120px; border-radius: 50%;
+      opacity: 0.11; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .tc:hover::after { opacity: 0.2; }
+    .tc-n::after { background: radial-gradient(circle, var(--orange), transparent 70%); }
+    .tc-q::after { background: radial-gradient(circle, var(--gold), transparent 70%); }
+
+    .tc-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 18px;
       position: relative; z-index: 1;
     }
-    .qc-logout:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.28); }
-    .qc-logout .material-icons { font-size: 1rem; }
 
-    /* ═══════════════════════════════════
-       RESPONSIVE
-    ═══════════════════════════════════ */
-    @media (max-width: 900px) {
-      .main { padding: 24px 20px 60px; }
-      .stats-row { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .tools-grid { grid-template-columns: 1fr; }
-      .bottom-row { grid-template-columns: 1fr; }
+    .tc-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tc-n .tc-icon { background: var(--orange-dim); border: 1px solid var(--orange-bd); }
+    .tc-q .tc-icon { background: var(--gold-dim);   border: 1px solid var(--gold-bd); }
+
+    .tc-n .tc-icon .material-icons { color: var(--orange); font-size: 1.15rem; }
+    .tc-q .tc-icon .material-icons { color: #f0c030; font-size: 1.15rem; }
+
+    .tc-arr {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--s2); border: 1px solid var(--bd);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--txt3);
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .tc:hover .tc-arr {
+      background: var(--orange-dim);
+      border-color: var(--orange-bd);
+      color: var(--orange);
+    }
+    .tc-arr .material-icons { font-size: 0.95rem; }
+
+    .tc-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 800;
+      letter-spacing: -0.3px; margin-bottom: 5px;
+      position: relative; z-index: 1;
+    }
+    .tc-desc {
+      font-size: 0.8rem; color: var(--txt2);
+      line-height: 1.55; font-weight: 400;
+      position: relative; z-index: 1;
     }
 
-    @media (max-width: 600px) {
-      .sidebar { width: 56px; }
-      .sidebar:hover { width: 56px; }
-      .sb-label { display: none; }
-      .main { margin-left: 56px; padding: 20px 16px 56px; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .stats-row .stat-card:last-child { grid-column: 1 / -1; }
-      .hero-card { padding: 22px 20px; }
+    /* ── bottom two-col ── */
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
-    /* ═══════════════════════════════════
-       FLASH TOASTS — top right
-    ═══════════════════════════════════ */
-    .tw {
-      position: fixed;
-      top: 20px; right: 20px;
-      z-index: 9999;
-      display: flex; flex-direction: column; gap: 10px;
+    /* profile detail card */
+    .pdc {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      padding: 24px 22px;
+      position: relative; overflow: hidden;
+    }
+
+    /* dot grid */
+    .pdc::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+      background-size: 20px 20px;
       pointer-events: none;
-      max-width: 320px;
-      width: calc(100% - 32px);
+    }
+
+    .pdc-rows {
+      display: flex; flex-direction: column; gap: 10px;
+      position: relative; z-index: 1;
+    }
+
+    .pdc-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 13px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--bd);
+      border-radius: 9px;
+    }
+    .pdc-k {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--txt3);
+    }
+    .pdc-v {
+      font-size: 0.84rem; font-weight: 600; color: var(--txt);
+    }
+
+    /* quick links card */
+    .qlc {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      padding: 24px 22px;
+      position: relative; overflow: hidden;
+    }
+
+    /* grid pattern */
+    .qlc::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.022) 0, transparent 1px),
+        repeating-linear-gradient(0deg,  rgba(255,255,255,0.022) 0, transparent 1px);
+      background-size: 26px 26px;
+      pointer-events: none;
+    }
+
+    .ql-list {
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative; z-index: 1;
+    }
+
+    .ql-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 13px; border-radius: 10px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--bd);
+      font-size: 0.85rem; font-weight: 500; color: var(--txt2);
+      transition: background .17s, color .17s, border-color .17s, transform .15s;
+      cursor: pointer;
+    }
+    .ql-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--bd2); color: var(--txt);
+      transform: translateX(3px);
+    }
+
+    .ql-ico {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ql-ico .material-icons { font-size: 0.95rem; }
+
+    .i-o { background: var(--orange-dim); }
+    .i-o .material-icons { color: var(--orange); }
+    .i-g { background: var(--gold-dim); }
+    .i-g .material-icons { color: #f0c030; }
+    .i-gr{ background: var(--green-dim); }
+    .i-gr .material-icons { color: var(--green); }
+    .i-b { background: var(--blue-dim); }
+    .i-b .material-icons { color: var(--blue); }
+
+    .ql-lbl { flex: 1; }
+    .ql-ch .material-icons { font-size: 0.85rem; color: var(--txt3); }
+
+    .ql-out {
+      margin-top: 10px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 13px; border-radius: 10px;
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.15);
+      font-size: 0.85rem; font-weight: 500; color: #f87171;
+      cursor: pointer;
+      transition: background .17s;
+      position: relative; z-index: 1;
+    }
+    .ql-out:hover { background: rgba(239,68,68,0.13); }
+    .ql-out .material-icons { font-size: 0.95rem; }
+
+    /* ── stagger animations ── */
+    .a { opacity:0; transform:translateY(16px);
+         animation: up .48s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1 { animation-delay:.04s; }
+    .a2 { animation-delay:.10s; }
+    .a3 { animation-delay:.17s; }
+    .a4 { animation-delay:.24s; }
+    .a5 { animation-delay:.31s; }
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    /* ── toasts ── */
+    .tw {
+      position: fixed; top: 72px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 9px;
+      pointer-events: none; max-width: 320px; width: calc(100% - 32px);
     }
     .toast {
-      position: relative; display: flex; align-items: flex-start; gap: 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      padding: 14px 14px 18px 16px;
+      position: relative; display: flex; align-items: flex-start; gap: 11px;
+      background: var(--s2); border: 1px solid var(--bd2);
+      border-radius: 12px; padding: 13px 13px 17px 15px;
       pointer-events: all; overflow: hidden;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-      animation: t-in .38s cubic-bezier(.22,1,.36,1) both;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.5);
+      animation: tin .36s cubic-bezier(.22,1,.36,1) both;
     }
-    .toast.t-hide { animation: t-out .28s ease forwards; }
-    @keyframes t-in  { from{opacity:0;transform:translateX(20px) scale(.96)} to{opacity:1;transform:none} }
-    @keyframes t-out { from{opacity:1;transform:none} to{opacity:0;transform:translateX(20px) scale(.96)} }
-    .toast::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; border-radius:13px 0 0 13px; }
+    .toast.th { animation: tout .26s ease forwards; }
+    @keyframes tin  { from{opacity:0;transform:translateX(18px) scale(.96)} to{opacity:1;transform:none} }
+    @keyframes tout { from{opacity:1;transform:none} to{opacity:0;transform:translateX(18px) scale(.96)} }
+    .toast::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; border-radius:12px 0 0 12px; }
     .toast.ts::before { background:#22c55e; }
     .toast.te::before { background:#ef4444; }
     .toast.ti::before { background:var(--orange); }
-    .t-ic .material-icons { font-size:1.1rem; line-height:1; margin-top:1px; }
-    .toast.ts .t-ic .material-icons { color:#22c55e; }
-    .toast.te .t-ic .material-icons { color:#ef4444; }
-    .toast.ti .t-ic .material-icons { color:var(--orange); }
-    .t-bd { flex:1; min-width:0; }
-    .t-tt { font-size:.87rem; font-weight:700; color:var(--text); margin-bottom:2px; }
-    .t-ms { font-size:.78rem; color:var(--muted); line-height:1.45; }
-    .t-cl { background:none; border:none; cursor:pointer; color:var(--muted); display:flex; align-items:center; padding:3px; border-radius:6px; flex-shrink:0; margin-top:1px; transition:color .15s; }
-    .t-cl:hover { color:var(--text); }
-    .t-cl .material-icons { font-size:.9rem; line-height:1; }
-    .t-bar { position:absolute; bottom:0; left:0; height:3px; animation:t-shrink var(--dur,3.5s) linear forwards; }
-    .toast.ts .t-bar { background:#22c55e; }
-    .toast.te .t-bar { background:#ef4444; }
-    .toast.ti .t-bar { background:var(--orange); }
-    @keyframes t-shrink { from{width:100%} to{width:0} }
+    .t-i .material-icons { font-size:1rem; line-height:1; margin-top:1px; }
+    .toast.ts .t-i .material-icons { color:#22c55e; }
+    .toast.te .t-i .material-icons { color:#ef4444; }
+    .toast.ti .t-i .material-icons { color:var(--orange); }
+    .t-b { flex:1; min-width:0; }
+    .t-t { font-size:.83rem; font-weight:600; color:var(--txt); }
+    .t-m { font-size:.75rem; color:var(--txt2); line-height:1.4; margin-top:1px; }
+    .t-x { background:none; border:none; cursor:pointer; color:var(--txt3); display:flex; align-items:center; padding:2px; border-radius:5px; flex-shrink:0; margin-top:1px; transition:color .14s; }
+    .t-x:hover { color:var(--txt); }
+    .t-x .material-icons { font-size:.85rem; line-height:1; }
+    .t-p { position:absolute; bottom:0; left:0; height:2px; animation:tp var(--dur,3.5s) linear forwards; }
+    .toast.ts .t-p { background:#22c55e; }
+    .toast.te .t-p { background:#ef4444; }
+    .toast.ti .t-p { background:var(--orange); }
+    @keyframes tp { from{width:100%} to{width:0} }
 
-    /* ═══════════════════════════════════
-       PAGE LOAD ANIMATIONS
-    ═══════════════════════════════════ */
-    .anim { opacity: 0; transform: translateY(18px); animation: fade-up .5s cubic-bezier(.22,1,.36,1) forwards; }
-    .anim-d1 { animation-delay: .05s; }
-    .anim-d2 { animation-delay: .12s; }
-    .anim-d3 { animation-delay: .19s; }
-    .anim-d4 { animation-delay: .26s; }
-    .anim-d5 { animation-delay: .33s; }
-    @keyframes fade-up { to { opacity:1; transform:none; } }
+    /* ── responsive ── */
+    @media (max-width: 720px) {
+      .page { padding: 24px 18px 64px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stats .sc:last-child { grid-column: 1/-1; }
+      .tools { grid-template-columns: 1fr; }
+      .bottom { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 440px) {
+      .id-card { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- flash data for toasts -->
-  <div id="flash-data"
+  <!-- flash data -->
+  <div id="fd"
        data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
        style="display:none"></div>
 
-  <div class="shell">
+  <div class="ambient"></div>
 
-    <!-- ══ SIDEBAR ══ -->
-    <aside class="sidebar">
-      <a href="{{ url_for('user_home') }}" class="sb-logo">
-        <em>U</em><span class="sb-full">-NEX</span>
+  <!-- ══ NAVBAR ══ -->
+  <nav class="nav">
+    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
+    <div class="nav-notif">
+      <span class="material-icons">notifications_none</span>
+    </div>
+    <div class="nav-avatar">{{ student_name[0] | upper }}</div>
+    <button class="burger" id="burgerBtn" aria-label="Open menu">
+      <span class="material-icons">menu</span>
+    </button>
+  </nav>
+
+  <!-- ══ DRAWER ══ -->
+  <div class="drawer-backdrop" id="backdrop"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <span class="drawer-title">Menu</span>
+      <button class="drawer-close" id="drawerClose">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a class="d-item active" href="{{ url_for('user_dashboard') }}">
+        <span class="material-icons">dashboard</span> Dashboard
       </a>
-
-      <nav class="sb-nav">
-        <a class="sb-item active" href="{{ url_for('user_dashboard') }}">
-          <span class="material-icons">dashboard</span>
-          <span class="sb-label">Dashboard</span>
-        </a>
-        <a class="sb-item" href="{{ url_for('user_notes') }}">
-          <span class="material-icons">menu_book</span>
-          <span class="sb-label">Notes</span>
-        </a>
-        <a class="sb-item" href="#">
-          <span class="material-icons">quiz</span>
-          <span class="sb-label">Quizzes</span>
-        </a>
-        <a class="sb-item" href="#">
-          <span class="material-icons">insights</span>
-          <span class="sb-label">Progress</span>
-        </a>
-      </nav>
-
-      <div class="sb-bottom">
-        <a class="sb-item" href="#">
-          <span class="material-icons">settings</span>
-          <span class="sb-label">Settings</span>
-        </a>
-        <a class="sb-item" href="{{ url_for('user_logout') }}"
-           style="color:#f87171"
-           onclick="return confirm('Log out of U-NEX?')">
-          <span class="material-icons">logout</span>
-          <span class="sb-label">Log out</span>
-        </a>
-      </div>
-    </aside>
-
-    <!-- ══ MAIN ══ -->
-    <main class="main">
-
-      <!-- top row -->
-      <div class="toprow anim anim-d1">
-        <div class="toprow-left">
-          <h1>Good {{ time_greeting }}, <span>{{ student_name.split()[0] }}</span> 👋</h1>
-          <p>{{ now.strftime('%A, %d %B %Y') }}</p>
-        </div>
-        <div class="toprow-right">
-          <div class="notif-btn">
-            <span class="material-icons">notifications_none</span>
-          </div>
-          <div class="avatar">{{ student_name[0] | upper }}</div>
-        </div>
-      </div>
-
-      <!-- hero identity card -->
-      <div class="hero-card anim anim-d2">
-        <div class="hero-left">
-          <p class="hero-greeting">Student Profile</p>
-          <h2 class="hero-name">{{ student_name }}</h2>
-          <div class="hero-tags">
-            <span class="tag orange">
-              <span class="material-icons">school</span>
-              {{ student_dept | title }}
-            </span>
-            <span class="tag gold">
-              <span class="material-icons">layers</span>
-              Level {{ student_level }}
-            </span>
-            <span class="tag blue">
-              <span class="material-icons">badge</span>
-              {{ student_matric }}
-            </span>
-          </div>
-        </div>
-        <div class="hero-orbit">
-          <div class="ho-ring"></div>
-          <div class="ho-ring-2"></div>
-          <div class="ho-core"></div>
-          <div class="ho-dot ho-d1"></div>
-          <div class="ho-dot ho-d2"></div>
-        </div>
-      </div>
-
-      <!-- stats row -->
-      <div class="stats-row anim anim-d3">
-        <div class="stat-card c-orange">
-          <div class="stat-icon"><span class="material-icons">menu_book</span></div>
-          <div class="stat-val">{{ notes_count if notes_count is defined else '—' }}</div>
-          <div class="stat-label">Notes Available</div>
-        </div>
-        <div class="stat-card c-gold">
-          <div class="stat-icon"><span class="material-icons">quiz</span></div>
-          <div class="stat-val">{{ quiz_count if quiz_count is defined else '0' }}</div>
-          <div class="stat-label">Quizzes Taken</div>
-        </div>
-        <div class="stat-card c-blue">
-          <div class="stat-icon"><span class="material-icons">emoji_events</span></div>
-          <div class="stat-val">{{ best_score if best_score is defined else '—' }}</div>
-          <div class="stat-label">Best Score</div>
-        </div>
-      </div>
-
-      <!-- tools -->
-      <p class="section-title anim anim-d4">Your Tools</p>
-      <div class="tools-grid anim anim-d4">
-
-        <a class="tool-card tc-notes" href="{{ url_for('user_notes') }}">
-          <div class="tc-head">
-            <div class="tc-ico"><span class="material-icons">menu_book</span></div>
-            <div class="tc-arrow"><span class="material-icons">arrow_forward</span></div>
-          </div>
-          <div class="tc-title">Lecture Notes</div>
-          <div class="tc-sub">
-            Browse past and current notes for your courses — organised by semester and course code.
-          </div>
-        </a>
-
-        <a class="tool-card tc-quiz" href="#">
-          <div class="tc-head">
-            <div class="tc-ico"><span class="material-icons">quiz</span></div>
-            <div class="tc-arrow"><span class="material-icons">arrow_forward</span></div>
-          </div>
-          <div class="tc-title">Take a Quiz</div>
-          <div class="tc-sub">
-            AI-generated questions from your actual lecture notes. 70 questions. Set your own time.
-          </div>
-        </a>
-
-      </div>
-
-      <!-- profile details + quick actions -->
-      <div class="bottom-row anim anim-d5">
-
-        <!-- profile card -->
-        <div class="profile-card">
-          <p class="section-title" style="margin-bottom:20px">Account Details</p>
-          <div class="pc-header">
-            <div class="pc-avatar">{{ student_name[0] | upper }}</div>
-            <div>
-              <div class="pc-name">{{ student_name }}</div>
-              <div class="pc-email">{{ student_email }}</div>
-            </div>
-          </div>
-          <div class="pc-fields">
-            <div class="pc-row">
-              <span class="pc-key">Matric No.</span>
-              <span class="pc-val">{{ student_matric }}</span>
-            </div>
-            <div class="pc-row">
-              <span class="pc-key">Department</span>
-              <span class="pc-val">{{ student_dept | title }}</span>
-            </div>
-            <div class="pc-row">
-              <span class="pc-key">Level</span>
-              <span class="pc-val">{{ student_level }}L</span>
-            </div>
-            <div class="pc-row">
-              <span class="pc-key">Status</span>
-              <span class="pc-val" style="color:var(--green)">● Active</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- quick actions -->
-        <div class="quick-card">
-          <p class="section-title" style="margin-bottom:20px">Quick Actions</p>
-          <div class="qc-list">
-            <a class="qc-item" href="{{ url_for('user_notes') }}">
-              <div class="qc-ico i-orange"><span class="material-icons">menu_book</span></div>
-              <span class="qc-label">Browse Notes</span>
-              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
-            </a>
-            <a class="qc-item" href="#">
-              <div class="qc-ico i-gold"><span class="material-icons">quiz</span></div>
-              <span class="qc-label">Start a Quiz</span>
-              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
-            </a>
-            <a class="qc-item" href="#">
-              <div class="qc-ico i-green"><span class="material-icons">insights</span></div>
-              <span class="qc-label">View My Progress</span>
-              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
-            </a>
-            <a class="qc-item" href="#">
-              <div class="qc-ico i-blue"><span class="material-icons">settings</span></div>
-              <span class="qc-label">Account Settings</span>
-              <div class="qc-arrow"><span class="material-icons">chevron_right</span></div>
-            </a>
-          </div>
-          <a class="qc-logout" href="{{ url_for('user_logout') }}"
-             onclick="return confirm('Log out of U-NEX?')">
-            <span class="material-icons">logout</span>
-            Log out
-          </a>
-        </div>
-
-      </div>
-
-    </main>
+      <a class="d-item" href="{{ url_for('user_notes') }}">
+        <span class="material-icons">menu_book</span> Notes
+      </a>
+      <a class="d-item" href="#">
+        <span class="material-icons">quiz</span> Quizzes
+      </a>
+      <a class="d-item" href="#">
+        <span class="material-icons">insights</span> Progress
+      </a>
+      <div class="drawer-divider"></div>
+      <a class="d-item" href="{{ url_for('sponsors_page') }}">
+        <span class="material-icons">handshake</span> Sponsors
+      </a>
+      <a class="d-item" href="#">
+        <span class="material-icons">settings</span> Settings
+      </a>
+    </nav>
+    <div class="drawer-foot">
+      <a class="d-logout" href="{{ url_for('user_logout') }}"
+         onclick="return confirm('Log out of U-NEX?')">
+        <span class="material-icons">logout</span> Log out
+      </a>
+    </div>
   </div>
 
-  <!-- toast wrap -->
+  <!-- ══ PAGE ══ -->
+  <div class="page">
+
+    <!-- greeting -->
+    <div class="greet-row a a1">
+      <p class="greet-label">Good {{ time_greeting }}</p>
+      <h1 class="greet-name">
+        {{ student_name.split()[0] }}<span>.</span>
+      </h1>
+      <p class="greet-date">{{ now.strftime('%A, %d %B %Y') }}</p>
+    </div>
+
+    <!-- identity card -->
+    <div class="id-card a a2">
+      <div class="id-ava">{{ student_name[0] | upper }}</div>
+      <div class="id-info">
+        <div class="id-name">{{ student_name }}</div>
+        <div class="id-tags">
+          <span class="pill pill-o">
+            <span class="material-icons">school</span>
+            {{ student_dept | title }}
+          </span>
+          <span class="pill pill-g">
+            <span class="material-icons">layers</span>
+            Level {{ student_level }}
+          </span>
+          <span class="pill pill-b">
+            <span class="material-icons">badge</span>
+            {{ student_matric }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- stats -->
+    <div class="stats a a3">
+      <div class="sc sc-o">
+        <div class="sc-ico"><span class="material-icons">menu_book</span></div>
+        <div class="sc-num">{{ notes_count }}</div>
+        <div class="sc-lbl">Notes Available</div>
+      </div>
+      <div class="sc sc-g">
+        <div class="sc-ico"><span class="material-icons">quiz</span></div>
+        <div class="sc-num">{{ quiz_count }}</div>
+        <div class="sc-lbl">Quizzes Taken</div>
+      </div>
+      <div class="sc sc-b">
+        <div class="sc-ico"><span class="material-icons">emoji_events</span></div>
+        <div class="sc-num">{{ best_score }}</div>
+        <div class="sc-lbl">Best Score</div>
+      </div>
+    </div>
+
+    <!-- tools -->
+    <p class="sh a a4">Tools</p>
+    <div class="tools a a4">
+      <a class="tc tc-n" href="{{ url_for('user_notes') }}">
+        <div class="tc-top">
+          <div class="tc-icon"><span class="material-icons">menu_book</span></div>
+          <div class="tc-arr"><span class="material-icons">arrow_forward</span></div>
+        </div>
+        <div class="tc-title">Lecture Notes</div>
+        <div class="tc-desc">Browse notes for your courses — organised by semester and course code.</div>
+      </a>
+      <a class="tc tc-q" href="#">
+        <div class="tc-top">
+          <div class="tc-icon"><span class="material-icons">quiz</span></div>
+          <div class="tc-arr"><span class="material-icons">arrow_forward</span></div>
+        </div>
+        <div class="tc-title">Take a Quiz</div>
+        <div class="tc-desc">AI questions from your actual notes. 70 questions. Set your own time.</div>
+      </a>
+    </div>
+
+    <!-- profile + quick links -->
+    <p class="sh a a5">Details &amp; Actions</p>
+    <div class="bottom a a5">
+
+      <div class="pdc">
+        <p class="sh" style="margin-bottom:16px">Account</p>
+        <div class="pdc-rows">
+          <div class="pdc-row">
+            <span class="pdc-k">Full Name</span>
+            <span class="pdc-v">{{ student_name }}</span>
+          </div>
+          <div class="pdc-row">
+            <span class="pdc-k">Email</span>
+            <span class="pdc-v" style="font-size:.78rem">{{ student_email }}</span>
+          </div>
+          <div class="pdc-row">
+            <span class="pdc-k">Matric No.</span>
+            <span class="pdc-v">{{ student_matric }}</span>
+          </div>
+          <div class="pdc-row">
+            <span class="pdc-k">Department</span>
+            <span class="pdc-v">{{ student_dept | title }}</span>
+          </div>
+          <div class="pdc-row">
+            <span class="pdc-k">Level</span>
+            <span class="pdc-v">{{ student_level }}L</span>
+          </div>
+          <div class="pdc-row">
+            <span class="pdc-k">Status</span>
+            <span class="pdc-v" style="color:var(--green)">● Active</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="qlc">
+        <p class="sh" style="margin-bottom:16px">Quick Links</p>
+        <div class="ql-list">
+          <a class="ql-item" href="{{ url_for('user_notes') }}">
+            <div class="ql-ico i-o"><span class="material-icons">menu_book</span></div>
+            <span class="ql-lbl">Browse Notes</span>
+            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
+          </a>
+          <a class="ql-item" href="#">
+            <div class="ql-ico i-g"><span class="material-icons">quiz</span></div>
+            <span class="ql-lbl">Start a Quiz</span>
+            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
+          </a>
+          <a class="ql-item" href="#">
+            <div class="ql-ico i-gr"><span class="material-icons">insights</span></div>
+            <span class="ql-lbl">My Progress</span>
+            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
+          </a>
+          <a class="ql-item" href="#">
+            <div class="ql-ico i-b"><span class="material-icons">settings</span></div>
+            <span class="ql-lbl">Settings</span>
+            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
+          </a>
+        </div>
+        <a class="ql-out" href="{{ url_for('user_logout') }}"
+           onclick="return confirm('Log out of U-NEX?')">
+          <span class="material-icons">logout</span>
+          Log out
+        </a>
+      </div>
+
+    </div>
+
+  </div><!-- /page -->
+
+  <!-- toasts -->
   <div class="tw" id="tw"></div>
 
   <script>
+    /* burger / drawer */
+    const burger   = document.getElementById('burgerBtn');
+    const drawer   = document.getElementById('drawer');
+    const backdrop = document.getElementById('backdrop');
+    const closeBtn = document.getElementById('drawerClose');
+
+    function openDrawer()  { drawer.classList.add('open'); backdrop.classList.add('open'); }
+    function closeDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('open'); }
+
+    burger.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+
     /* toast engine */
-    const ICONS = { success:'check_circle', error:'error_outline', info:'notifications_active' };
-    const CLS   = { success:'ts', error:'te', info:'ti' };
+    const TICONS = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const TCLS   = { success:'ts', error:'te', info:'ti' };
 
     function showToast({ cat, msg, dur=4000 }) {
-      const k = CLS[cat] || 'ti';
+      const k = TCLS[cat] || 'ti';
       const wrap = document.getElementById('tw');
       const el = document.createElement('div');
       el.className = `toast ${k}`;
       el.style.setProperty('--dur', dur + 'ms');
       el.innerHTML = `
-        <div class="t-ic"><span class="material-icons">${ICONS[cat] || ICONS.info}</span></div>
-        <div class="t-bd"><div class="t-tt">${msg}</div></div>
-        <button class="t-cl" aria-label="Dismiss"><span class="material-icons">close</span></button>
-        <div class="t-bar"></div>`;
-      el.querySelector('.t-cl').addEventListener('click', () => hide(el));
+        <div class="t-i"><span class="material-icons">${TICONS[cat] || TICONS.info}</span></div>
+        <div class="t-b"><div class="t-t">${msg}</div></div>
+        <button class="t-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+        <div class="t-p"></div>`;
+      el.querySelector('.t-x').addEventListener('click', () => hide(el));
       wrap.appendChild(el);
       const t = setTimeout(() => hide(el), dur);
       el._t = t;
     }
 
     function hide(el) {
-      if (!el || el.classList.contains('t-hide')) return;
+      if (!el || el.classList.contains('th')) return;
       clearTimeout(el._t);
-      el.classList.add('t-hide');
+      el.classList.add('th');
       el.addEventListener('animationend', () => el.remove(), { once: true });
     }
 
-    /* render server flash messages */
     (function() {
       try {
-        const msgs = JSON.parse(document.getElementById('flash-data').dataset.messages);
-        msgs.forEach(([cat, msg], i) => setTimeout(() => showToast({ cat, msg }), i * 300));
+        const msgs = JSON.parse(document.getElementById('fd').dataset.messages);
+        msgs.forEach(([cat, msg], i) => setTimeout(() => showToast({ cat, msg }), i * 280));
       } catch(e) {}
     })();
   </script>
