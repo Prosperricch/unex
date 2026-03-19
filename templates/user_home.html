@@ -205,7 +205,7 @@
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.55); /* increased opacity for better text contrast */
+    background: rgba(0,0,0,0.55);
     z-index: 2;
   }
 
@@ -262,20 +262,17 @@
     transform: translateY(-3px);
   }
 
-  /* FIX: Remove underline from links in hero-buttons only */
   .hero-buttons a {
     text-decoration: none !important;
     display: inline-block;
     text-align: center;
   }
 
-  /* Optional: subtle press effect */
   .hero-buttons a:active {
     transform: scale(0.97);
     opacity: 0.95;
   }
 
-  /* Scale up SVG on wider screens to feel larger */
   @media (min-aspect-ratio: 16/9) {
     .hero-bg-svg {
       transform: scale(1.25);
@@ -283,7 +280,6 @@
     }
   }
 
-  /* From Uiverse.io by Juanes200122 */
   @keyframes bounce {
     0%, 100% { translate: 0px 36px; }
     50%      { translate: 0px 46px; }
@@ -356,90 +352,190 @@
     border-radius: 3px;
   }
 
-  /* Tools Section – Side-by-side layout */
+  /* ─── Tools Section (UPDATED) ────────────────────────────────── */
   .tools-section {
     background: #ffffff;
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
-    padding: 140px 5vw;
+    padding: 120px 5vw;
   }
 
-  .tools-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5rem;
-    align-items: center;
+  .tools-section-header {
     max-width: 1280px;
-    margin: 0 auto;
+    margin: 0 auto 80px;
+    text-align: left;
   }
 
-  .tools-text {
-    order: 1;
-  }
-
-  .tools-image {
-    order: 2;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-  }
-
-  .tools-image img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .tools-card {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    margin-top: 0;
-  }
-
-  .tools-card h3 {
+  .tools-section-header .eyebrow {
     color: #f97316;
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-bottom: 1.2rem;
+    margin-bottom: 14px;
   }
 
-  .tools-card h2 {
-    font-size: 3rem;
-    margin-bottom: 1.4rem;
-  }
-
-  .tools-card h4 {
-    font-size: 2.2rem;
-    margin-bottom: 1.4rem;
+  .tools-section-header h2 {
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.08;
+    margin-bottom: 0;
     color: #111827;
   }
 
-  .tools-card p {
-    font-size: 1.25rem;
-    color: #4b5563;
-    margin-bottom: 2.4rem;
-    line-height: 1.7;
+  /* Two-panel tool cards */
+  .tools-panels {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .tool-panel {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .tool-panel-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s ease;
+  }
+
+  .tool-panel:hover .tool-panel-img {
+    transform: scale(1.04);
+  }
+
+  .tool-panel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(10, 10, 14, 0.92) 0%,
+      rgba(10, 10, 14, 0.55) 45%,
+      rgba(10, 10, 14, 0.15) 100%
+    );
+    z-index: 1;
+  }
+
+  .tool-panel-body {
+    position: relative;
+    z-index: 2;
+    padding: 40px 40px 44px;
+  }
+
+  .tool-panel-tag {
+    display: inline-block;
+    background: rgba(249, 115, 22, 0.18);
+    border: 1px solid rgba(249, 115, 22, 0.45);
+    color: #fb923c;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  .tool-panel-title {
+    font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .tool-panel-sub {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.68);
+    line-height: 1.55;
+    margin-bottom: 32px;
+    max-width: 340px;
   }
 
   .visit-btn {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 32px;
-    background: #111827;
+    gap: 10px;
+    padding: 13px 28px;
+    background: #f97316;
     color: white;
     border-radius: 12px;
     font-weight: 600;
+    font-size: 1rem;
     text-decoration: none;
-    transition: background 0.25s;
+    border: none;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s;
   }
 
   .visit-btn:hover {
-    background: #1f2937;
+    background: #ea580c;
+    transform: translateY(-2px);
+  }
+
+  .visit-btn .material-icons {
+    font-size: 1.1rem;
+  }
+
+  /* Responsive – tools panels */
+  @media (max-width: 900px) {
+    .tools-panels {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .tool-panel {
+      min-height: 400px;
+    }
+
+    .tool-panel-body {
+      padding: 28px 28px 34px;
+    }
+
+    .tools-section-header {
+      margin-bottom: 48px;
+      padding-left: 2px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tools-section {
+      padding: 80px 6vw;
+    }
+
+    .tool-panel {
+      min-height: 340px;
+    }
+
+    .tool-panel-body {
+      padding: 22px 22px 28px;
+    }
+
+    .tool-panel-title {
+      font-size: 1.55rem;
+    }
+
+    .tool-panel-sub {
+      font-size: 0.97rem;
+      margin-bottom: 24px;
+    }
+
+    .tools-section-header h2 {
+      font-size: 2.1rem;
+    }
   }
 
   /* Partners focus carousel */
@@ -738,22 +834,52 @@
   </section>
 
 
+  <!-- ─── Tools Section (NEW) ──────────────────────────────────────── -->
   <section class="tools-section">
-    <div class="tools-grid">
-      <div class="tools-text">
-        <div class="tools-card">
-          <h3>Our Tools</h3>
-          <h2>Student Productivity Suite</h2>
-          <h4>Notes Management System</h4>
-          <p>
-            Organize your academic life with our powerful note-taking and management tool. Sync across devices and collaborate with peers seamlessly.
-          </p>
-          <a onclick="showUnderDevModal()" class="visit-btn">Visit <span class="material-icons" style="font-size:1.2rem;">arrow_forward</span></a>
+
+    <div class="tools-section-header">
+      <p class="eyebrow">Our Tools</p>
+      <h2>Built for<br><span class="highlight">Student Success</span></h2>
+    </div>
+
+    <div class="tools-panels">
+
+      <!-- Notes Panel -->
+      <div class="tool-panel">
+        <img
+          src="{{ url_for('static', filename='img_notes.jpg') }}"
+          alt="Lecture notes"
+          class="tool-panel-img"
+        >
+        <div class="tool-panel-overlay"></div>
+        <div class="tool-panel-body">
+          <span class="tool-panel-tag">Notes</span>
+          <h3 class="tool-panel-title">Every Note.<br>Every Semester.</h3>
+          <p class="tool-panel-sub">Past and current lecture notes — organized, searchable, always available.</p>
+          <a href="/user/notes" class="visit-btn">
+            Access Notes <span class="material-icons">arrow_forward</span>
+          </a>
         </div>
       </div>
-      <div class="tools-image">
-        <img src="https://setapp.com/cdn-cgi/image/quality=75,format=auto/https://cdn.setapp.com/blog/images/studies-note-taking.webp" alt="Clean student notes management interface on multiple devices">
+
+      <!-- Quiz Panel -->
+      <div class="tool-panel">
+        <img
+          src="{{ url_for('static', filename='img_quiz.jpg') }}"
+          alt="Quiz yourself"
+          class="tool-panel-img"
+        >
+        <div class="tool-panel-overlay"></div>
+        <div class="tool-panel-body">
+          <span class="tool-panel-tag">Quiz</span>
+          <h3 class="tool-panel-title">Test What<br>You Know.</h3>
+          <p class="tool-panel-sub">Quick quizzes that reveal gaps and sharpen your understanding fast.</p>
+          <a onclick="showUnderDevModal()" class="visit-btn">
+            Take a Quiz <span class="material-icons">arrow_forward</span>
+          </a>
+        </div>
       </div>
+
     </div>
   </section>
 
