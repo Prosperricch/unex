@@ -1,4 +1,6 @@
+import json
 import re
+import base64
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
@@ -935,6 +937,510 @@ def user_settings_delete():
     except Exception as e:
         flash(f"Could not delete account: {str(e)}", 'error')
         return redirect(url_for('user_settings_page'))
+
+
+
+
+
+# ── replace with your actual Gemini API key ──────────────────────────
+GEMINI_API_KEY = "AIzaSyB3Ll7smfLXLoLS1ezblKC3Ao8pFYvuG8U"
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY
+)
  
+QUESTIONS_PER_NOTE = 70
+ 
+ 
+# ── PROMPT ────────────────────────────────────────────────────────────
+def _build_prompt(course_code: str, course_title: str) -> str:
+    return f"""You are an experienced university lecturer creating a comprehensive exam for the course:
+Course Code: {course_code}
+Course Title: {course_title}
+ 
+Read the entire attached document carefully from start to finish — every page, every section.
+Do NOT focus only on the introduction or headings. Extract assessable content from:
+- Definitions and key terms
+- Theorems, formulas, and proofs
+- Worked examples and their steps
+- Case studies and applications
+- Diagrams and what they represent
+- Any numbered lists or procedures
+- Comparisons and classifications
+ 
+Generate exactly {QUESTIONS_PER_NOTE} multiple-choice questions that cover the FULL BREADTH of the document.
+Distribute difficulty: roughly 25 easy, 30 medium, 15 hard questions.
+ 
+STRICT RULES:
+1. Each question must have exactly 4 options (a, b, c, d).
+2. Only one option is correct. The others must be plausible but clearly wrong.
+3. Wrong options must NOT be obviously silly — use real-looking distractors.
+4. The explanation must state WHY the correct answer is right (1-2 sentences).
+5. Do NOT number the questions yourself — just include them in the JSON array.
+6. Return ONLY valid JSON. No markdown fences, no preamble, no commentary.
+ 
+Return this exact JSON structure:
+{{
+  "questions": [
+    {{
+      "question_text": "...",
+      "option_a": "...",
+      "option_b": "...",
+      "option_c": "...",
+      "option_d": "...",
+      "correct_option": "a",
+      "explanation": "...",
+      "difficulty": "easy"
+    }}
+  ]
+}}
+ 
+difficulty must be one of: "easy", "medium", "hard"
+correct_option must be one of: "a", "b", "c", "d"
+"""
+ 
+ 
+# ── MAIN GENERATION FUNCTION ──────────────────────────────────────────
+def generate_questions_for_note(note: dict, supabase) -> dict:
+    """
+    Fetch the note file from Supabase storage, send to Gemini,
+    parse response, store questions.
+ 
+    Returns:
+        {"success": True, "count": N}   on success
+        {"success": False, "error": "..."}  on failure
+    """
+    note_id      = note["id"]
+    file_url     = note["file_url"]
+    course_code  = note["course_code"]
+    course_title = note.get("course_title") or course_code
+    department   = note["department"]
+    level        = note["level"]
+    semester     = note["semester"]
+    acad_year    = note["academic_year"]
+ 
+    # ── 1. Mark as processing ─────────────────────────────────────────
+    try:
+        supabase.table("question_generation_log").upsert({
+            "note_id":             note_id,
+            "status":              "processing",
+            "questions_generated": 0,
+            "error_message":       None,
+            "updated_at":          "now()"
+        }, on_conflict="note_id").execute()
+    except Exception as e:
+        return {"success": False, "error": f"Log upsert failed: {e}"}
+ 
+    # ── 2. Download the file from Supabase storage ────────────────────
+    try:
+        resp = requests.get(file_url, timeout=30)
+        resp.raise_for_status()
+        file_bytes   = resp.content
+        content_type = resp.headers.get("Content-Type", "application/pdf")
+    except Exception as e:
+        _mark_failed(supabase, note_id, f"File download failed: {e}")
+        return {"success": False, "error": f"File download failed: {e}"}
+ 
+    # ── 3. Determine MIME type ────────────────────────────────────────
+    fname = file_url.split("?")[0].lower()
+    if fname.endswith(".pdf"):
+        mime = "application/pdf"
+    elif fname.endswith(".docx"):
+        mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    elif fname.endswith(".pptx"):
+        mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    else:
+        mime = content_type or "application/pdf"
+ 
+    # ── 4. Build Gemini request ───────────────────────────────────────
+    encoded = base64.b64encode(file_bytes).decode("utf-8")
+    prompt  = _build_prompt(course_code, course_title)
+ 
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "inline_data": {
+                            "mime_type": mime,
+                            "data":      encoded
+                        }
+                    },
+                    {
+                        "text": prompt
+                    }
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature":      0.4,
+            "maxOutputTokens":  16384,
+            "responseMimeType": "application/json"
+        }
+    }
+ 
+    # ── 5. Call Gemini ────────────────────────────────────────────────
+    try:
+        gemini_resp = requests.post(
+            GEMINI_URL,
+            json=payload,
+            timeout=120,
+            headers={"Content-Type": "application/json"}
+        )
+        gemini_resp.raise_for_status()
+        gemini_data = gemini_resp.json()
+    except Exception as e:
+        _mark_failed(supabase, note_id, f"Gemini API error: {e}")
+        return {"success": False, "error": f"Gemini API error: {e}"}
+ 
+    # ── 6. Extract text from Gemini response ──────────────────────────
+    try:
+        raw_text = gemini_data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError) as e:
+        _mark_failed(supabase, note_id, f"Gemini response parse error: {e}")
+        return {"success": False, "error": f"Gemini response malformed: {e}"}
+ 
+    # ── 7. Parse JSON — strip any accidental markdown fences ──────────
+    try:
+        cleaned       = re.sub(r"```(?:json)?|```", "", raw_text).strip()
+        data          = json.loads(cleaned)
+        questions_raw = data.get("questions", [])
+    except Exception as e:
+        _mark_failed(supabase, note_id, f"JSON parse failed: {e} | Raw: {raw_text[:300]}")
+        return {"success": False, "error": f"JSON parse failed: {e}"}
+ 
+    if not questions_raw:
+        _mark_failed(supabase, note_id, "Gemini returned 0 questions.")
+        return {"success": False, "error": "No questions returned by Gemini."}
+ 
+    # ── 8. Validate each question before inserting ────────────────────
+    valid_options = {"a", "b", "c", "d"}
+    valid_diff    = {"easy", "medium", "hard"}
+    rows          = []
+    skipped       = 0
+ 
+    for q in questions_raw:
+        qt    = str(q.get("question_text", "")).strip()
+        opt_a = str(q.get("option_a", "")).strip()
+        opt_b = str(q.get("option_b", "")).strip()
+        opt_c = str(q.get("option_c", "")).strip()
+        opt_d = str(q.get("option_d", "")).strip()
+        correct = str(q.get("correct_option", "")).strip().lower()
+        expl    = str(q.get("explanation", "")).strip()
+        diff    = str(q.get("difficulty", "medium")).strip().lower()
+ 
+        if not all([qt, opt_a, opt_b, opt_c, opt_d]):
+            skipped += 1
+            continue
+        if correct not in valid_options:
+            skipped += 1
+            continue
+        if diff not in valid_diff:
+            diff = "medium"
+ 
+        rows.append({
+            "note_id":        note_id,
+            "course_code":    course_code,
+            "department":     department,
+            "level":          level,
+            "semester":       semester,
+            "academic_year":  acad_year,
+            "question_text":  qt,
+            "option_a":       opt_a,
+            "option_b":       opt_b,
+            "option_c":       opt_c,
+            "option_d":       opt_d,
+            "correct_option": correct,
+            "explanation":    expl,
+            "difficulty":     diff,
+            "status":         "pending",
+            "created_at":     "now()"
+        })
+ 
+    if not rows:
+        _mark_failed(supabase, note_id, "All questions failed validation.")
+        return {"success": False, "error": "All questions failed validation."}
+ 
+    # ── 9. Bulk insert in batches of 25 ───────────────────────────────
+    try:
+        for i in range(0, len(rows), 25):
+            supabase.table("questions").insert(rows[i:i + 25]).execute()
+    except Exception as e:
+        _mark_failed(supabase, note_id, f"DB insert failed: {e}")
+        return {"success": False, "error": f"DB insert failed: {e}"}
+ 
+    # ── 10. Mark done ─────────────────────────────────────────────────
+    count = len(rows)
+    try:
+        supabase.table("question_generation_log").upsert({
+            "note_id":             note_id,
+            "status":              "done",
+            "questions_generated": count,
+            "error_message":       None,
+            "updated_at":          "now()"
+        }, on_conflict="note_id").execute()
+    except Exception:
+        pass
+ 
+    return {"success": True, "count": count, "skipped": skipped}
+ 
+ 
+# ── HELPER ────────────────────────────────────────────────────────────
+def _mark_failed(supabase, note_id: int, error_msg: str):
+    try:
+        supabase.table("question_generation_log").upsert({
+            "note_id":       note_id,
+            "status":        "failed",
+            "error_message": error_msg[:500],
+            "updated_at":    "now()"
+        }, on_conflict="note_id").execute()
+    except Exception:
+        pass
+
+# ── TRIGGER GENERATION FOR ONE NOTE ──────────────────────────────────
+@app.route('/admin/quiz/generate/<int:note_id>', methods=['POST'])
+@admin_required
+def admin_generate_questions(note_id):
+    """
+    Called when admin clicks "Generate Questions" next to a note.
+    Runs synchronously — for large PDFs this may take 20-40 seconds.
+    On Render free tier, keep the request alive by setting a long timeout.
+    """
+    # prevent double-generation: check if already done
+    try:
+        log = supabase.table('question_generation_log') \
+            .select('status, questions_generated') \
+            .eq('note_id', note_id).execute()
+ 
+        if log.data:
+            existing = log.data[0]
+            if existing['status'] == 'done':
+                flash(
+                    f"Questions already generated for this note "
+                    f"({existing['questions_generated']} questions). "
+                    f"To regenerate, delete existing questions first.",
+                    'error'
+                )
+                return redirect(url_for('admin_questions_review'))
+ 
+            if existing['status'] == 'processing':
+                flash("Generation already in progress for this note.", 'error')
+                return redirect(url_for('admin_questions_review'))
+ 
+    except Exception:
+        pass  # log may not exist yet — continue
+ 
+    # fetch the note
+    try:
+        note_res = supabase.table('notes').select('*').eq('id', note_id).single().execute()
+        note = note_res.data
+        if not note:
+            flash("Note not found.", 'error')
+            return redirect(url_for('admin_questions_review'))
+    except Exception as e:
+        flash(f"Could not fetch note: {str(e)}", 'error')
+        return redirect(url_for('admin_questions_review'))
+ 
+    # run generation
+    result = generate_questions_for_note(note, supabase)
+ 
+    if result['success']:
+        skipped = result.get('skipped', 0)
+        msg = f"Generated {result['count']} questions for {note['course_code']}."
+        if skipped:
+            msg += f" ({skipped} malformed questions skipped.)"
+        flash(msg, 'success')
+    else:
+        flash(f"Generation failed: {result['error']}", 'error')
+ 
+    return redirect(url_for('admin_questions_review'))
+ 
+ 
+# ── ADMIN QUESTION REVIEW PAGE ────────────────────────────────────────
+@app.route('/admin/questions', methods=['GET'])
+@admin_required
+def admin_questions_review():
+    """
+    Shows:
+    - All notes with generation status
+    - Filterable question list (by status, course code, difficulty)
+    """
+    # filter params
+    status_filter  = request.args.get('status', 'pending')   # pending | approved | flagged | all
+    course_filter  = request.args.get('course_code', '').strip().upper()
+    diff_filter    = request.args.get('difficulty', '').strip()
+    search_q       = request.args.get('search', '').strip()
+ 
+    # ── fetch notes with generation log joined ────────────────────────
+    try:
+        notes_res = supabase.table('notes') \
+            .select('id, course_code, course_title, department, level, semester, academic_year') \
+            .order('created_at', desc=True).execute()
+        notes_list = notes_res.data or []
+ 
+        # attach generation status to each note
+        log_res = supabase.table('question_generation_log') \
+            .select('note_id, status, questions_generated, updated_at').execute()
+        log_map = {r['note_id']: r for r in (log_res.data or [])}
+ 
+        for note in notes_list:
+            log = log_map.get(note['id'])
+            note['gen_status']  = log['status']              if log else 'not_started'
+            note['gen_count']   = log['questions_generated'] if log else 0
+            note['gen_updated'] = log['updated_at']          if log else None
+ 
+    except Exception as e:
+        flash(f"Could not load notes: {str(e)}", 'error')
+        notes_list = []
+ 
+    # ── fetch questions with filters ──────────────────────────────────
+    try:
+        q = supabase.table('questions').select(
+            'id, note_id, course_code, department, level, semester, '
+            'question_text, option_a, option_b, option_c, option_d, '
+            'correct_option, explanation, difficulty, status, created_at'
+        )
+ 
+        if status_filter and status_filter != 'all':
+            q = q.eq('status', status_filter)
+        if course_filter:
+            q = q.eq('course_code', course_filter)
+        if diff_filter:
+            q = q.eq('difficulty', diff_filter)
+        if search_q:
+            q = q.ilike('question_text', f'%{search_q}%')
+ 
+        q = q.order('created_at', desc=True)
+        questions_res = q.execute()
+        questions_list = questions_res.data or []
+ 
+    except Exception as e:
+        flash(f"Could not load questions: {str(e)}", 'error')
+        questions_list = []
+ 
+    # ── counts for tab badges ─────────────────────────────────────────
+    try:
+        counts_res = supabase.table('questions').select('status').execute()
+        status_counts = Counter(r['status'] for r in (counts_res.data or []))
+    except Exception:
+        status_counts = {}
+ 
+    # ── distinct course codes for filter dropdown ─────────────────────
+    try:
+        cc_res = supabase.table('questions').select('course_code').execute()
+        course_codes = sorted(set(r['course_code'] for r in (cc_res.data or [])))
+    except Exception:
+        course_codes = []
+ 
+    return render_template(
+        'admin_questions.html',
+        notes_list     = notes_list,
+        questions_list = questions_list,
+        status_counts  = status_counts,
+        course_codes   = course_codes,
+        filters={
+            'status':      status_filter,
+            'course_code': course_filter,
+            'difficulty':  diff_filter,
+            'search':      search_q,
+        }
+    )
+ 
+ 
+# ── APPROVE A QUESTION ────────────────────────────────────────────────
+@app.route('/admin/questions/approve/<int:q_id>', methods=['POST'])
+@admin_required
+def admin_approve_question(q_id):
+    try:
+        supabase.table('questions').update({
+            'status': 'approved'
+        }).eq('id', q_id).execute()
+        return jsonify({'success': True, 'new_status': 'approved'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+ 
+# ── FLAG A QUESTION ───────────────────────────────────────────────────
+@app.route('/admin/questions/flag/<int:q_id>', methods=['POST'])
+@admin_required
+def admin_flag_question(q_id):
+    try:
+        supabase.table('questions').update({
+            'status': 'flagged'
+        }).eq('id', q_id).execute()
+        return jsonify({'success': True, 'new_status': 'flagged'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+ 
+# ── EDIT A QUESTION (inline) ──────────────────────────────────────────
+@app.route('/admin/questions/edit/<int:q_id>', methods=['POST'])
+@admin_required
+def admin_edit_question(q_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'No data'}), 400
+ 
+    allowed = {
+        'question_text', 'option_a', 'option_b', 'option_c', 'option_d',
+        'correct_option', 'explanation', 'difficulty'
+    }
+    update = {k: v for k, v in data.items() if k in allowed}
+ 
+    if not update:
+        return jsonify({'success': False, 'error': 'Nothing to update'}), 400
+ 
+    # basic validation
+    if 'correct_option' in update and update['correct_option'] not in 'abcd':
+        return jsonify({'success': False, 'error': 'Invalid correct_option'}), 400
+ 
+    try:
+        supabase.table('questions').update(update).eq('id', q_id).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+ 
+# ── DELETE A QUESTION ─────────────────────────────────────────────────
+@app.route('/admin/questions/delete/<int:q_id>', methods=['POST'])
+@admin_required
+def admin_delete_question(q_id):
+    try:
+        supabase.table('questions').delete().eq('id', q_id).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+ 
+# ── APPROVE ALL PENDING FOR A NOTE ───────────────────────────────────
+@app.route('/admin/questions/approve-all/<int:note_id>', methods=['POST'])
+@admin_required
+def admin_approve_all(note_id):
+    try:
+        supabase.table('questions') \
+            .update({'status': 'approved'}) \
+            .eq('note_id', note_id) \
+            .eq('status', 'pending') \
+            .execute()
+        flash("All pending questions for this note approved.", 'success')
+    except Exception as e:
+        flash(f"Error: {str(e)}", 'error')
+    return redirect(url_for('admin_questions_review'))
+ 
+ 
+# ── DELETE ALL QUESTIONS FOR A NOTE (to regenerate) ──────────────────
+@app.route('/admin/questions/delete-all/<int:note_id>', methods=['POST'])
+@admin_required
+def admin_delete_all_questions(note_id):
+    try:
+        supabase.table('questions').delete().eq('note_id', note_id).execute()
+        supabase.table('question_generation_log').delete().eq('note_id', note_id).execute()
+        flash("All questions deleted. You can now regenerate.", 'success')
+    except Exception as e:
+        flash(f"Error: {str(e)}", 'error')
+    return redirect(url_for('admin_questions_review'))
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
