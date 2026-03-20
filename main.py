@@ -747,7 +747,194 @@ def user_dashboard():
         quiz_count     = quiz_count,
         best_score     = best_score,
     )
+
+
+# ── SETTINGS PAGE ────────────────────────────────────────────────────
+@app.route('/user/settings', methods=['GET'])
+@student_required
+def user_settings_page():
+    try:
+        dept_res    = supabase.table('departments').select('name').order('name').execute()
+        departments = [r['name'] for r in dept_res.data] if dept_res.data else []
+    except Exception:
+        departments = []
  
+    return render_template(
+        'user_settings.html',
+        student_name   = session.get('student_name', ''),
+        student_email  = session.get('student_email', ''),
+        student_dept   = session.get('student_dept', ''),
+        student_level  = session.get('student_level', ''),
+        student_matric = session.get('student_matric', ''),
+        departments    = departments,
+    )
+ 
+ 
+# ── UPDATE PROFILE ───────────────────────────────────────────────────
+@app.route('/user/settings/profile', methods=['POST'])
+@student_required
+def user_settings_profile():
+    uid        = session.get('student_id')
+    full_name  = request.form.get('full_name', '').strip()
+    matric     = request.form.get('matric_number', '').strip().upper()
+    department = request.form.get('department', '').strip()
+    level      = request.form.get('level', '').strip()
+ 
+    # validate
+    errors = []
+    if not full_name:
+        errors.append("Full name is required.")
+    if not matric:
+        errors.append("Matric number is required.")
+    elif not re.match(r'^[A-Z0-9][A-Z0-9/\-]{2,19}$', matric):
+        errors.append("Matric number format is invalid.")
+    if not department:
+        errors.append("Please select a department.")
+    if level not in ['100', '200', '300', '400']:
+        errors.append("Please select a valid level.")
+ 
+    if errors:
+        for msg in errors:
+            flash(msg, 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    # check matric uniqueness if changed
+    try:
+        if matric != session.get('student_matric', '').upper():
+            check = supabase.table('users').select('id').eq('matric_number', matric).execute()
+            if check.data and check.data[0]['id'] != uid:
+                flash("That matric number is already in use.", 'error')
+                return redirect(url_for('user_settings_page'))
+ 
+        supabase.table('users').update({
+            "full_name":     full_name,
+            "matric_number": matric,
+            "department":    department,
+            "level":         level,
+            "updated_at":    "now()"
+        }).eq('id', uid).execute()
+ 
+        # refresh session
+        session['student_name']   = full_name
+        session['student_matric'] = matric
+        session['student_dept']   = department
+        session['student_level']  = level
+ 
+        flash("Profile updated successfully.", 'success')
+ 
+    except Exception as e:
+        flash(f"Could not update profile: {str(e)}", 'error')
+ 
+    return redirect(url_for('user_settings_page'))
+ 
+ 
+# ── CHANGE EMAIL ─────────────────────────────────────────────────────
+@app.route('/user/settings/email', methods=['POST'])
+@student_required
+def user_settings_email():
+    uid           = session.get('student_id')
+    new_email     = request.form.get('new_email', '').strip().lower()
+    confirm_email = request.form.get('confirm_email', '').strip().lower()
+    password      = request.form.get('current_password_email', '')
+ 
+    if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', new_email):
+        flash("Enter a valid email address.", 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    if new_email != confirm_email:
+        flash("Email addresses do not match.", 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    try:
+        user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
+        if not check_password_hash(user_res.data['password_hash'], password):
+            flash("Current password is incorrect.", 'error')
+            return redirect(url_for('user_settings_page'))
+ 
+        # check new email not already taken
+        taken = supabase.table('users').select('id').eq('email', new_email).execute()
+        if taken.data and taken.data[0]['id'] != uid:
+            flash("That email is already registered to another account.", 'error')
+            return redirect(url_for('user_settings_page'))
+ 
+        supabase.table('users').update({
+            "email":      new_email,
+            "updated_at": "now()"
+        }).eq('id', uid).execute()
+ 
+        session['student_email'] = new_email
+        flash("Email updated successfully.", 'success')
+ 
+    except Exception as e:
+        flash(f"Could not update email: {str(e)}", 'error')
+ 
+    return redirect(url_for('user_settings_page'))
+ 
+ 
+# ── CHANGE PASSWORD ───────────────────────────────────────────────────
+@app.route('/user/settings/password', methods=['POST'])
+@student_required
+def user_settings_password():
+    uid         = session.get('student_id')
+    current_pw  = request.form.get('current_password', '')
+    new_pw      = request.form.get('new_password', '')
+    confirm_pw  = request.form.get('confirm_new_password', '')
+ 
+    if len(new_pw) < 8:
+        flash("New password must be at least 8 characters.", 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    if new_pw != confirm_pw:
+        flash("New passwords do not match.", 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    try:
+        user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
+        if not check_password_hash(user_res.data['password_hash'], current_pw):
+            flash("Current password is incorrect.", 'error')
+            return redirect(url_for('user_settings_page'))
+ 
+        supabase.table('users').update({
+            "password_hash": generate_password_hash(new_pw),
+            "updated_at":    "now()"
+        }).eq('id', uid).execute()
+ 
+        flash("Password changed successfully.", 'success')
+ 
+    except Exception as e:
+        flash(f"Could not change password: {str(e)}", 'error')
+ 
+    return redirect(url_for('user_settings_page'))
+ 
+ 
+# ── DELETE ACCOUNT ────────────────────────────────────────────────────
+@app.route('/user/settings/delete', methods=['POST'])
+@student_required
+def user_settings_delete():
+    uid      = session.get('student_id')
+    password = request.form.get('delete_password', '')
+    confirm  = request.form.get('delete_confirm', '').strip()
+ 
+    if confirm.lower() != 'delete my account':
+        flash("Type 'delete my account' exactly to confirm deletion.", 'error')
+        return redirect(url_for('user_settings_page'))
+ 
+    try:
+        user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
+        if not check_password_hash(user_res.data['password_hash'], password):
+            flash("Incorrect password. Account not deleted.", 'error')
+            return redirect(url_for('user_settings_page'))
+ 
+        supabase.table('users').delete().eq('id', uid).execute()
+ 
+        # clear session
+        session.clear()
+        flash("Your account has been permanently deleted.", 'info')
+        return redirect(url_for('user_home'))
+ 
+    except Exception as e:
+        flash(f"Could not delete account: {str(e)}", 'error')
+        return redirect(url_for('user_settings_page'))
  
 if __name__ == '__main__':
     app.run(debug=True)
