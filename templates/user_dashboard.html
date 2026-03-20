@@ -489,7 +489,7 @@
   <!-- ══ NAVBAR ══ -->
   <nav class="nav">
     <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
-    <a href="#" class="nav-avatar" title="Settings">{{ student_name[0] | upper }}</a>
+    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar" title="Settings">{{ student_name[0] | upper }}</a>
     <button class="burger" id="burgerBtn" aria-label="Open menu">
       <span class="material-icons">menu</span>
     </button>
