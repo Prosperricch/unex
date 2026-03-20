@@ -943,7 +943,7 @@ def user_settings_delete():
 
 
 # ── replace with your actual Gemini API key ──────────────────────────
-GEMINI_API_KEY = "AIzaSyB3Ll7smfLXLoLS1ezblKC3Ao8pFYvuG8U"
+GEMINI_API_KEY = "AIzaSyBgZUIz9pZSsArvg_LPScpqflXcHHrnmNc"
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY
