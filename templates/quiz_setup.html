@@ -455,39 +455,50 @@
     const startBtn = document.getElementById('startBtn');
 
     function fetchCount() {
-      const sem    = document.getElementById('sel-semester').value;
-      const yr     = document.getElementById('sel-year').value;
-      const cc     = document.getElementById('sel-course').value;
+      const sem = document.getElementById('sel-semester').value;
+      const yr  = document.getElementById('sel-year').value;
+      const cc  = document.getElementById('sel-course').value;
 
       if (!sem || !yr) {
-        badge.className = 'count-badge';
+        badge.className     = 'count-badge';
         countVal.textContent = '—';
-        startBtn.disabled = true;
+        startBtn.disabled   = true;
         return;
       }
 
-      badge.className = 'count-badge cb-loading';
+      badge.className     = 'count-badge cb-loading';
       countVal.textContent = '…';
 
-      const url = `{{ url_for('quiz_question_count') }}?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}`;
+      const url = `/user/quiz/count?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}`;
 
-      fetch(url)
-        .then(r => r.json())
+      fetch(url, { credentials: 'same-origin' })
+        .then(r => {
+          if (r.status === 302 || r.redirected) {
+            /* redirected to login — session expired */
+            window.location.href = '/user/login';
+            return null;
+          }
+          return r.json();
+        })
         .then(data => {
-          const n = data.count || 0;
+          if (!data) return;
+          const n = data.count !== undefined ? data.count : 0;
           countVal.textContent = n;
-          if (n >= 10) {
-            badge.className = 'count-badge has-questions';
+          if (n >= 1) {
+            badge.className   = 'count-badge has-questions';
             startBtn.disabled = false;
           } else {
-            badge.className = 'count-badge no-questions';
+            badge.className   = 'count-badge no-questions';
             startBtn.disabled = true;
+            if (data.error) console.error('Count error:', data.error);
           }
         })
-        .catch(() => {
-          badge.className = 'count-badge no-questions';
-          countVal.textContent = 'Error';
-          startBtn.disabled = true;
+        .catch(err => {
+          /* network error — still let user try if fields are filled */
+          console.error('fetchCount failed:', err);
+          badge.className     = 'count-badge has-questions';
+          countVal.textContent = '?';
+          startBtn.disabled   = false;
         });
     }
 
