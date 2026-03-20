@@ -2,6 +2,7 @@ import json
 import random as _random
 import re
 import base64
+from collections import Counter
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
@@ -30,11 +31,11 @@ db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx'}
 
 # ── KEEP-ALIVE (prevents Render free tier from sleeping) ──────────────────
-APP_URL = "https://unex.onrender.com"  # ← replace with your Render URL when deployed
+APP_URL = "https://unex.onrender.com"
 
 def keep_alive():
     while True:
-        time.sleep(840)  # ping every 14 minutes (Render sleeps after 15)
+        time.sleep(840)
         try:
             requests.get(APP_URL)
         except Exception:
@@ -58,7 +59,7 @@ class Notes(db.Model):
     weeks          = db.Column(db.String(200), nullable=False)
     description    = db.Column(db.String(500), nullable=True)
     academic_year  = db.Column(db.String(20), nullable=False)
-    semester       = db.Column(db.String(20), nullable=False)           # ← NEW: 1st Semester / 2nd Semester
+    semester       = db.Column(db.String(20), nullable=False)
     file_url       = db.Column(db.Text, nullable=False)
     downloadable   = db.Column(db.Boolean, default=True)
     created_at     = db.Column(db.DateTime, default=datetime.utcnow)
@@ -89,7 +90,6 @@ class Department(db.Model):
 with app.app_context():
     db.create_all()
 
-    # Insert sample department if table is empty
     if Department.query.count() == 0:
         supabase.table('departments').insert({
             "name": "computer engineering",
@@ -157,7 +157,7 @@ def add_notes():
     if request.method == 'POST':
         course_code     = request.form.get('course_code', '').strip().upper()
         academic_year   = request.form.get('academic_year', '').strip()
-        semester        = request.form.get('semester', '').strip()                     # ← NEW
+        semester        = request.form.get('semester', '').strip()
         department      = request.form.get('department', '').strip()
         level           = request.form.get('level', '').strip()
         lecturer_name   = request.form.get('lecturer_name', '').strip()
@@ -210,7 +210,7 @@ def add_notes():
                     "weeks": weeks or "Not specified",
                     "description": description or "No description provided",
                     "academic_year": academic_year,
-                    "semester": semester,                                           # ← NEW
+                    "semester": semester,
                     "file_url": public_url,
                     "downloadable": downloadable,
                     "created_at": "now()",
@@ -330,7 +330,7 @@ def edit_notes():
                 "weeks": request.form.get('weeks', '').strip(),
                 "description": request.form.get('description', '').strip(),
                 "academic_year": request.form.get('academic_year', '').strip(),
-                "semester": request.form.get('semester', '').strip(),               # ← NEW
+                "semester": request.form.get('semester', '').strip(),
                 "downloadable": 'downloadable' in request.form,
                 "updated_at": "now()"
             }
@@ -360,7 +360,7 @@ def edit_notes():
                 f"lecturer_name.ilike.%{search_query}%,"
                 f"department.ilike.%{search_query}%,"
                 f"academic_year.ilike.%{search_query}%,"
-                f"semester.ilike.%{search_query}%"                                 # ← NEW
+                f"semester.ilike.%{search_query}%"
             )
 
         notes_res = query.order('created_at', desc=True).execute()
@@ -412,7 +412,7 @@ def user_notes():
     level         = request.args.get('level', '').strip()
     lecturer      = request.args.get('lecturer', '').strip()
     academic_year = request.args.get('academic_year', '').strip()
-    semester      = request.args.get('semester', '').strip()                   # ← NEW
+    semester      = request.args.get('semester', '').strip()
 
     try:
         query = supabase.table('notes').select('*')
@@ -433,7 +433,7 @@ def user_notes():
             query = query.ilike('lecturer_name', f'%{lecturer}%')
         if academic_year:
             query = query.eq('academic_year', academic_year)
-        if semester:                                                                # ← NEW
+        if semester:
             query = query.eq('semester', semester)
 
         notes_res = query.order('created_at', desc=True).execute()
@@ -460,7 +460,7 @@ def user_notes():
             'level': level,
             'lecturer': lecturer,
             'academic_year': academic_year,
-            'semester': semester                                                   # ← NEW
+            'semester': semester
         }
     )
 
@@ -515,13 +515,13 @@ def admin_logout():
     flash('You have been logged out successfully', 'success')
     return redirect(url_for('admin_login_page'))
 
+
 @app.route('/user/sponsors')
 def sponsors_page():
     return render_template('sponsors.html')
 
 
-#----------new part -------------
-# ── STUDENT DECORATOR  (mirrors admin_required) ─────────────────────
+# ── STUDENT DECORATOR ─────────────────────────────────────────────────────
 def student_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -530,9 +530,9 @@ def student_required(f):
             return redirect(url_for('user_login_page'))
         return f(*args, **kwargs)
     return decorated_function
- 
- 
-# ── SIGNUP ──────────────────────────────────────────────────────────
+
+
+# ── SIGNUP ────────────────────────────────────────────────────────────────
 @app.route('/user/signup', methods=['GET'])
 def user_signup_page():
     if session.get('student_logged_in'):
@@ -543,8 +543,8 @@ def user_signup_page():
     except Exception:
         departments = []
     return render_template('user_signup.html', departments=departments)
- 
- 
+
+
 @app.route('/user/signup', methods=['POST'])
 def user_signup():
     full_name     = request.form.get('full_name', '').strip()
@@ -554,63 +554,58 @@ def user_signup():
     level         = request.form.get('level', '').strip()
     password      = request.form.get('password', '')
     confirm_pw    = request.form.get('confirm_password', '')
- 
-    # ── server-side validation ───────────────────────────────────────
+
     errors = []
- 
+
     if not full_name:
         errors.append("Full name is required.")
- 
-    # email: must contain @ and a dot after it — accepts gmail, yahoo, etc.
+
     email_ok = bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
     if not email or not email_ok:
         errors.append("Enter a valid email address (e.g. name@gmail.com).")
- 
-    # matric: letters, digits, slashes and hyphens — e.g. CSC/2021/001 or MU/EN/0323
+
     if not matric_number:
         errors.append("Matric number is required.")
     elif not re.match(r'^[A-Z0-9][A-Z0-9/\-]{2,19}$', matric_number):
         errors.append("Matric number format is invalid (e.g. CSC/2021/001 or MU/EN/0323).")
- 
+
     if not department:
         errors.append("Please select your department.")
- 
+
     valid_levels = ['100', '200', '300', '400']
     if not level:
         errors.append("Please select your level.")
     elif level not in valid_levels:
         errors.append("Level must be 100, 200, 300, or 400.")
- 
+
     if len(password) < 8:
         errors.append("Password must be at least 8 characters.")
     if password != confirm_pw:
         errors.append("Passwords do not match.")
- 
+
     if errors:
         for msg in errors:
             flash(msg, 'error')
         return redirect(url_for('user_signup_page'))
- 
-    # ── check duplicates ─────────────────────────────────────────────
+
     try:
         email_check = supabase.table('users').select('id').eq('email', email).execute()
         if email_check.data:
             flash("An account with that email already exists.", 'error')
             return redirect(url_for('user_signup_page'))
- 
+
         matric_check = supabase.table('users').select('id').eq('matric_number', matric_number).execute()
         if matric_check.data:
             flash("That matric number is already registered.", 'error')
             return redirect(url_for('user_signup_page'))
- 
+
     except Exception as e:
         flash(f"Could not verify account details: {str(e)}", 'error')
         return redirect(url_for('user_signup_page'))
- 
-    # ── create user ──────────────────────────────────────────────────
+
     try:
         password_hash = generate_password_hash(password)
- 
+
         result = supabase.table('users').insert({
             "full_name":     full_name,
             "email":         email,
@@ -622,8 +617,7 @@ def user_signup():
             "created_at":    "now()",
             "updated_at":    "now()"
         }).execute()
- 
-        # log the student in immediately after signup
+
         user = result.data[0]
         session['student_logged_in'] = True
         session['student_id']        = user['id']
@@ -632,50 +626,49 @@ def user_signup():
         session['student_dept']      = user['department']
         session['student_level']     = user['level']
         session['student_matric']    = user['matric_number']
- 
+
         flash(f"Welcome to U-NEX, {full_name.split()[0]}! Your account is ready.", 'success')
         return redirect(url_for('user_dashboard'))
- 
+
     except Exception as e:
         flash(f"Could not create account: {str(e)}", 'error')
         return redirect(url_for('user_signup_page'))
- 
- 
-# ── LOGIN ────────────────────────────────────────────────────────────
+
+
+# ── LOGIN ─────────────────────────────────────────────────────────────────
 @app.route('/user/login', methods=['GET'])
 def user_login_page():
     if session.get('student_logged_in'):
         return redirect(url_for('user_dashboard'))
     return render_template('user_login.html')
- 
- 
+
+
 @app.route('/user/login', methods=['POST'])
 def user_login():
     email    = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '')
- 
+
     if not email or not password:
         flash("Email and password are required.", 'error')
         return redirect(url_for('user_login_page'))
- 
+
     try:
         result = supabase.table('users').select('*').eq('email', email).execute()
- 
+
         if not result.data:
             flash("No account found with that email.", 'error')
             return redirect(url_for('user_login_page'))
- 
+
         user = result.data[0]
- 
+
         if not check_password_hash(user['password_hash'], password):
             flash("Incorrect password. Please try again.", 'error')
             return redirect(url_for('user_login_page'))
- 
+
         if not user.get('is_active', True):
             flash("Your account has been deactivated. Contact support.", 'error')
             return redirect(url_for('user_login_page'))
- 
-        # set session
+
         session['student_logged_in'] = True
         session['student_id']        = user['id']
         session['student_name']      = user['full_name']
@@ -683,16 +676,16 @@ def user_login():
         session['student_dept']      = user['department']
         session['student_level']     = user['level']
         session['student_matric']    = user['matric_number']
- 
+
         flash(f"Welcome back, {user['full_name'].split()[0]}!", 'success')
         return redirect(url_for('user_dashboard'))
- 
+
     except Exception as e:
         flash(f"Login error: {str(e)}", 'error')
         return redirect(url_for('user_login_page'))
- 
- 
-# ── LOGOUT ───────────────────────────────────────────────────────────
+
+
+# ── LOGOUT ────────────────────────────────────────────────────────────────
 @app.route('/user/logout', methods=['GET', 'POST'])
 @student_required
 def user_logout():
@@ -705,15 +698,14 @@ def user_logout():
     session.pop('student_matric',    None)
     flash("You've been logged out.", 'success')
     return redirect(url_for('user_login_page'))
- 
- 
-# ── DASHBOARD ───────────────────────────────────────────────────────
+
+
+# ── DASHBOARD — FIX 3: real quiz stats ───────────────────────────────────
 @app.route('/user/dashboard')
 @student_required
 def user_dashboard():
     from datetime import datetime as _dt
- 
-    # time-based greeting
+
     hour = _dt.now().hour
     if hour < 12:
         greeting = 'morning'
@@ -721,28 +713,39 @@ def user_dashboard():
         greeting = 'afternoon'
     else:
         greeting = 'evening'
- 
-    # fetch notes count for the student's dept/level from DB
+
+    uid   = session.get('student_id')
+    dept  = session.get('student_dept', '')
+    level = session.get('student_level', '')
+
     try:
         notes_res = supabase.table('notes') \
             .select('id', count='exact') \
-            .eq('department', session.get('student_dept', '')) \
-            .eq('level', session.get('student_level', '')) \
+            .eq('department', dept) \
+            .eq('level', level) \
             .execute()
         notes_count = notes_res.count if notes_res.count is not None else 0
     except Exception:
         notes_count = 0
- 
-    # quiz stats — placeholder until quiz tables are populated
-    quiz_count = 0
-    best_score = '—'
- 
+
+    try:
+        qr_res = supabase.table('quiz_results') \
+            .select('percentage') \
+            .eq('user_id', uid) \
+            .execute()
+        results    = qr_res.data or []
+        quiz_count = len(results)
+        best_score = f"{max(r['percentage'] for r in results):.0f}%" if results else '—'
+    except Exception:
+        quiz_count = 0
+        best_score = '—'
+
     return render_template(
         'user_dashboard.html',
         student_name   = session.get('student_name', ''),
         student_email  = session.get('student_email', ''),
-        student_dept   = session.get('student_dept', ''),
-        student_level  = session.get('student_level', ''),
+        student_dept   = dept,
+        student_level  = level,
         student_matric = session.get('student_matric', ''),
         time_greeting  = greeting,
         now            = _dt.now(),
@@ -752,7 +755,7 @@ def user_dashboard():
     )
 
 
-# ── SETTINGS PAGE ────────────────────────────────────────────────────
+# ── SETTINGS ──────────────────────────────────────────────────────────────
 @app.route('/user/settings', methods=['GET'])
 @student_required
 def user_settings_page():
@@ -761,7 +764,7 @@ def user_settings_page():
         departments = [r['name'] for r in dept_res.data] if dept_res.data else []
     except Exception:
         departments = []
- 
+
     return render_template(
         'user_settings.html',
         student_name   = session.get('student_name', ''),
@@ -771,9 +774,8 @@ def user_settings_page():
         student_matric = session.get('student_matric', ''),
         departments    = departments,
     )
- 
- 
-# ── UPDATE PROFILE ───────────────────────────────────────────────────
+
+
 @app.route('/user/settings/profile', methods=['POST'])
 @student_required
 def user_settings_profile():
@@ -782,8 +784,7 @@ def user_settings_profile():
     matric     = request.form.get('matric_number', '').strip().upper()
     department = request.form.get('department', '').strip()
     level      = request.form.get('level', '').strip()
- 
-    # validate
+
     errors = []
     if not full_name:
         errors.append("Full name is required.")
@@ -795,20 +796,19 @@ def user_settings_profile():
         errors.append("Please select a department.")
     if level not in ['100', '200', '300', '400']:
         errors.append("Please select a valid level.")
- 
+
     if errors:
         for msg in errors:
             flash(msg, 'error')
         return redirect(url_for('user_settings_page'))
- 
-    # check matric uniqueness if changed
+
     try:
         if matric != session.get('student_matric', '').upper():
             check = supabase.table('users').select('id').eq('matric_number', matric).execute()
             if check.data and check.data[0]['id'] != uid:
                 flash("That matric number is already in use.", 'error')
                 return redirect(url_for('user_settings_page'))
- 
+
         supabase.table('users').update({
             "full_name":     full_name,
             "matric_number": matric,
@@ -816,22 +816,20 @@ def user_settings_profile():
             "level":         level,
             "updated_at":    "now()"
         }).eq('id', uid).execute()
- 
-        # refresh session
+
         session['student_name']   = full_name
         session['student_matric'] = matric
         session['student_dept']   = department
         session['student_level']  = level
- 
+
         flash("Profile updated successfully.", 'success')
- 
+
     except Exception as e:
         flash(f"Could not update profile: {str(e)}", 'error')
- 
+
     return redirect(url_for('user_settings_page'))
- 
- 
-# ── CHANGE EMAIL ─────────────────────────────────────────────────────
+
+
 @app.route('/user/settings/email', methods=['POST'])
 @student_required
 def user_settings_email():
@@ -839,126 +837,119 @@ def user_settings_email():
     new_email     = request.form.get('new_email', '').strip().lower()
     confirm_email = request.form.get('confirm_email', '').strip().lower()
     password      = request.form.get('current_password_email', '')
- 
+
     if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', new_email):
         flash("Enter a valid email address.", 'error')
         return redirect(url_for('user_settings_page'))
- 
+
     if new_email != confirm_email:
         flash("Email addresses do not match.", 'error')
         return redirect(url_for('user_settings_page'))
- 
+
     try:
         user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
         if not check_password_hash(user_res.data['password_hash'], password):
             flash("Current password is incorrect.", 'error')
             return redirect(url_for('user_settings_page'))
- 
-        # check new email not already taken
+
         taken = supabase.table('users').select('id').eq('email', new_email).execute()
         if taken.data and taken.data[0]['id'] != uid:
             flash("That email is already registered to another account.", 'error')
             return redirect(url_for('user_settings_page'))
- 
+
         supabase.table('users').update({
             "email":      new_email,
             "updated_at": "now()"
         }).eq('id', uid).execute()
- 
+
         session['student_email'] = new_email
         flash("Email updated successfully.", 'success')
- 
+
     except Exception as e:
         flash(f"Could not update email: {str(e)}", 'error')
- 
+
     return redirect(url_for('user_settings_page'))
- 
- 
-# ── CHANGE PASSWORD ───────────────────────────────────────────────────
+
+
 @app.route('/user/settings/password', methods=['POST'])
 @student_required
 def user_settings_password():
-    uid         = session.get('student_id')
-    current_pw  = request.form.get('current_password', '')
-    new_pw      = request.form.get('new_password', '')
-    confirm_pw  = request.form.get('confirm_new_password', '')
- 
+    uid        = session.get('student_id')
+    current_pw = request.form.get('current_password', '')
+    new_pw     = request.form.get('new_password', '')
+    confirm_pw = request.form.get('confirm_new_password', '')
+
     if len(new_pw) < 8:
         flash("New password must be at least 8 characters.", 'error')
         return redirect(url_for('user_settings_page'))
- 
+
     if new_pw != confirm_pw:
         flash("New passwords do not match.", 'error')
         return redirect(url_for('user_settings_page'))
- 
+
     try:
         user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
         if not check_password_hash(user_res.data['password_hash'], current_pw):
             flash("Current password is incorrect.", 'error')
             return redirect(url_for('user_settings_page'))
- 
+
         supabase.table('users').update({
             "password_hash": generate_password_hash(new_pw),
             "updated_at":    "now()"
         }).eq('id', uid).execute()
- 
+
         flash("Password changed successfully.", 'success')
- 
+
     except Exception as e:
         flash(f"Could not change password: {str(e)}", 'error')
- 
+
     return redirect(url_for('user_settings_page'))
- 
- 
-# ── DELETE ACCOUNT ────────────────────────────────────────────────────
+
+
 @app.route('/user/settings/delete', methods=['POST'])
 @student_required
 def user_settings_delete():
     uid      = session.get('student_id')
     password = request.form.get('delete_password', '')
     confirm  = request.form.get('delete_confirm', '').strip()
- 
+
     if confirm.lower() != 'delete my account':
         flash("Type 'delete my account' exactly to confirm deletion.", 'error')
         return redirect(url_for('user_settings_page'))
- 
+
     try:
         user_res = supabase.table('users').select('password_hash').eq('id', uid).single().execute()
         if not check_password_hash(user_res.data['password_hash'], password):
             flash("Incorrect password. Account not deleted.", 'error')
             return redirect(url_for('user_settings_page'))
- 
+
         supabase.table('users').delete().eq('id', uid).execute()
- 
-        # clear session
+
         session.clear()
         flash("Your account has been permanently deleted.", 'info')
         return redirect(url_for('user_home'))
- 
+
     except Exception as e:
         flash(f"Could not delete account: {str(e)}", 'error')
         return redirect(url_for('user_settings_page'))
 
 
-
-
-
-# ── replace with your actual Gemini API key ──────────────────────────
+# ── GEMINI CONFIG ─────────────────────────────────────────────────────────
 GEMINI_API_KEY = "AIzaSyBgZUIz9pZSsArvg_LPScpqflXcHHrnmNc"
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY
 )
- 
+
 QUESTIONS_PER_NOTE = 70
- 
- 
-# ── PROMPT ────────────────────────────────────────────────────────────
+
+
+# ── PROMPT ────────────────────────────────────────────────────────────────
 def _build_prompt(course_code: str, course_title: str) -> str:
     return f"""You are an experienced university lecturer creating a comprehensive exam for the course:
 Course Code: {course_code}
 Course Title: {course_title}
- 
+
 Read the entire attached document carefully from start to finish — every page, every section.
 Do NOT focus only on the introduction or headings. Extract assessable content from:
 - Definitions and key terms
@@ -968,10 +959,10 @@ Do NOT focus only on the introduction or headings. Extract assessable content fr
 - Diagrams and what they represent
 - Any numbered lists or procedures
 - Comparisons and classifications
- 
+
 Generate exactly {QUESTIONS_PER_NOTE} multiple-choice questions that cover the FULL BREADTH of the document.
 Distribute difficulty: roughly 25 easy, 30 medium, 15 hard questions.
- 
+
 STRICT RULES:
 1. Each question must have exactly 4 options (a, b, c, d).
 2. Only one option is correct. The others must be plausible but clearly wrong.
@@ -979,7 +970,7 @@ STRICT RULES:
 4. The explanation must state WHY the correct answer is right (1-2 sentences).
 5. Do NOT number the questions yourself — just include them in the JSON array.
 6. Return ONLY valid JSON. No markdown fences, no preamble, no commentary.
- 
+
 Return this exact JSON structure:
 {{
   "questions": [
@@ -995,22 +986,39 @@ Return this exact JSON structure:
     }}
   ]
 }}
- 
+
 difficulty must be one of: "easy", "medium", "hard"
 correct_option must be one of: "a", "b", "c", "d"
 """
- 
- 
-# ── MAIN GENERATION FUNCTION ──────────────────────────────────────────
+
+
+# ── FIX 2: SAFE LOG UPSERT — replaces all .upsert(on_conflict=) calls ─────
+def _log_upsert(supabase, note_id: int, data: dict):
+    """Safe insert-or-update for question_generation_log."""
+    try:
+        existing = supabase.table("question_generation_log") \
+            .select("id").eq("note_id", note_id).execute()
+        if existing.data:
+            supabase.table("question_generation_log") \
+                .update(data).eq("note_id", note_id).execute()
+        else:
+            payload = {"note_id": note_id}
+            payload.update(data)
+            supabase.table("question_generation_log").insert(payload).execute()
+    except Exception:
+        pass
+
+
+def _mark_failed(supabase, note_id: int, error_msg: str):
+    _log_upsert(supabase, note_id, {
+        "status":        "failed",
+        "error_message": error_msg[:500],
+        "updated_at":    "now()"
+    })
+
+
+# ── GENERATION FUNCTION ───────────────────────────────────────────────────
 def generate_questions_for_note(note: dict, supabase) -> dict:
-    """
-    Fetch the note file from Supabase storage, send to Gemini,
-    parse response, store questions.
- 
-    Returns:
-        {"success": True, "count": N}   on success
-        {"success": False, "error": "..."}  on failure
-    """
     note_id      = note["id"]
     file_url     = note["file_url"]
     course_code  = note["course_code"]
@@ -1019,20 +1027,16 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
     level        = note["level"]
     semester     = note["semester"]
     acad_year    = note["academic_year"]
- 
-    # ── 1. Mark as processing ─────────────────────────────────────────
-    try:
-        supabase.table("question_generation_log").upsert({
-            "note_id":             note_id,
-            "status":              "processing",
-            "questions_generated": 0,
-            "error_message":       None,
-            "updated_at":          "now()"
-        }, on_conflict="note_id").execute()
-    except Exception as e:
-        return {"success": False, "error": f"Log upsert failed: {e}"}
- 
-    # ── 2. Download the file from Supabase storage ────────────────────
+
+    # 1. Mark as processing
+    _log_upsert(supabase, note_id, {
+        "status":              "processing",
+        "questions_generated": 0,
+        "error_message":       None,
+        "updated_at":          "now()"
+    })
+
+    # 2. Download file
     try:
         resp = requests.get(file_url, timeout=30)
         resp.raise_for_status()
@@ -1041,8 +1045,8 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
     except Exception as e:
         _mark_failed(supabase, note_id, f"File download failed: {e}")
         return {"success": False, "error": f"File download failed: {e}"}
- 
-    # ── 3. Determine MIME type ────────────────────────────────────────
+
+    # 3. MIME type
     fname = file_url.split("?")[0].lower()
     if fname.endswith(".pdf"):
         mime = "application/pdf"
@@ -1052,24 +1056,17 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
         mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     else:
         mime = content_type or "application/pdf"
- 
-    # ── 4. Build Gemini request ───────────────────────────────────────
+
+    # 4. Build Gemini payload
     encoded = base64.b64encode(file_bytes).decode("utf-8")
     prompt  = _build_prompt(course_code, course_title)
- 
+
     payload = {
         "contents": [
             {
                 "parts": [
-                    {
-                        "inline_data": {
-                            "mime_type": mime,
-                            "data":      encoded
-                        }
-                    },
-                    {
-                        "text": prompt
-                    }
+                    {"inline_data": {"mime_type": mime, "data": encoded}},
+                    {"text": prompt}
                 ]
             }
         ],
@@ -1079,8 +1076,8 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
             "responseMimeType": "application/json"
         }
     }
- 
-    # ── 5. Call Gemini ────────────────────────────────────────────────
+
+    # 5. Call Gemini
     try:
         gemini_resp = requests.post(
             GEMINI_URL,
@@ -1093,15 +1090,15 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
     except Exception as e:
         _mark_failed(supabase, note_id, f"Gemini API error: {e}")
         return {"success": False, "error": f"Gemini API error: {e}"}
- 
-    # ── 6. Extract text from Gemini response ──────────────────────────
+
+    # 6. Extract response text
     try:
         raw_text = gemini_data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError) as e:
-        _mark_failed(supabase, note_id, f"Gemini response parse error: {e}")
+        _mark_failed(supabase, note_id, f"Gemini response malformed: {e}")
         return {"success": False, "error": f"Gemini response malformed: {e}"}
- 
-    # ── 7. Parse JSON — strip any accidental markdown fences ──────────
+
+    # 7. Parse JSON
     try:
         cleaned       = re.sub(r"```(?:json)?|```", "", raw_text).strip()
         data          = json.loads(cleaned)
@@ -1109,17 +1106,17 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
     except Exception as e:
         _mark_failed(supabase, note_id, f"JSON parse failed: {e} | Raw: {raw_text[:300]}")
         return {"success": False, "error": f"JSON parse failed: {e}"}
- 
+
     if not questions_raw:
         _mark_failed(supabase, note_id, "Gemini returned 0 questions.")
         return {"success": False, "error": "No questions returned by Gemini."}
- 
-    # ── 8. Validate each question before inserting ────────────────────
+
+    # 8. Validate
     valid_options = {"a", "b", "c", "d"}
     valid_diff    = {"easy", "medium", "hard"}
     rows          = []
     skipped       = 0
- 
+
     for q in questions_raw:
         qt    = str(q.get("question_text", "")).strip()
         opt_a = str(q.get("option_a", "")).strip()
@@ -1129,7 +1126,7 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
         correct = str(q.get("correct_option", "")).strip().lower()
         expl    = str(q.get("explanation", "")).strip()
         diff    = str(q.get("difficulty", "medium")).strip().lower()
- 
+
         if not all([qt, opt_a, opt_b, opt_c, opt_d]):
             skipped += 1
             continue
@@ -1138,7 +1135,7 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
             continue
         if diff not in valid_diff:
             diff = "medium"
- 
+
         rows.append({
             "note_id":        note_id,
             "course_code":    course_code,
@@ -1157,57 +1154,40 @@ def generate_questions_for_note(note: dict, supabase) -> dict:
             "status":         "pending",
             "created_at":     "now()"
         })
- 
+
     if not rows:
         _mark_failed(supabase, note_id, "All questions failed validation.")
         return {"success": False, "error": "All questions failed validation."}
- 
-    # ── 9. Bulk insert in batches of 25 ───────────────────────────────
+
+    # 9. Insert in batches of 25
     try:
         for i in range(0, len(rows), 25):
             supabase.table("questions").insert(rows[i:i + 25]).execute()
     except Exception as e:
         _mark_failed(supabase, note_id, f"DB insert failed: {e}")
         return {"success": False, "error": f"DB insert failed: {e}"}
- 
-    # ── 10. Mark done ─────────────────────────────────────────────────
-    count = len(rows)
-    try:
-        supabase.table("question_generation_log").upsert({
-            "note_id":             note_id,
-            "status":              "done",
-            "questions_generated": count,
-            "error_message":       None,
-            "updated_at":          "now()"
-        }, on_conflict="note_id").execute()
-    except Exception:
-        pass
- 
-    return {"success": True, "count": count, "skipped": skipped}
- 
- 
-# ── HELPER ────────────────────────────────────────────────────────────
-def _mark_failed(supabase, note_id: int, error_msg: str):
-    try:
-        supabase.table("question_generation_log").upsert({
-            "note_id":       note_id,
-            "status":        "failed",
-            "error_message": error_msg[:500],
-            "updated_at":    "now()"
-        }, on_conflict="note_id").execute()
-    except Exception:
-        pass
 
-# ── TRIGGER GENERATION FOR ONE NOTE ──────────────────────────────────
+    # 10. Mark done
+    count = len(rows)
+    _log_upsert(supabase, note_id, {
+        "status":              "done",
+        "questions_generated": count,
+        "error_message":       None,
+        "updated_at":          "now()"
+    })
+
+    return {"success": True, "count": count, "skipped": skipped}
+
+
+# ── TRIGGER GENERATION ────────────────────────────────────────────────────
 @app.route('/admin/quiz/generate/<int:note_id>', methods=['POST'])
 @admin_required
 def admin_generate_questions(note_id):
-    # prevent double-generation: check if already done
     try:
         log = supabase.table('question_generation_log') \
             .select('status, questions_generated') \
             .eq('note_id', note_id).execute()
- 
+
         if log.data:
             existing = log.data[0]
             if existing['status'] == 'done':
@@ -1218,15 +1198,14 @@ def admin_generate_questions(note_id):
                     'error'
                 )
                 return redirect(url_for('admin_questions_review'))
- 
+
             if existing['status'] == 'processing':
                 flash("Generation already in progress for this note.", 'error')
                 return redirect(url_for('admin_questions_review'))
- 
+
     except Exception:
-        pass  # log may not exist yet — continue
- 
-    # fetch the note
+        pass
+
     try:
         note_res = supabase.table('notes').select('*').eq('id', note_id).single().execute()
         note = note_res.data
@@ -1236,67 +1215,57 @@ def admin_generate_questions(note_id):
     except Exception as e:
         flash(f"Could not fetch note: {str(e)}", 'error')
         return redirect(url_for('admin_questions_review'))
- 
-    # run generation in background thread so page returns immediately
+
     def _run_generation(n, sb):
         generate_questions_for_note(n, sb)
- 
+
     t = threading.Thread(target=_run_generation, args=(note, supabase), daemon=True)
     t.start()
- 
+
     flash(
         f"Generation started for {note['course_code']}. "
         f"Refresh the page in 60 seconds to see the results.",
         'info'
     )
     return redirect(url_for('admin_questions_review'))
- 
- 
-# ── ADMIN QUESTION REVIEW PAGE ────────────────────────────────────────
+
+
+# ── ADMIN QUESTION REVIEW ─────────────────────────────────────────────────
 @app.route('/admin/questions', methods=['GET'])
 @admin_required
 def admin_questions_review():
-    """
-    Shows:
-    - All notes with generation status
-    - Filterable question list (by status, course code, difficulty)
-    """
-    # filter params
-    status_filter  = request.args.get('status', 'pending')   # pending | approved | flagged | all
-    course_filter  = request.args.get('course_code', '').strip().upper()
-    diff_filter    = request.args.get('difficulty', '').strip()
-    search_q       = request.args.get('search', '').strip()
- 
-    # ── fetch notes with generation log joined ────────────────────────
+    status_filter = request.args.get('status', 'pending')
+    course_filter = request.args.get('course_code', '').strip().upper()
+    diff_filter   = request.args.get('difficulty', '').strip()
+    search_q      = request.args.get('search', '').strip()
+
     try:
         notes_res = supabase.table('notes') \
             .select('id, course_code, course_title, department, level, semester, academic_year') \
             .order('created_at', desc=True).execute()
         notes_list = notes_res.data or []
- 
-        # attach generation status to each note
+
         log_res = supabase.table('question_generation_log') \
             .select('note_id, status, questions_generated, updated_at').execute()
         log_map = {r['note_id']: r for r in (log_res.data or [])}
- 
+
         for note in notes_list:
             log = log_map.get(note['id'])
             note['gen_status']  = log['status']              if log else 'not_started'
             note['gen_count']   = log['questions_generated'] if log else 0
             note['gen_updated'] = log['updated_at']          if log else None
- 
+
     except Exception as e:
         flash(f"Could not load notes: {str(e)}", 'error')
         notes_list = []
- 
-    # ── fetch questions with filters ──────────────────────────────────
+
     try:
         q = supabase.table('questions').select(
             'id, note_id, course_code, department, level, semester, '
             'question_text, option_a, option_b, option_c, option_d, '
             'correct_option, explanation, difficulty, status, created_at'
         )
- 
+
         if status_filter and status_filter != 'all':
             q = q.eq('status', status_filter)
         if course_filter:
@@ -1305,29 +1274,28 @@ def admin_questions_review():
             q = q.eq('difficulty', diff_filter)
         if search_q:
             q = q.ilike('question_text', f'%{search_q}%')
- 
+
         q = q.order('created_at', desc=True)
-        questions_res = q.execute()
+        questions_res  = q.execute()
         questions_list = questions_res.data or []
- 
+
     except Exception as e:
         flash(f"Could not load questions: {str(e)}", 'error')
         questions_list = []
- 
-    # ── counts for tab badges ─────────────────────────────────────────
+
+    # FIX 1: Counter now imported at top of file
     try:
-        counts_res = supabase.table('questions').select('status').execute()
+        counts_res    = supabase.table('questions').select('status').execute()
         status_counts = Counter(r['status'] for r in (counts_res.data or []))
     except Exception:
         status_counts = {}
- 
-    # ── distinct course codes for filter dropdown ─────────────────────
+
     try:
-        cc_res = supabase.table('questions').select('course_code').execute()
+        cc_res       = supabase.table('questions').select('course_code').execute()
         course_codes = sorted(set(r['course_code'] for r in (cc_res.data or [])))
     except Exception:
         course_codes = []
- 
+
     return render_template(
         'admin_questions.html',
         notes_list     = notes_list,
@@ -1341,63 +1309,54 @@ def admin_questions_review():
             'search':      search_q,
         }
     )
- 
- 
-# ── APPROVE A QUESTION ────────────────────────────────────────────────
+
+
 @app.route('/admin/questions/approve/<int:q_id>', methods=['POST'])
 @admin_required
 def admin_approve_question(q_id):
     try:
-        supabase.table('questions').update({
-            'status': 'approved'
-        }).eq('id', q_id).execute()
+        supabase.table('questions').update({'status': 'approved'}).eq('id', q_id).execute()
         return jsonify({'success': True, 'new_status': 'approved'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
- 
-# ── FLAG A QUESTION ───────────────────────────────────────────────────
+
+
 @app.route('/admin/questions/flag/<int:q_id>', methods=['POST'])
 @admin_required
 def admin_flag_question(q_id):
     try:
-        supabase.table('questions').update({
-            'status': 'flagged'
-        }).eq('id', q_id).execute()
+        supabase.table('questions').update({'status': 'flagged'}).eq('id', q_id).execute()
         return jsonify({'success': True, 'new_status': 'flagged'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
- 
-# ── EDIT A QUESTION (inline) ──────────────────────────────────────────
+
+
 @app.route('/admin/questions/edit/<int:q_id>', methods=['POST'])
 @admin_required
 def admin_edit_question(q_id):
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'error': 'No data'}), 400
- 
+
     allowed = {
         'question_text', 'option_a', 'option_b', 'option_c', 'option_d',
         'correct_option', 'explanation', 'difficulty'
     }
     update = {k: v for k, v in data.items() if k in allowed}
- 
+
     if not update:
         return jsonify({'success': False, 'error': 'Nothing to update'}), 400
- 
-    # basic validation
+
     if 'correct_option' in update and update['correct_option'] not in 'abcd':
         return jsonify({'success': False, 'error': 'Invalid correct_option'}), 400
- 
+
     try:
         supabase.table('questions').update(update).eq('id', q_id).execute()
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
- 
-# ── DELETE A QUESTION ─────────────────────────────────────────────────
+
+
 @app.route('/admin/questions/delete/<int:q_id>', methods=['POST'])
 @admin_required
 def admin_delete_question(q_id):
@@ -1406,9 +1365,8 @@ def admin_delete_question(q_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
- 
-# ── APPROVE ALL PENDING FOR A NOTE ───────────────────────────────────
+
+
 @app.route('/admin/questions/approve-all/<int:note_id>', methods=['POST'])
 @admin_required
 def admin_approve_all(note_id):
@@ -1422,9 +1380,8 @@ def admin_approve_all(note_id):
     except Exception as e:
         flash(f"Error: {str(e)}", 'error')
     return redirect(url_for('admin_questions_review'))
- 
- 
-# ── DELETE ALL QUESTIONS FOR A NOTE (to regenerate) ──────────────────
+
+
 @app.route('/admin/questions/delete-all/<int:note_id>', methods=['POST'])
 @admin_required
 def admin_delete_all_questions(note_id):
@@ -1436,14 +1393,14 @@ def admin_delete_all_questions(note_id):
         flash(f"Error: {str(e)}", 'error')
     return redirect(url_for('admin_questions_review'))
 
-# ── QUIZ SETUP PAGE ───────────────────────────────────────────────────
+
+# ── QUIZ SETUP ────────────────────────────────────────────────────────────
 @app.route('/user/quiz/setup', methods=['GET'])
 @student_required
 def quiz_setup():
     dept  = session.get('student_dept', '')
     level = session.get('student_level', '')
- 
-    # distinct semesters and academic years available for this dept/level
+
     try:
         sem_res = supabase.table('questions') \
             .select('semester') \
@@ -1454,7 +1411,7 @@ def quiz_setup():
         semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
     except Exception:
         semesters = []
- 
+
     try:
         yr_res = supabase.table('questions') \
             .select('academic_year') \
@@ -1468,7 +1425,7 @@ def quiz_setup():
         )
     except Exception:
         academic_years = []
- 
+
     try:
         cc_res = supabase.table('questions') \
             .select('course_code') \
@@ -1479,51 +1436,48 @@ def quiz_setup():
         course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
     except Exception:
         course_codes = []
- 
+
     return render_template(
         'quiz_setup.html',
-        student_name  = session.get('student_name', ''),
-        student_dept  = dept,
-        student_level = level,
-        semesters     = semesters,
-        academic_years= academic_years,
-        course_codes  = course_codes,
+        student_name   = session.get('student_name', ''),
+        student_dept   = dept,
+        student_level  = level,
+        semesters      = semesters,
+        academic_years = academic_years,
+        course_codes   = course_codes,
     )
- 
- 
-# ── AJAX: COUNT AVAILABLE QUESTIONS ──────────────────────────────────
+
+
 @app.route('/user/quiz/count', methods=['GET'])
 @student_required
 def quiz_question_count():
-    """Returns how many approved questions match the chosen filters."""
     dept        = session.get('student_dept', '')
     level       = session.get('student_level', '')
     semester    = request.args.get('semester', '').strip()
     acad_year   = request.args.get('academic_year', '').strip()
     course_code = request.args.get('course_code', '').strip().upper()
- 
+
     try:
         q = supabase.table('questions') \
             .select('id', count='exact') \
             .eq('status', 'approved') \
             .eq('department', dept) \
             .eq('level', level)
- 
+
         if semester:
             q = q.eq('semester', semester)
         if acad_year:
             q = q.eq('academic_year', acad_year)
         if course_code:
             q = q.eq('course_code', course_code)
- 
+
         res   = q.execute()
         count = res.count if res.count is not None else 0
         return jsonify({'count': count})
     except Exception as e:
         return jsonify({'count': 0, 'error': str(e)})
- 
- 
-# ── START A QUIZ SESSION ──────────────────────────────────────────────
+
+
 @app.route('/user/quiz/start', methods=['POST'])
 @student_required
 def quiz_start():
@@ -1535,20 +1489,18 @@ def quiz_start():
     course_code = request.form.get('course_code', '').strip().upper()
     time_limit  = request.form.get('time_limit', '').strip()
     mode        = request.form.get('mode', 'exam').strip()
- 
-    # validate
+
     if not semester or not acad_year:
         flash("Please select a semester and academic year.", 'error')
         return redirect(url_for('quiz_setup'))
- 
+
     if mode not in ('exam', 'practice'):
         mode = 'exam'
- 
+
     time_limit_int = None
     if time_limit and time_limit.isdigit():
-        time_limit_int = max(5, min(int(time_limit), 300))  # 5–300 minutes
- 
-    # ── fetch approved questions matching filters ─────────────────────
+        time_limit_int = max(5, min(int(time_limit), 300))
+
     try:
         q = supabase.table('questions') \
             .select('id, correct_option, option_a, option_b, option_c, option_d') \
@@ -1557,16 +1509,16 @@ def quiz_start():
             .eq('level', level) \
             .eq('semester', semester) \
             .eq('academic_year', acad_year)
- 
+
         if course_code:
             q = q.eq('course_code', course_code)
- 
+
         pool_res = q.execute()
         pool     = pool_res.data or []
     except Exception as e:
         flash(f"Could not load questions: {str(e)}", 'error')
         return redirect(url_for('quiz_setup'))
- 
+
     if len(pool) < 10:
         flash(
             f"Not enough approved questions for that selection "
@@ -1575,13 +1527,11 @@ def quiz_start():
             'error'
         )
         return redirect(url_for('quiz_setup'))
- 
-    # ── pick up to 70, shuffle ────────────────────────────────────────
-    total = min(70, len(pool))
+
+    total    = min(70, len(pool))
     selected = _random.sample(pool, total)
     _random.shuffle(selected)
- 
-    # ── create quiz session ───────────────────────────────────────────
+
     try:
         sess_res = supabase.table('quiz_sessions').insert({
             "user_id":            uid,
@@ -1596,59 +1546,52 @@ def quiz_start():
             "status":             "in_progress",
             "started_at":         "now()"
         }).execute()
- 
+
         session_id = sess_res.data[0]['id']
     except Exception as e:
         flash(f"Could not create quiz session: {str(e)}", 'error')
         return redirect(url_for('quiz_setup'))
- 
-    # ── assign shuffled questions to session ──────────────────────────
-    options_order = ['a', 'b', 'c', 'd']
+
+    options_order     = ['a', 'b', 'c', 'd']
     session_questions = []
- 
+
     for pos, q in enumerate(selected, start=1):
-        # shuffle the display order of the 4 options for this student
         shuffled = options_order.copy()
         _random.shuffle(shuffled)
- 
-        # map display letter → actual option column
+
         shuffled_map = {
             'a': shuffled[0],
             'b': shuffled[1],
             'c': shuffled[2],
             'd': shuffled[3],
         }
- 
+
         session_questions.append({
-            "session_id":      session_id,
-            "question_id":     q['id'],
-            "position":        pos,
+            "session_id":       session_id,
+            "question_id":      q['id'],
+            "position":         pos,
             "shuffled_options": json.dumps(shuffled_map)
         })
- 
+
     try:
-        # insert in batches
         for i in range(0, len(session_questions), 25):
             supabase.table('quiz_session_questions') \
                 .insert(session_questions[i:i+25]).execute()
     except Exception as e:
-        # clean up orphan session
         supabase.table('quiz_sessions').delete().eq('id', session_id).execute()
         flash(f"Could not assign questions: {str(e)}", 'error')
         return redirect(url_for('quiz_setup'))
- 
+
     return redirect(url_for('quiz_session', session_id=session_id))
- 
- 
-# ── QUIZ SESSION PAGE ─────────────────────────────────────────────────
+
+
 @app.route('/user/quiz/session/<int:session_id>', methods=['GET'])
 @student_required
 def quiz_session(session_id):
     uid = session.get('student_id')
- 
-    # fetch session and verify ownership
+
     try:
-        sess_res = supabase.table('quiz_sessions') \
+        sess_res  = supabase.table('quiz_sessions') \
             .select('*').eq('id', session_id).eq('user_id', uid).single().execute()
         quiz_sess = sess_res.data
         if not quiz_sess:
@@ -1657,14 +1600,12 @@ def quiz_session(session_id):
     except Exception as e:
         flash(f"Could not load session: {str(e)}", 'error')
         return redirect(url_for('user_dashboard'))
- 
-    # redirect if already completed
+
     if quiz_sess['status'] == 'completed':
         return redirect(url_for('quiz_results', session_id=session_id))
- 
-    # fetch this session's questions with full question data
+
     try:
-        sq_res = supabase.table('quiz_session_questions') \
+        sq_res  = supabase.table('quiz_session_questions') \
             .select(
                 'position, question_id, shuffled_options, '
                 'questions(question_text, option_a, option_b, option_c, option_d, difficulty, course_code)'
@@ -1675,8 +1616,7 @@ def quiz_session(session_id):
     except Exception as e:
         flash(f"Could not load questions: {str(e)}", 'error')
         return redirect(url_for('user_dashboard'))
- 
-    # fetch existing answers so student can resume
+
     try:
         ans_res = supabase.table('quiz_attempts') \
             .select('question_id, selected_option') \
@@ -1684,63 +1624,57 @@ def quiz_session(session_id):
         answers = {r['question_id']: r['selected_option'] for r in (ans_res.data or [])}
     except Exception:
         answers = {}
- 
-    # build question list for template
+
     questions = []
     for sq in sq_list:
-        q      = sq.get('questions', {})
-        s_map  = json.loads(sq['shuffled_options'])  # {'a': 'option_c', ...}
-        q_id   = sq['question_id']
- 
-        # resolve display text for each shuffled option
+        q     = sq.get('questions', {})
+        s_map = json.loads(sq['shuffled_options'])
+        q_id  = sq['question_id']
+
         opt_texts = {
             display_ltr: q.get(f'option_{real_col}', '')
             for display_ltr, real_col in s_map.items()
         }
- 
-        # what did the student pick (in display letters)?
+
         selected = answers.get(q_id)
- 
+
         questions.append({
-            'position':        sq['position'],
-            'question_id':     q_id,
-            'question_text':   q.get('question_text', ''),
-            'options':         opt_texts,          # {'a': 'text', 'b': 'text', ...}
-            'shuffled_map':    s_map,              # {'a': 'option_c', ...}
-            'selected':        selected,
-            'difficulty':      q.get('difficulty', ''),
-            'course_code':     q.get('course_code', ''),
+            'position':      sq['position'],
+            'question_id':   q_id,
+            'question_text': q.get('question_text', ''),
+            'options':       opt_texts,
+            'shuffled_map':  s_map,
+            'selected':      selected,
+            'difficulty':    q.get('difficulty', ''),
+            'course_code':   q.get('course_code', ''),
         })
- 
+
     return render_template(
         'quiz_session.html',
-        quiz_sess    = quiz_sess,
-        questions    = questions,
-        answers      = answers,
-        total        = len(questions),
+        quiz_sess      = quiz_sess,
+        questions      = questions,
+        answers        = answers,
+        total          = len(questions),
         answered_count = len(answers),
-        student_name = session.get('student_name', ''),
+        student_name   = session.get('student_name', ''),
     )
- 
- 
-# ── AJAX: SAVE SINGLE ANSWER ──────────────────────────────────────────
+
+
 @app.route('/user/quiz/answer', methods=['POST'])
 @student_required
 def quiz_save_answer():
-    """Called every time the student selects an option. Upserts the answer."""
     uid         = session.get('student_id')
     data        = request.get_json()
     session_id  = data.get('session_id')
     question_id = data.get('question_id')
     selected    = data.get('selected_option', '').lower()
- 
+
     if not all([session_id, question_id, selected]):
         return jsonify({'success': False, 'error': 'Missing fields'}), 400
- 
+
     if selected not in ('a', 'b', 'c', 'd'):
         return jsonify({'success': False, 'error': 'Invalid option'}), 400
- 
-    # verify session belongs to this student
+
     try:
         owns = supabase.table('quiz_sessions') \
             .select('id, status') \
@@ -1750,24 +1684,20 @@ def quiz_save_answer():
             return jsonify({'success': False, 'error': 'Session not active'}), 403
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
-    # get the shuffled map to find the real correct option
+
     try:
         sq = supabase.table('quiz_session_questions') \
             .select('shuffled_options, questions(correct_option)') \
             .eq('session_id', session_id) \
             .eq('question_id', question_id).single().execute()
- 
-        s_map   = json.loads(sq.data['shuffled_options'])
-        # real column the student selected (e.g. 'option_c')
-        real_col        = s_map.get(selected, '')
-        # actual correct column stored on the question (e.g. 'c')
-        correct_col     = sq.data['questions']['correct_option']
-        is_correct      = (real_col == correct_col)
+
+        s_map       = json.loads(sq.data['shuffled_options'])
+        real_col    = s_map.get(selected, '')
+        correct_col = sq.data['questions']['correct_option']
+        is_correct  = (real_col == correct_col)
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
-    # upsert answer
+
     try:
         supabase.table('quiz_attempts').upsert({
             "session_id":      session_id,
@@ -1776,21 +1706,19 @@ def quiz_save_answer():
             "is_correct":      is_correct,
             "answered_at":     "now()"
         }, on_conflict="session_id,question_id").execute()
- 
+
         return jsonify({'success': True, 'is_correct': is_correct})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
- 
- 
-# ── SUBMIT QUIZ ───────────────────────────────────────────────────────
+
+
 @app.route('/user/quiz/submit/<int:session_id>', methods=['POST'])
 @student_required
 def quiz_submit(session_id):
     uid = session.get('student_id')
- 
-    # verify ownership
+
     try:
-        sess_res = supabase.table('quiz_sessions') \
+        sess_res  = supabase.table('quiz_sessions') \
             .select('*').eq('id', session_id).eq('user_id', uid).single().execute()
         quiz_sess = sess_res.data
         if not quiz_sess or quiz_sess['status'] != 'in_progress':
@@ -1799,38 +1727,35 @@ def quiz_submit(session_id):
     except Exception as e:
         flash(f"Error: {str(e)}", 'error')
         return redirect(url_for('user_dashboard'))
- 
-    # count correct answers
+
     try:
-        ans_res = supabase.table('quiz_attempts') \
+        ans_res  = supabase.table('quiz_attempts') \
             .select('is_correct') \
             .eq('session_id', session_id).execute()
         attempts = ans_res.data or []
     except Exception as e:
         flash(f"Could not fetch answers: {str(e)}", 'error')
         return redirect(url_for('quiz_session', session_id=session_id))
- 
-    total        = quiz_sess['total_questions']
-    score        = sum(1 for a in attempts if a['is_correct'])
-    percentage   = round((score / total) * 100, 2) if total > 0 else 0
-    passed       = percentage >= 50
- 
-    # calculate time taken
+
+    total      = quiz_sess['total_questions']
+    score      = sum(1 for a in attempts if a['is_correct'])
+    percentage = round((score / total) * 100, 2) if total > 0 else 0
+    passed     = percentage >= 50
+
     try:
         from datetime import datetime as _dt, timezone as _tz
-        started  = _dt.fromisoformat(quiz_sess['started_at'].replace('Z', '+00:00'))
-        now_utc  = _dt.now(_tz.utc)
+        started    = _dt.fromisoformat(quiz_sess['started_at'].replace('Z', '+00:00'))
+        now_utc    = _dt.now(_tz.utc)
         time_taken = int((now_utc - started).total_seconds())
     except Exception:
         time_taken = None
- 
-    # mark session complete and save result
+
     try:
         supabase.table('quiz_sessions').update({
             "status":       "completed",
             "submitted_at": "now()"
         }).eq('id', session_id).execute()
- 
+
         supabase.table('quiz_results').insert({
             "session_id":         session_id,
             "user_id":            uid,
@@ -1844,16 +1769,15 @@ def quiz_submit(session_id):
     except Exception as e:
         flash(f"Could not save result: {str(e)}", 'error')
         return redirect(url_for('quiz_session', session_id=session_id))
- 
+
     return redirect(url_for('quiz_results', session_id=session_id))
- 
- 
-# ── RESULTS PAGE (stub — full page built next) ────────────────────────
+
+
 @app.route('/user/quiz/results/<int:session_id>', methods=['GET'])
 @student_required
 def quiz_results(session_id):
     uid = session.get('student_id')
- 
+
     try:
         result_res = supabase.table('quiz_results') \
             .select('*').eq('session_id', session_id).single().execute()
@@ -1864,14 +1788,13 @@ def quiz_results(session_id):
     except Exception as e:
         flash(f"Could not load results: {str(e)}", 'error')
         return redirect(url_for('user_dashboard'))
- 
-    sess_res = supabase.table('quiz_sessions') \
+
+    sess_res  = supabase.table('quiz_sessions') \
         .select('*').eq('id', session_id).single().execute()
     quiz_sess = sess_res.data or {}
- 
-    # fetch all questions with answers for review
+
     try:
-        sq_res = supabase.table('quiz_session_questions') \
+        sq_res  = supabase.table('quiz_session_questions') \
             .select(
                 'position, question_id, shuffled_options, '
                 'questions(question_text, option_a, option_b, option_c, option_d, correct_option, explanation, course_code, difficulty)'
@@ -1881,7 +1804,7 @@ def quiz_results(session_id):
         sq_list = sq_res.data or []
     except Exception:
         sq_list = []
- 
+
     try:
         ans_res = supabase.table('quiz_attempts') \
             .select('question_id, selected_option, is_correct') \
@@ -1889,40 +1812,37 @@ def quiz_results(session_id):
         answers = {r['question_id']: r for r in (ans_res.data or [])}
     except Exception:
         answers = {}
- 
-    # build review list
+
     review = []
     for sq in sq_list:
-        q       = sq.get('questions', {})
-        q_id    = sq['question_id']
-        s_map   = json.loads(sq['shuffled_options'])
-        ans     = answers.get(q_id, {})
-        sel     = ans.get('selected_option')
- 
-        # build display options
+        q     = sq.get('questions', {})
+        q_id  = sq['question_id']
+        s_map = json.loads(sq['shuffled_options'])
+        ans   = answers.get(q_id, {})
+        sel   = ans.get('selected_option')
+
         opt_texts = {
             d_ltr: q.get(f'option_{real_col}', '')
             for d_ltr, real_col in s_map.items()
         }
- 
-        # find which display letter maps to the correct option
-        correct_real = q.get('correct_option', '')
+
+        correct_real    = q.get('correct_option', '')
         correct_display = next(
             (d for d, real in s_map.items() if real == correct_real), None
         )
- 
+
         review.append({
-            'position':       sq['position'],
-            'question_text':  q.get('question_text', ''),
-            'options':        opt_texts,
-            'selected':       sel,
-            'correct':        correct_display,
-            'is_correct':     ans.get('is_correct', False),
-            'explanation':    q.get('explanation', ''),
-            'course_code':    q.get('course_code', ''),
-            'difficulty':     q.get('difficulty', ''),
+            'position':      sq['position'],
+            'question_text': q.get('question_text', ''),
+            'options':       opt_texts,
+            'selected':      sel,
+            'correct':       correct_display,
+            'is_correct':    ans.get('is_correct', False),
+            'explanation':   q.get('explanation', ''),
+            'course_code':   q.get('course_code', ''),
+            'difficulty':    q.get('difficulty', ''),
         })
- 
+
     return render_template(
         'quiz_results.html',
         result       = result,
@@ -1930,14 +1850,13 @@ def quiz_results(session_id):
         review       = review,
         student_name = session.get('student_name', ''),
     )
- 
- 
-# ── QUIZ HISTORY ──────────────────────────────────────────────────────
+
+
 @app.route('/user/quiz/history', methods=['GET'])
 @student_required
 def quiz_history():
     uid = session.get('student_id')
- 
+
     try:
         hist_res = supabase.table('quiz_results') \
             .select('*, quiz_sessions(course_code, semester, academic_year, mode, total_questions)') \
@@ -1946,13 +1865,13 @@ def quiz_history():
         history = hist_res.data or []
     except Exception:
         history = []
- 
+
     return render_template(
         'quiz_history.html',
         history      = history,
         student_name = session.get('student_name', ''),
     )
- 
+
 
 if __name__ == '__main__':
     app.run(debug=True)
