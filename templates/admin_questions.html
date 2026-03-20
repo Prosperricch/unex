@@ -7,16 +7,14 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     :root {
-      --primary:           #f97316;
-      --primary-dk:        #ea580c;
-      --dark:              #111827;
-      --gray:              #6b7280;
-      --light:             #f9fafb;
-      --sidebar-bg:        #1f2937;
-      --sidebar-width:     260px;
-      --sidebar-collapsed: 80px;
-
-      /* status colours */
+      --primary:    #f97316;
+      --primary-dk: #ea580c;
+      --dark:       #111827;
+      --gray:       #6b7280;
+      --light:      #f9fafb;
+      --sidebar-bg: #1f2937;
+      --sidebar-w:  260px;
+      --sidebar-c:  80px;
       --green:      #22c55e;
       --green-bg:   #f0fdf4;
       --green-bd:   #bbf7d0;
@@ -31,7 +29,7 @@
       --blue-bd:    #bfdbfe;
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -41,92 +39,197 @@
       display: flex;
     }
 
-    /* ═══ SIDEBAR ═══ */
+    a { text-decoration: none; color: inherit; }
+
+    /* ── SIDEBAR ── */
     .sidebar {
-      width: var(--sidebar-width);
+      width: var(--sidebar-w);
       background: var(--sidebar-bg);
       color: white;
       height: 100vh;
       position: fixed;
       overflow-y: auto;
-      transition: width 0.3s ease;
+      transition: width .3s;
       z-index: 100;
     }
-    .sidebar.collapsed { width: var(--sidebar-collapsed); }
-
     .sidebar-header {
       padding: 24px 20px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--primary); text-align: center;
     }
-
     .nav-list { padding: 20px 0; }
-
     .nav-item {
       display: flex; align-items: center;
       padding: 14px 24px;
-      color: #d1d5db;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: all 0.2s;
+      color: #d1d5db; font-size: 1rem;
+      transition: all .2s;
     }
-    .nav-item:hover,
-    .nav-item.active {
-      background: rgba(255,255,255,0.08);
-      color: white;
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,0.08); color: white;
     }
     .nav-item .material-icons {
-      margin-right: 16px;
-      font-size: 1.4rem;
-      min-width: 24px;
-      text-align: center;
+      margin-right: 16px; font-size: 1.4rem;
+      min-width: 24px; text-align: center;
     }
 
-    /* ═══ MAIN ═══ */
+    /* ── MAIN ── */
     .main-content {
       flex: 1;
-      margin-left: var(--sidebar-width);
-      transition: margin-left 0.3s ease;
-      padding: 40px 5vw;
-    }
-    .main-content.collapsed { margin-left: var(--sidebar-collapsed); }
-
-    /* page title row */
-    .page-header {
-      margin-bottom: 28px;
-    }
-    .page-header h1 {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 4px;
-    }
-    .page-header p {
-      font-size: 0.95rem;
-      color: var(--gray);
+      margin-left: var(--sidebar-w);
+      padding: 36px 4vw 80px;
+      transition: margin-left .3s;
     }
 
-    /* ═══ TWO-COL LAYOUT ═══ */
-    .layout {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 4px; }
+    .page-header p  { font-size: .95rem; color: var(--gray); }
 
-    /* ─── NOTES PANEL ─── */
-    .notes-panel {
+    /* ── CREATE FORM CARD ── */
+    .create-card {
       background: white;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+
+    .cc-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+      cursor: pointer; user-select: none;
+    }
+    .cc-head-ico {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cc-head-ico .material-icons { color: var(--primary); font-size: 1.1rem; }
+    .cc-head-title { font-size: 1rem; font-weight: 700; flex: 1; }
+    .cc-head-sub   { font-size: .82rem; color: var(--gray); margin-top: 1px; }
+    .cc-toggle .material-icons { color: var(--gray); font-size: 1.2rem; transition: transform .2s; }
+    .cc-toggle.open .material-icons { transform: rotate(180deg); }
+
+    .create-form { display: none; }
+    .create-form.open { display: block; }
+
+    /* form grid */
+    .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .fg.three { grid-template-columns: 1fr 1fr 1fr; }
+    .fg.four  { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .fg.single { grid-template-columns: 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: #9ca3af;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      padding: 9px 12px;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 9px;
+      font-family: system-ui, sans-serif;
+      font-size: .88rem; color: var(--dark);
+      outline: none;
+      -webkit-appearance: none; appearance: none;
+      transition: border-color .2s, background .2s;
+    }
+    .field select {
+      cursor: pointer; padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center;
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--primary);
+      background: #fff7ed;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: #c4c9d4; }
+
+    /* correct option picker */
+    .correct-row {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .correct-opt {
+      flex: 1; min-width: 60px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 8px; border-radius: 9px;
+      border: 1.5px solid #e5e7eb;
+      cursor: pointer; background: #f9fafb;
+      transition: all .15s;
+    }
+    .correct-opt input[type="radio"] { display: none; }
+    .correct-opt .co-ltr {
+      font-size: .9rem; font-weight: 800;
+      color: var(--gray);
+    }
+    .correct-opt .co-txt {
+      font-size: .72rem; color: var(--gray);
+      text-align: center; line-height: 1.3;
+      max-width: 120px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+      width: 100%;
+    }
+    .correct-opt.selected {
+      border-color: var(--green);
+      background: var(--green-bg);
+    }
+    .correct-opt.selected .co-ltr { color: #166534; }
+    .correct-opt.selected .co-txt { color: #166534; }
+
+    /* form divider */
+    .form-divider {
+      height: 1px; background: #f3f4f6;
+      margin: 18px 0;
+    }
+
+    .form-foot {
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px; border-radius: 9px;
+      font-size: .88rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-primary {
+      background: var(--primary); color: white;
+    }
+    .btn-primary:hover { background: var(--primary-dk); }
+    .btn-secondary {
+      background: #f3f4f6; color: var(--gray);
+      border: 1px solid #e5e7eb;
+    }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn .material-icons { font-size: 1rem; }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px; align-items: start;
+    }
+
+    /* ── NOTES PANEL ── */
+    .notes-panel {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
       overflow: hidden;
-      position: sticky;
-      top: 24px;
+      position: sticky; top: 24px;
       max-height: calc(100vh - 80px);
       overflow-y: auto;
     }
@@ -135,42 +238,33 @@
 
     .np-head {
       position: sticky; top: 0;
-      padding: 16px 18px;
-      background: white;
-      border-bottom: 1px solid #f3f4f6;
+      padding: 14px 16px;
+      background: white; border-bottom: 1px solid #f3f4f6;
       display: flex; align-items: center; justify-content: space-between;
-      z-index: 1;
     }
-    .np-head-title {
-      font-size: 0.9rem; font-weight: 700; color: var(--dark);
-    }
+    .np-head-title { font-size: .88rem; font-weight: 700; }
     .np-count {
-      font-size: 0.72rem; font-weight: 600;
+      font-size: .72rem; font-weight: 600;
       background: #f3f4f6; color: var(--gray);
       padding: 2px 8px; border-radius: 100px;
     }
 
     .note-row {
-      padding: 14px 18px;
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.15s;
+      padding: 12px 16px; border-bottom: 1px solid #f3f4f6;
+      transition: background .15s;
     }
     .note-row:last-child { border-bottom: none; }
     .note-row:hover { background: #fafafa; }
 
     .nr-top {
       display: flex; align-items: center;
-      justify-content: space-between; gap: 8px;
-      margin-bottom: 4px;
+      justify-content: space-between; gap: 6px; margin-bottom: 4px;
     }
-    .nr-code {
-      font-size: 0.88rem; font-weight: 700; color: var(--dark);
-    }
+    .nr-code { font-size: .88rem; font-weight: 700; }
 
-    /* gen status badge */
     .gbadge {
-      font-size: 0.62rem; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase;
+      font-size: .62rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
       padding: 2px 8px; border-radius: 100px;
       border: 1px solid; white-space: nowrap; flex-shrink: 0;
     }
@@ -180,86 +274,66 @@
     .gb-pending { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
     .gb-none    { background: #f9fafb;          border-color: #e5e7eb;          color: var(--gray); }
 
-    .nr-meta {
-      font-size: 0.73rem; color: var(--gray);
-      margin-bottom: 10px; line-height: 1.4;
-    }
+    .nr-meta { font-size: .73rem; color: var(--gray); margin-bottom: 8px; line-height: 1.4; }
 
-    .nr-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nr-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 
     .nra-btn {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 5px 10px; border-radius: 7px;
-      font-size: 0.72rem; font-weight: 600;
+      font-size: .72rem; font-weight: 600;
       border: 1px solid; cursor: pointer; background: none;
-      transition: all 0.15s;
+      transition: all .15s;
     }
-    .nra-btn .material-icons { font-size: 0.78rem; }
-
-    .nra-gen {
-      background: #fff7ed; border-color: #fed7aa; color: #c2410c;
-    }
+    .nra-btn .material-icons { font-size: .78rem; }
+    .nra-gen     { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
     .nra-gen:hover { background: #ffedd5; }
-
-    .nra-approve {
-      background: var(--green-bg); border-color: var(--green-bd); color: #166534;
-    }
+    .nra-approve { background: var(--green-bg); border-color: var(--green-bd); color: #166534; }
     .nra-approve:hover { background: #dcfce7; }
-
-    .nra-del {
-      background: var(--red-bg); border-color: var(--red-bd); color: #991b1b;
-    }
+    .nra-del     { background: var(--red-bg);   border-color: var(--red-bd);   color: #991b1b; }
     .nra-del:hover { background: #fee2e2; }
 
-    /* ─── QUESTIONS PANEL ─── */
+    /* ── QUESTIONS PANEL ── */
     .q-panel { min-width: 0; }
 
-    /* controls card */
     .q-controls {
       background: white;
-      border-radius: 16px;
+      border-radius: 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-      padding: 16px 18px;
-      margin-bottom: 20px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
     }
 
-    .q-filters {
-      margin-bottom: 14px;
-    }
+    .q-filters { margin-bottom: 12px; }
     .q-filters form {
       display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
     }
 
     .f-select, .f-input {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 7px 11px;
+      background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 8px; padding: 7px 10px;
       font-family: system-ui, sans-serif;
-      font-size: 0.82rem; color: var(--dark);
-      outline: none;
-      -webkit-appearance: none; appearance: none;
-      transition: border-color 0.2s;
+      font-size: .82rem; color: var(--dark);
+      outline: none; -webkit-appearance: none; appearance: none;
+      transition: border-color .2s;
     }
     .f-select {
-      cursor: pointer; padding-right: 28px;
+      cursor: pointer; padding-right: 26px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 9px center;
+      background-repeat: no-repeat; background-position: right 8px center;
     }
-    .f-input { flex: 1; min-width: 160px; }
+    .f-input { flex: 1; min-width: 140px; }
     .f-input::placeholder { color: #9ca3af; }
-    .f-select:focus, .f-input:focus { border-color: var(--primary); outline: none; }
+    .f-select:focus, .f-input:focus { border-color: var(--primary); }
 
     .f-btn {
       padding: 7px 18px; border-radius: 8px;
-      font-size: 0.82rem; font-weight: 600;
+      font-size: .82rem; font-weight: 600;
       background: var(--primary); color: white;
-      border: none; cursor: pointer;
-      transition: background 0.2s;
+      border: none; cursor: pointer; transition: background .2s;
     }
     .f-btn:hover { background: var(--primary-dk); }
 
-    /* status tabs */
     .status-tabs {
       display: flex; gap: 4px;
       overflow-x: auto; scrollbar-width: none;
@@ -269,19 +343,15 @@
     .stab {
       display: flex; align-items: center; gap: 6px;
       padding: 7px 14px; border-radius: 8px;
-      font-size: 0.8rem; font-weight: 600;
+      font-size: .8rem; font-weight: 600;
       color: var(--gray); white-space: nowrap;
       border: 1px solid transparent;
-      transition: all 0.15s;
-      text-decoration: none;
+      transition: all .15s; text-decoration: none;
     }
     .stab:hover { background: #f3f4f6; color: var(--dark); }
-    .stab.active {
-      background: #f3f4f6; color: var(--dark);
-      border-color: #e5e7eb;
-    }
+    .stab.active { background: #f3f4f6; color: var(--dark); border-color: #e5e7eb; }
     .stab-n {
-      font-size: 0.68rem; font-weight: 700;
+      font-size: .68rem; font-weight: 700;
       padding: 1px 6px; border-radius: 100px;
     }
     .s-pending  .stab-n { background: var(--yellow-bg); color: #854d0e; }
@@ -289,15 +359,15 @@
     .s-flagged  .stab-n { background: var(--red-bg);    color: #991b1b; }
     .s-all      .stab-n { background: #f3f4f6;          color: var(--gray); }
 
-    /* question card */
+    /* ── QUESTION CARD ── */
     .qcard {
       background: white;
-      border-radius: 14px;
+      border-radius: 13px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       padding: 20px 22px;
       margin-bottom: 12px;
       border-left: 4px solid #e5e7eb;
-      transition: box-shadow 0.2s;
+      transition: box-shadow .2s;
     }
     .qcard:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
     .qcard.st-approved { border-left-color: var(--green); }
@@ -306,15 +376,12 @@
 
     .qc-head {
       display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 12px;
-      margin-bottom: 12px;
+      justify-content: space-between; gap: 12px; margin-bottom: 10px;
     }
-
     .qc-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
     .qpill {
-      font-size: 0.64rem; font-weight: 700;
-      letter-spacing: 0.07em; text-transform: uppercase;
+      font-size: .64rem; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
       padding: 2px 8px; border-radius: 100px; border: 1px solid;
     }
     .qp-course { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
@@ -323,73 +390,81 @@
     .qp-hard   { background: var(--red-bg);    border-color: var(--red-bd);    color: #991b1b; }
     .qp-meta   { background: #f9fafb;          border-color: #e5e7eb;          color: var(--gray); }
 
-    .qc-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
+    .qc-actions { display: flex; gap: 5px; flex-shrink: 0; }
     .qa {
       width: 30px; height: 30px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       border: 1px solid #e5e7eb; background: #f9fafb;
-      cursor: pointer; color: var(--gray);
-      transition: all 0.15s;
+      cursor: pointer; color: var(--gray); transition: all .15s;
     }
-    .qa .material-icons { font-size: 0.95rem; }
-
-    .qa.a-approve:hover,
-    .qa.a-approve.on  { background: var(--green-bg);  border-color: var(--green-bd);  color: #166534; }
-    .qa.a-flag:hover,
-    .qa.a-flag.on     { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
-    .qa.a-del:hover   { background: var(--red-bg);    border-color: var(--red-bd);    color: #991b1b; }
+    .qa .material-icons { font-size: .95rem; }
+    .qa.a-approve:hover, .qa.a-approve.on { background: var(--green-bg); border-color: var(--green-bd); color: #166534; }
+    .qa.a-flag:hover,    .qa.a-flag.on    { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
+    .qa.a-edit:hover                       { background: var(--blue-bg);  border-color: var(--blue-bd);  color: #1e40af; }
+    .qa.a-del:hover                        { background: var(--red-bg);   border-color: var(--red-bd);   color: #991b1b; }
 
     .qc-question {
-      font-size: 0.92rem; font-weight: 500;
-      line-height: 1.6; color: var(--dark);
-      margin-bottom: 14px;
+      font-size: .92rem; font-weight: 500;
+      line-height: 1.6; color: var(--dark); margin-bottom: 12px;
     }
 
-    .qc-options {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 6px; margin-bottom: 12px;
-    }
-
+    .qc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
     .qopt {
       display: flex; align-items: flex-start; gap: 8px;
-      padding: 8px 11px; border-radius: 8px;
+      padding: 7px 10px; border-radius: 8px;
       background: #f9fafb; border: 1px solid #f3f4f6;
-      font-size: 0.82rem; line-height: 1.4; color: var(--gray);
+      font-size: .82rem; line-height: 1.4; color: var(--gray);
     }
-    .qopt.correct {
-      background: var(--green-bg);
-      border-color: var(--green-bd); color: var(--dark);
-    }
-    .qopt-ltr {
-      font-size: 0.7rem; font-weight: 800;
-      flex-shrink: 0; margin-top: 1px; min-width: 14px;
-      color: var(--gray);
-    }
+    .qopt.correct { background: var(--green-bg); border-color: var(--green-bd); color: var(--dark); }
+    .qopt-ltr { font-size: .7rem; font-weight: 800; flex-shrink: 0; margin-top: 1px; min-width: 14px; color: var(--gray); }
     .qopt.correct .qopt-ltr { color: #166534; }
 
     .qc-expl {
-      font-size: 0.8rem; color: var(--gray);
-      background: #f9fafb;
-      border: 1px solid #f3f4f6;
-      border-radius: 8px; padding: 10px 12px;
-      line-height: 1.55;
+      font-size: .8rem; color: var(--gray);
+      background: #f9fafb; border: 1px solid #f3f4f6;
+      border-radius: 8px; padding: 9px 12px; line-height: 1.55;
     }
     .qc-expl strong { color: var(--primary); font-weight: 600; }
 
-    /* empty state */
+    /* ── EDIT MODAL ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.open { display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+    .modal {
+      background: white; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      padding: 28px 30px;
+      width: 100%; max-width: 680px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .modal-title { font-size: 1rem; font-weight: 700; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #f3f4f6; border: 1px solid #e5e7eb;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--gray); transition: background .15s;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+    .modal-close .material-icons { font-size: 1rem; }
+
+    /* empty */
     .empty {
-      background: white;
-      border-radius: 16px;
+      background: white; border-radius: 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-      padding: 60px 24px;
-      text-align: center;
+      padding: 52px 24px; text-align: center;
     }
     .empty .material-icons { font-size: 2.8rem; color: #d1d5db; margin-bottom: 12px; display: block; }
-    .empty h3 { font-size: 1rem; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
-    .empty p  { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
+    .empty h3 { font-size: 1rem; font-weight: 600; margin-bottom: 5px; }
+    .empty p  { font-size: .85rem; color: var(--gray); line-height: 1.6; }
 
-    /* ═══ TOASTS — top right ═══ */
+    /* ── TOASTS ── */
     .tw {
       position: fixed; top: 20px; right: 24px; z-index: 9999;
       display: flex; flex-direction: column; gap: 9px;
@@ -425,20 +500,18 @@
     .toast.ti .t-p { background:var(--primary); }
     @keyframes tp { from{width:100%} to{width:0} }
 
-    /* ═══ RESPONSIVE ═══ */
+    /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
       .layout { grid-template-columns: 1fr; }
       .notes-panel { position: static; max-height: none; }
     }
-
     @media (max-width: 768px) {
-      .sidebar { width: var(--sidebar-collapsed); }
-      .main-content { margin-left: var(--sidebar-collapsed); padding: 24px 4vw; }
+      .sidebar { width: var(--sidebar-c); }
+      .main-content { margin-left: var(--sidebar-c); padding: 20px 4vw; }
       .nav-item span:not(.material-icons) { display: none; }
       .sidebar-header { font-size: 1.1rem; padding: 16px; }
-      .qc-options { grid-template-columns: 1fr; }
-      .q-filters form { flex-direction: column; align-items: stretch; }
-      .f-input { min-width: unset; }
+      .qc-options, .fg, .fg.three, .fg.four { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
     }
   </style>
 </head>
@@ -448,48 +521,177 @@
        data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
        style="display:none"></div>
 
-  <!-- ═══ SIDEBAR ═══ -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">U-NEX Admin</div>
     <nav class="nav-list">
       <a href="{{ url_for('admin_dashboard_page') }}" class="nav-item">
-        <span class="material-icons">dashboard</span>
-        <span>Dashboard</span>
+        <span class="material-icons">dashboard</span><span>Dashboard</span>
       </a>
       <a href="{{ url_for('add_notes') }}" class="nav-item">
-        <span class="material-icons">upload_file</span>
-        <span>Add Notes</span>
+        <span class="material-icons">upload_file</span><span>Add Notes</span>
       </a>
       <a href="{{ url_for('edit_notes') }}" class="nav-item">
-        <span class="material-icons">edit</span>
-        <span>Edit Notes</span>
+        <span class="material-icons">edit</span><span>Edit Notes</span>
       </a>
       <a href="{{ url_for('register_code') }}" class="nav-item">
-        <span class="material-icons">school</span>
-        <span>Course Codes</span>
+        <span class="material-icons">school</span><span>Course Codes</span>
       </a>
       <a href="{{ url_for('admin_questions_review') }}" class="nav-item active">
-        <span class="material-icons">quiz</span>
-        <span>Question Bank</span>
+        <span class="material-icons">quiz</span><span>Question Bank</span>
       </a>
       <a href="{{ url_for('admin_logout') }}" class="nav-item">
-        <span class="material-icons">logout</span>
-        <span>Logout</span>
+        <span class="material-icons">logout</span><span>Logout</span>
       </a>
     </nav>
   </aside>
 
-  <!-- ═══ MAIN ═══ -->
+  <!-- MAIN -->
   <main class="main-content">
 
     <div class="page-header">
       <h1>Question Bank</h1>
-      <p>Generate questions from uploaded notes, review them, and approve before students see them.</p>
+      <p>Create questions manually, review them, and manage the full question pool.</p>
     </div>
 
+    <!-- ══ CREATE QUESTION CARD ══ -->
+    <div class="create-card">
+      <div class="cc-head" onclick="toggleForm()">
+        <div class="cc-head-ico"><span class="material-icons">add_circle</span></div>
+        <div>
+          <div class="cc-head-title">Add New Question</div>
+          <div class="cc-head-sub">Create a question manually — it goes straight to Approved.</div>
+        </div>
+        <div class="cc-toggle" id="ccToggle">
+          <span class="material-icons">expand_more</span>
+        </div>
+      </div>
+
+      <div class="create-form" id="createForm">
+        <form method="POST" action="{{ url_for('admin_create_question') }}" id="qForm">
+
+          <!-- metadata row -->
+          <div class="fg four">
+            <div class="field">
+              <label>Course Code *</label>
+              <select name="course_code" required>
+                <option value="" disabled selected>Select</option>
+                {% for cc in all_course_codes %}
+                <option value="{{ cc }}">{{ cc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label>Department *</label>
+              <select name="department" required>
+                <option value="" disabled selected>Select</option>
+                {% for d in all_departments %}
+                <option value="{{ d }}">{{ d | title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label>Level *</label>
+              <select name="level" required>
+                <option value="" disabled selected>Level</option>
+                <option>100</option><option>200</option>
+                <option>300</option><option>400</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Difficulty</label>
+              <select name="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fg">
+            <div class="field">
+              <label>Semester *</label>
+              <select name="semester" required>
+                <option value="" disabled selected>Select</option>
+                <option>1st Semester</option>
+                <option>2nd Semester</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Academic Year *</label>
+              <input type="text" name="academic_year" placeholder="e.g. 2024/2025" required>
+            </div>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <!-- question text -->
+          <div class="field" style="margin-bottom:14px">
+            <label>Question *</label>
+            <textarea name="question_text" id="qText" placeholder="Type the question here…" required></textarea>
+          </div>
+
+          <!-- options -->
+          <div class="fg" style="margin-bottom:14px">
+            <div class="field">
+              <label>Option A *</label>
+              <input type="text" name="option_a" id="opt_a" placeholder="Option A" required
+                     oninput="updateCorrectLabel('a', this.value)">
+            </div>
+            <div class="field">
+              <label>Option B *</label>
+              <input type="text" name="option_b" id="opt_b" placeholder="Option B" required
+                     oninput="updateCorrectLabel('b', this.value)">
+            </div>
+            <div class="field">
+              <label>Option C *</label>
+              <input type="text" name="option_c" id="opt_c" placeholder="Option C" required
+                     oninput="updateCorrectLabel('c', this.value)">
+            </div>
+            <div class="field">
+              <label>Option D *</label>
+              <input type="text" name="option_d" id="opt_d" placeholder="Option D" required
+                     oninput="updateCorrectLabel('d', this.value)">
+            </div>
+          </div>
+
+          <!-- correct picker -->
+          <div class="field" style="margin-bottom:14px">
+            <label>Which option is correct? *</label>
+            <div class="correct-row" id="correctRow">
+              {% for ltr in ['a','b','c','d'] %}
+              <label class="correct-opt" id="co_{{ ltr }}" onclick="selectCorrect('{{ ltr }}')">
+                <input type="radio" name="correct_option" value="{{ ltr }}" required>
+                <span class="co-ltr">{{ ltr | upper }}</span>
+                <span class="co-txt" id="co_txt_{{ ltr }}">Option {{ ltr | upper }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- explanation -->
+          <div class="field" style="margin-bottom:18px">
+            <label>Explanation (optional but recommended)</label>
+            <textarea name="explanation" placeholder="Why is this the correct answer?"></textarea>
+          </div>
+
+          <div class="form-foot">
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+              <span class="material-icons">clear</span> Clear
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span class="material-icons">save</span> Save Question
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ REVIEW LAYOUT ══ -->
     <div class="layout">
 
-      <!-- ── NOTES LIST ── -->
+      <!-- NOTES PANEL -->
       <div class="notes-panel">
         <div class="np-head">
           <span class="np-head-title">Uploaded Notes</span>
@@ -508,36 +710,20 @@
             {% else                    %}<span class="gbadge gb-none">No questions</span>
             {% endif %}
           </div>
-
           <div class="nr-meta">
             {{ note.department | title }} · L{{ note.level }}<br>
             {{ note.semester }} · {{ note.academic_year }}
           </div>
-
           <div class="nr-actions">
-            <form method="POST"
-                  action="{{ url_for('admin_generate_questions', note_id=note.id) }}"
-                  style="display:inline"
-                  onsubmit="return confirmGen('{{ note.course_code }}', '{{ gs }}')">
-              <button type="submit" class="nra-btn nra-gen">
-                <span class="material-icons">auto_awesome</span>
-                {% if gs == 'done' %}Regen{% else %}Generate{% endif %}
-              </button>
-            </form>
-
             {% if gs == 'done' and note.gen_count > 0 %}
-            <form method="POST"
-                  action="{{ url_for('admin_approve_all', note_id=note.id) }}"
-                  style="display:inline">
+            <form method="POST" action="{{ url_for('admin_approve_all', note_id=note.id) }}" style="display:inline">
               <button type="submit" class="nra-btn nra-approve">
                 <span class="material-icons">done_all</span> Approve All
               </button>
             </form>
-
-            <form method="POST"
-                  action="{{ url_for('admin_delete_all_questions', note_id=note.id) }}"
+            <form method="POST" action="{{ url_for('admin_delete_all_questions', note_id=note.id) }}"
                   style="display:inline"
-                  onsubmit="return confirm('Delete ALL questions for {{ note.course_code }}? Cannot be undone.')">
+                  onsubmit="return confirm('Delete ALL questions for {{ note.course_code }}?')">
               <button type="submit" class="nra-btn nra-del">
                 <span class="material-icons">delete_sweep</span>
               </button>
@@ -546,18 +732,17 @@
           </div>
         </div>
         {% else %}
-        <div style="padding:28px 18px;text-align:center;color:var(--gray);font-size:.85rem;">
-          No notes uploaded yet.<br>
+        <div style="padding:24px;text-align:center;color:var(--gray);font-size:.85rem;">
+          No notes uploaded yet.
           <a href="{{ url_for('add_notes') }}" style="color:var(--primary);font-weight:600;">Upload notes →</a>
         </div>
         {% endfor %}
       </div>
 
-      <!-- ── QUESTIONS ── -->
+      <!-- QUESTIONS PANEL -->
       <div class="q-panel">
 
         <div class="q-controls">
-          <!-- filters -->
           <div class="q-filters">
             <form method="GET" action="{{ url_for('admin_questions_review') }}">
               <input type="hidden" name="status" value="{{ filters.status }}">
@@ -569,44 +754,40 @@
               </select>
               <select class="f-select" name="difficulty">
                 <option value="">All difficulties</option>
-                <option value="easy"   {% if filters.difficulty == 'easy'   %}selected{% endif %}>Easy</option>
-                <option value="medium" {% if filters.difficulty == 'medium' %}selected{% endif %}>Medium</option>
-                <option value="hard"   {% if filters.difficulty == 'hard'   %}selected{% endif %}>Hard</option>
+                <option value="easy"   {% if filters.difficulty=='easy'   %}selected{% endif %}>Easy</option>
+                <option value="medium" {% if filters.difficulty=='medium' %}selected{% endif %}>Medium</option>
+                <option value="hard"   {% if filters.difficulty=='hard'   %}selected{% endif %}>Hard</option>
               </select>
               <input class="f-input" type="text" name="search"
-                     placeholder="Search question text…"
-                     value="{{ filters.search }}">
+                     placeholder="Search question text…" value="{{ filters.search }}">
               <button type="submit" class="f-btn">Filter</button>
             </form>
           </div>
 
-          <!-- status tabs -->
           {% set base = '?course_code=' ~ filters.course_code ~ '&difficulty=' ~ filters.difficulty ~ '&search=' ~ filters.search %}
           <div class="status-tabs">
             <a href="{{ url_for('admin_questions_review') ~ base }}&status=pending"
-               class="stab s-pending {% if filters.status == 'pending' %}active{% endif %}">
+               class="stab s-pending {% if filters.status=='pending' %}active{% endif %}">
               Pending <span class="stab-n">{{ status_counts.get('pending', 0) }}</span>
             </a>
             <a href="{{ url_for('admin_questions_review') ~ base }}&status=approved"
-               class="stab s-approved {% if filters.status == 'approved' %}active{% endif %}">
+               class="stab s-approved {% if filters.status=='approved' %}active{% endif %}">
               Approved <span class="stab-n">{{ status_counts.get('approved', 0) }}</span>
             </a>
             <a href="{{ url_for('admin_questions_review') ~ base }}&status=flagged"
-               class="stab s-flagged {% if filters.status == 'flagged' %}active{% endif %}">
+               class="stab s-flagged {% if filters.status=='flagged' %}active{% endif %}">
               Flagged <span class="stab-n">{{ status_counts.get('flagged', 0) }}</span>
             </a>
             <a href="{{ url_for('admin_questions_review') ~ base }}&status=all"
-               class="stab s-all {% if filters.status == 'all' %}active{% endif %}">
+               class="stab s-all {% if filters.status=='all' %}active{% endif %}">
               All <span class="stab-n">{{ status_counts.values() | sum }}</span>
             </a>
           </div>
         </div>
 
-        <!-- question cards -->
         {% if questions_list %}
           {% for q in questions_list %}
           <div class="qcard st-{{ q.status }}" id="qc-{{ q.id }}">
-
             <div class="qc-head">
               <div class="qc-pills">
                 <span class="qpill qp-course">{{ q.course_code }}</span>
@@ -615,19 +796,20 @@
                 <span class="qpill qp-meta">{{ q.semester }}</span>
               </div>
               <div class="qc-actions">
-                <button class="qa a-approve {% if q.status == 'approved' %}on{% endif %}"
-                        title="Approve"
-                        onclick="setStatus({{ q.id }}, 'approve', this)">
+                <button class="qa a-approve {% if q.status=='approved' %}on{% endif %}"
+                        title="Approve" onclick="setStatus({{ q.id }}, 'approve', this)">
                   <span class="material-icons">check</span>
                 </button>
-                <button class="qa a-flag {% if q.status == 'flagged' %}on{% endif %}"
-                        title="Flag as bad"
-                        onclick="setStatus({{ q.id }}, 'flag', this)">
+                <button class="qa a-flag {% if q.status=='flagged' %}on{% endif %}"
+                        title="Flag" onclick="setStatus({{ q.id }}, 'flag', this)">
                   <span class="material-icons">flag</span>
                 </button>
+                <button class="qa a-edit"
+                        title="Edit" onclick="openEdit({{ q | tojson | e }})">
+                  <span class="material-icons">edit</span>
+                </button>
                 <button class="qa a-del"
-                        title="Delete"
-                        onclick="deleteQ({{ q.id }})">
+                        title="Delete" onclick="deleteQ({{ q.id }})">
                   <span class="material-icons">delete_outline</span>
                 </button>
               </div>
@@ -645,11 +827,8 @@
             </div>
 
             {% if q.explanation %}
-            <div class="qc-expl">
-              <strong>Why:</strong> {{ q.explanation }}
-            </div>
+            <div class="qc-expl"><strong>Why:</strong> {{ q.explanation }}</div>
             {% endif %}
-
           </div>
           {% endfor %}
 
@@ -657,76 +836,223 @@
           <div class="empty">
             <span class="material-icons">quiz</span>
             <h3>No questions found</h3>
-            <p>
-              Select a note on the left and click <strong>Generate</strong>
-              to create questions from it.<br>
-              Questions will appear here for review before students can see them.
-            </p>
+            <p>Use the form above to add questions manually,<br>
+               or adjust your filters.</p>
           </div>
         {% endif %}
 
-      </div><!-- /q-panel -->
-    </div><!-- /layout -->
+      </div>
+    </div>
   </main>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-backdrop" id="editBackdrop" onclick="closeEdit(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <span class="modal-title">Edit Question</span>
+        <button class="modal-close" onclick="closeEditModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <form method="POST" id="editForm">
+
+        <div class="field" style="margin-bottom:12px">
+          <label>Question</label>
+          <textarea name="question_text" id="e_qtext" required></textarea>
+        </div>
+
+        <div class="fg" style="margin-bottom:12px">
+          <div class="field">
+            <label>Option A</label>
+            <input type="text" name="option_a" id="e_opt_a" required oninput="updateEditLabel('a',this.value)">
+          </div>
+          <div class="field">
+            <label>Option B</label>
+            <input type="text" name="option_b" id="e_opt_b" required oninput="updateEditLabel('b',this.value)">
+          </div>
+          <div class="field">
+            <label>Option C</label>
+            <input type="text" name="option_c" id="e_opt_c" required oninput="updateEditLabel('c',this.value)">
+          </div>
+          <div class="field">
+            <label>Option D</label>
+            <input type="text" name="option_d" id="e_opt_d" required oninput="updateEditLabel('d',this.value)">
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label>Correct Option</label>
+          <div class="correct-row" id="editCorrectRow">
+            {% for ltr in ['a','b','c','d'] %}
+            <label class="correct-opt" id="eco_{{ ltr }}" onclick="selectEditCorrect('{{ ltr }}')">
+              <input type="radio" name="correct_option" value="{{ ltr }}" required>
+              <span class="co-ltr">{{ ltr | upper }}</span>
+              <span class="co-txt" id="eco_txt_{{ ltr }}">Option {{ ltr | upper }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="fg" style="margin-bottom:12px">
+          <div class="field">
+            <label>Difficulty</label>
+            <select name="difficulty" id="e_diff">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:18px">
+          <label>Explanation</label>
+          <textarea name="explanation" id="e_expl"></textarea>
+        </div>
+
+        <div class="form-foot">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="material-icons">save</span> Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
 
   <div class="tw" id="tw"></div>
 
   <script>
-    function confirmGen(code, status) {
-      if (status === 'done') {
-        return confirm(
-          code + ' already has questions.\n\n' +
-          'This will ADD more on top. Use "Delete All" first for a clean regeneration.\n\nContinue?'
-        );
-      }
-      return confirm('Generate 70 questions for ' + code + '?\nThis may take 30–60 seconds.');
+    /* ── CREATE FORM TOGGLE ── */
+    function toggleForm() {
+      var f  = document.getElementById('createForm');
+      var t  = document.getElementById('ccToggle');
+      var open = f.classList.toggle('open');
+      t.classList.toggle('open', open);
     }
 
+    /* auto-open if there were validation errors on create */
+    (function(){
+      try {
+        var msgs = JSON.parse(document.getElementById('fd').dataset.messages);
+        if (msgs.some(function(m){ return m[0]==='error'; })) {
+          document.getElementById('createForm').classList.add('open');
+          document.getElementById('ccToggle').classList.add('open');
+        }
+      } catch(e){}
+    })();
+
+    /* ── CORRECT OPTION PICKER (create form) ── */
+    var selectedCorrect = null;
+    function selectCorrect(ltr) {
+      ['a','b','c','d'].forEach(function(l) {
+        document.getElementById('co_' + l).classList.toggle('selected', l === ltr);
+        document.getElementById('co_' + l).querySelector('input').checked = (l === ltr);
+      });
+      selectedCorrect = ltr;
+    }
+    function updateCorrectLabel(ltr, val) {
+      var el = document.getElementById('co_txt_' + ltr);
+      if (el) el.textContent = val || ('Option ' + ltr.toUpperCase());
+    }
+    function resetForm() {
+      document.getElementById('qForm').reset();
+      ['a','b','c','d'].forEach(function(l) {
+        document.getElementById('co_' + l).classList.remove('selected');
+        document.getElementById('co_txt_' + l).textContent = 'Option ' + l.toUpperCase();
+      });
+    }
+
+    /* ── APPROVE / FLAG ── */
     async function setStatus(id, action, btn) {
       try {
-        const res  = await fetch('/admin/questions/' + action + '/' + id, { method: 'POST' });
-        const data = await res.json();
+        var res  = await fetch('/admin/questions/' + action + '/' + id, { method: 'POST' });
+        var data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        const card = document.getElementById('qc-' + id);
-        card.classList.remove('st-pending', 'st-approved', 'st-flagged');
+        var card = document.getElementById('qc-' + id);
+        card.classList.remove('st-pending','st-approved','st-flagged');
         card.classList.add('st-' + data.new_status);
-
-        card.querySelectorAll('.qa').forEach(b => b.classList.remove('on'));
+        card.querySelectorAll('.qa').forEach(function(b){ b.classList.remove('on'); });
         btn.classList.add('on');
-
         showToast('success', 'Question ' + data.new_status + '.');
-      } catch(e) {
-        showToast('error', 'Error: ' + e.message);
-      }
+      } catch(e) { showToast('error', 'Error: ' + e.message); }
     }
 
+    /* ── DELETE ── */
     async function deleteQ(id) {
       if (!confirm('Permanently delete this question?')) return;
       try {
-        const res  = await fetch('/admin/questions/delete/' + id, { method: 'POST' });
-        const data = await res.json();
+        var res  = await fetch('/admin/questions/delete/' + id, { method: 'POST' });
+        var data = await res.json();
         if (!data.success) throw new Error(data.error);
-
-        const card = document.getElementById('qc-' + id);
+        var card = document.getElementById('qc-' + id);
         card.style.transition = 'opacity .25s, transform .25s';
         card.style.opacity    = '0';
         card.style.transform  = 'translateX(14px)';
-        setTimeout(() => card.remove(), 260);
+        setTimeout(function(){ card.remove(); }, 260);
         showToast('info', 'Question deleted.');
-      } catch(e) {
-        showToast('error', 'Error: ' + e.message);
-      }
+      } catch(e) { showToast('error', 'Error: ' + e.message); }
     }
 
-    /* toast engine */
-    const TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
-    const TC = { success:'ts', error:'te', info:'ti' };
+    /* ── EDIT MODAL ── */
+    var currentEditId = null;
+
+    function openEdit(q) {
+      currentEditId = q.id;
+      document.getElementById('editForm').action = '/admin/questions/update/' + q.id;
+      document.getElementById('e_qtext').value = q.question_text || '';
+      document.getElementById('e_opt_a').value  = q.option_a || '';
+      document.getElementById('e_opt_b').value  = q.option_b || '';
+      document.getElementById('e_opt_c').value  = q.option_c || '';
+      document.getElementById('e_opt_d').value  = q.option_d || '';
+      document.getElementById('e_expl').value   = q.explanation || '';
+      document.getElementById('e_diff').value   = q.difficulty || 'medium';
+
+      // update labels and select correct
+      ['a','b','c','d'].forEach(function(l) {
+        var txt = q['option_' + l] || ('Option ' + l.toUpperCase());
+        document.getElementById('eco_txt_' + l).textContent = txt;
+        document.getElementById('eco_' + l).classList.remove('selected');
+        document.getElementById('eco_' + l).querySelector('input').checked = false;
+      });
+      selectEditCorrect(q.correct_option);
+
+      document.getElementById('editBackdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editBackdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeEdit(e) {
+      if (e.target === document.getElementById('editBackdrop')) closeEditModal();
+    }
+
+    function selectEditCorrect(ltr) {
+      ['a','b','c','d'].forEach(function(l) {
+        var el = document.getElementById('eco_' + l);
+        if (!el) return;
+        el.classList.toggle('selected', l === ltr);
+        el.querySelector('input').checked = (l === ltr);
+      });
+    }
+
+    function updateEditLabel(ltr, val) {
+      var el = document.getElementById('eco_txt_' + ltr);
+      if (el) el.textContent = val || ('Option ' + ltr.toUpperCase());
+    }
+
+    /* ── TOAST ENGINE ── */
+    var TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    var TC = { success:'ts', error:'te', info:'ti' };
 
     function showToast(cat, msg, dur) {
       dur = dur || 3800;
-      const wrap = document.getElementById('tw');
-      const el   = document.createElement('div');
+      var wrap = document.getElementById('tw');
+      var el   = document.createElement('div');
       el.className = 'toast ' + (TC[cat] || 'ti');
       el.style.setProperty('--dur', dur + 'ms');
       el.innerHTML =
@@ -734,26 +1060,24 @@
         '<div class="t-b"><div class="t-t">' + msg + '</div></div>' +
         '<button class="t-x"><span class="material-icons">close</span></button>' +
         '<div class="t-p"></div>';
-      el.querySelector('.t-x').addEventListener('click', function(){ hide(el); });
+      el.querySelector('.t-x').addEventListener('click', function(){ hideT(el); });
       wrap.appendChild(el);
-      var t = setTimeout(function(){ hide(el); }, dur);
+      var t = setTimeout(function(){ hideT(el); }, dur);
       el._t = t;
     }
 
-    function hide(el) {
+    function hideT(el) {
       if (!el || el.classList.contains('th')) return;
       clearTimeout(el._t);
       el.classList.add('th');
       el.addEventListener('animationend', function(){ el.remove(); }, { once: true });
     }
 
-    (function() {
+    (function(){
       try {
-        var msgs = JSON.parse(document.getElementById('fd').dataset.messages);
-        msgs.forEach(function(m, i) {
-          setTimeout(function(){ showToast(m[0], m[1]); }, i * 260);
-        });
-      } catch(e) {}
+        JSON.parse(document.getElementById('fd').dataset.messages)
+          .forEach(function(m, i){ setTimeout(function(){ showToast(m[0], m[1]); }, i * 260); });
+      } catch(e){}
     })();
   </script>
 
