@@ -1,5 +1,4 @@
 import json
-import threading
 import re
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1202,11 +1201,6 @@ def _mark_failed(supabase, note_id: int, error_msg: str):
 @app.route('/admin/quiz/generate/<int:note_id>', methods=['POST'])
 @admin_required
 def admin_generate_questions(note_id):
-    """
-    Called when admin clicks "Generate Questions" next to a note.
-    Runs synchronously — for large PDFs this may take 20-40 seconds.
-    On Render free tier, keep the request alive by setting a long timeout.
-    """
     # prevent double-generation: check if already done
     try:
         log = supabase.table('question_generation_log') \
@@ -1242,24 +1236,19 @@ def admin_generate_questions(note_id):
         flash(f"Could not fetch note: {str(e)}", 'error')
         return redirect(url_for('admin_questions_review'))
  
-    # run generation
-   # REPLACE with this
-def _run_generation(note, supabase):
-    generate_questions_for_note(note, supabase)
-
-thread = threading.Thread(
-    target=_run_generation,
-    args=(note, supabase),
-    daemon=True
-)
-thread.start()
-
-flash(
-    f"Generation started for {note['course_code']}. "
-    f"Refresh the page in 60 seconds to see results.",
-    'info'
-)
-return redirect(url_for('admin_questions_review'))
+    # run generation in background thread so page returns immediately
+    def _run_generation(n, sb):
+        generate_questions_for_note(n, sb)
+ 
+    t = threading.Thread(target=_run_generation, args=(note, supabase), daemon=True)
+    t.start()
+ 
+    flash(
+        f"Generation started for {note['course_code']}. "
+        f"Refresh the page in 60 seconds to see the results.",
+        'info'
+    )
+    return redirect(url_for('admin_questions_review'))
  
  
 # ── ADMIN QUESTION REVIEW PAGE ────────────────────────────────────────
