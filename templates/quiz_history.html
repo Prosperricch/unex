@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Quiz History</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange:     #f97316;
+      --orange-dk:  #ea580c;
+      --orange-dim: rgba(249,115,22,0.10);
+      --orange-bd:  rgba(249,115,22,0.22);
+      --gold:       #d4a017;
+      --green:      #22c55e;
+      --green-dim:  rgba(34,197,94,0.10);
+      --green-bd:   rgba(34,197,94,0.22);
+      --red:        #ef4444;
+      --red-dim:    rgba(239,68,68,0.08);
+      --red-bd:     rgba(239,68,68,0.20);
+      --bg:         #0c0e14;
+      --s1:         #13161f;
+      --s2:         #191d28;
+      --bd:         rgba(255,255,255,0.06);
+      --bd2:        rgba(255,255,255,0.10);
+      --txt:        #eef0f6;
+      --txt2:       rgba(238,240,246,0.55);
+      --txt3:       rgba(238,240,246,0.28);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(34,197,94,0.04) 0%, transparent 60%);
+    }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 60px;
+      background: rgba(12,14,20,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--bd);
+      display: flex; align-items: center;
+      padding: 0 28px; gap: 12px;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.45rem; font-weight: 900;
+      letter-spacing: -1.1px; margin-right: auto;
+    }
+    .nav-logo em { color: var(--orange); font-style: normal; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 500; color: var(--txt2);
+      padding: 7px 13px; border-radius: 9px;
+      border: 1px solid var(--bd2); background: var(--s1);
+      transition: color .2s;
+    }
+    .nav-btn:hover { color: var(--txt); }
+    .nav-btn .material-icons { font-size: 0.95rem; }
+    .nav-btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .nav-btn.primary:hover { background: var(--orange-dk); }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 900; color: #fff;
+    }
+
+    /* PAGE */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+
+    .ph { margin-bottom: 28px; }
+    .ph-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: .13em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 6px;
+    }
+    .ph-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.7px;
+    }
+    .ph-sub { font-size: 0.84rem; color: var(--txt2); margin-top: 5px; }
+
+    /* SUMMARY STRIP */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .ss-card {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 18px 16px;
+      position: relative; overflow: hidden;
+    }
+    .ss-card::after {
+      content: '';
+      position: absolute; bottom: -20px; right: -20px;
+      width: 70px; height: 70px; border-radius: 50%;
+      pointer-events: none; opacity: 0.07;
+    }
+    .ss-o::after { background: var(--orange); }
+    .ss-g::after { background: var(--green); }
+    .ss-r::after { background: var(--red); }
+    .ss-b::after { background: #60a5fa; }
+
+    .ss-ico {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+    .ss-o .ss-ico { background: var(--orange-dim); }
+    .ss-g .ss-ico { background: var(--green-dim); }
+    .ss-r .ss-ico { background: var(--red-dim); }
+    .ss-b .ss-ico { background: rgba(96,165,250,0.10); }
+    .ss-o .ss-ico .material-icons { color: var(--orange); font-size: 0.95rem; }
+    .ss-g .ss-ico .material-icons { color: var(--green);  font-size: 0.95rem; }
+    .ss-r .ss-ico .material-icons { color: var(--red);    font-size: 0.95rem; }
+    .ss-b .ss-ico .material-icons { color: #60a5fa;       font-size: 0.95rem; }
+
+    .ss-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem; font-weight: 900; line-height: 1;
+      margin-bottom: 3px;
+    }
+    .ss-o .ss-val { color: var(--orange); }
+    .ss-g .ss-val { color: var(--green); }
+    .ss-r .ss-val { color: var(--red); }
+    .ss-b .ss-val { color: #60a5fa; }
+    .ss-lbl { font-size: 0.72rem; color: var(--txt2); }
+
+    /* HISTORY CARDS */
+    .hcard {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 18px;
+      transition: border-color .2s, transform .15s;
+    }
+    .hcard:hover { border-color: var(--bd2); transform: translateX(3px); }
+
+    /* score bubble */
+    .hc-score {
+      flex-shrink: 0;
+      width: 58px; height: 58px;
+      border-radius: 13px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 2px solid;
+    }
+    .hc-score.passed { border-color: var(--green-bd); background: var(--green-dim); }
+    .hc-score.failed { border-color: var(--red-bd);   background: var(--red-dim); }
+
+    .hcs-pct {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 900; line-height: 1;
+    }
+    .hc-score.passed .hcs-pct { color: var(--green); }
+    .hc-score.failed .hcs-pct { color: var(--red); }
+    .hcs-lbl { font-size: 0.55rem; color: var(--txt3); margin-top: 1px; }
+
+    .hc-info { flex: 1; min-width: 0; }
+    .hc-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem; font-weight: 800;
+      margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hc-meta {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      font-size: 0.75rem; color: var(--txt2);
+    }
+    .hc-meta span { display: flex; align-items: center; gap: 4px; }
+    .hc-meta .material-icons { font-size: 0.82rem; color: var(--txt3); }
+
+    .hc-right {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px; flex-shrink: 0;
+    }
+    .hc-badge {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 100px; border: 1px solid;
+    }
+    .hcb-pass { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
+    .hcb-fail { background: var(--red-dim);   border-color: var(--red-bd);   color: var(--red); }
+
+    .hc-view {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.75rem; font-weight: 600; color: var(--txt3);
+      transition: color .2s;
+    }
+    .hcard:hover .hc-view { color: var(--orange); }
+    .hc-view .material-icons { font-size: 0.85rem; }
+
+    /* empty */
+    .empty {
+      text-align: center; padding: 60px 24px;
+      background: var(--s1); border: 1px solid var(--bd);
+      border-radius: 16px;
+    }
+    .empty .material-icons { font-size: 2.5rem; color: var(--txt3); display: block; margin-bottom: 12px; }
+    .empty h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .empty p  { font-size: 0.85rem; color: var(--txt2); margin-bottom: 20px; line-height: 1.6; }
+    .empty-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 700;
+      background: var(--orange); color: #fff;
+      transition: background .2s;
+    }
+    .empty-btn:hover { background: var(--orange-dk); }
+    .empty-btn .material-icons { font-size: 1rem; }
+
+    /* ANIMS */
+    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.10s}
+    .a3{animation-delay:.16s} .a4{animation-delay:.20s}
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    @media (max-width: 640px) {
+      .summary-strip { grid-template-columns: 1fr 1fr; }
+      .page { padding: 24px 14px 64px; }
+      .nav  { padding: 0 16px; }
+      .hcard { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('quiz_setup') }}" class="nav-btn primary">
+      <span class="material-icons">play_arrow</span> New Quiz
+    </a>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-btn">
+      <span class="material-icons">dashboard</span> Dashboard
+    </a>
+    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar">
+      {{ student_name[0] | upper }}
+    </a>
+  </nav>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <div class="ph a a1">
+      <p class="ph-label">Quiz</p>
+      <h1 class="ph-title">Your History</h1>
+      <p class="ph-sub">All your past quiz attempts and scores.</p>
+    </div>
+
+    {% if history %}
+
+    <!-- SUMMARY STATS -->
+    {% set total_quizzes = history | length %}
+    {% set passed_quizzes = history | selectattr('passed') | list | length %}
+    {% set avg_pct = (history | map(attribute='percentage') | map('float') | sum / total_quizzes) | round(1) if total_quizzes > 0 else 0 %}
+    {% set best_pct = history | map(attribute='percentage') | map('float') | max | round(1) if total_quizzes > 0 else 0 %}
+
+    <div class="summary-strip a a2">
+      <div class="ss-card ss-o">
+        <div class="ss-ico"><span class="material-icons">quiz</span></div>
+        <div class="ss-val">{{ total_quizzes }}</div>
+        <div class="ss-lbl">Total Quizzes</div>
+      </div>
+      <div class="ss-card ss-g">
+        <div class="ss-ico"><span class="material-icons">emoji_events</span></div>
+        <div class="ss-val">{{ best_pct }}%</div>
+        <div class="ss-lbl">Best Score</div>
+      </div>
+      <div class="ss-card ss-b">
+        <div class="ss-ico"><span class="material-icons">insights</span></div>
+        <div class="ss-val">{{ avg_pct }}%</div>
+        <div class="ss-lbl">Average Score</div>
+      </div>
+      <div class="ss-card ss-r">
+        <div class="ss-ico"><span class="material-icons">check_circle</span></div>
+        <div class="ss-val">{{ passed_quizzes }}</div>
+        <div class="ss-lbl">Passed</div>
+      </div>
+    </div>
+
+    <!-- HISTORY LIST -->
+    <div class="a a3">
+      {% for h in history %}
+      {% set qs = h.get('quiz_sessions', {}) %}
+      <a class="hcard" href="{{ url_for('quiz_results', session_id=h.session_id) }}">
+
+        <div class="hc-score {% if h.passed %}passed{% else %}failed{% endif %}">
+          <div class="hcs-pct">{{ h.percentage | float | int }}%</div>
+          <div class="hcs-lbl">score</div>
+        </div>
+
+        <div class="hc-info">
+          <div class="hc-title">
+            {{ qs.course_code if qs.course_code else 'Mixed Courses' }}
+            · {{ qs.semester }} {{ qs.academic_year }}
+          </div>
+          <div class="hc-meta">
+            <span>
+              <span class="material-icons">quiz</span>
+              {{ h.score }}/{{ h.total }} correct
+            </span>
+            {% if h.time_taken_seconds %}
+            <span>
+              <span class="material-icons">timer</span>
+              {{ (h.time_taken_seconds // 60) }}m {{ (h.time_taken_seconds % 60) }}s
+            </span>
+            {% endif %}
+            <span>
+              <span class="material-icons">{{ 'assignment' if qs.mode == 'exam' else 'school' }}</span>
+              {{ qs.mode | title if qs.mode else 'Exam' }}
+            </span>
+            {% if h.created_at %}
+            <span>
+              <span class="material-icons">calendar_today</span>
+              {{ h.created_at[:10] }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="hc-right">
+          <span class="hc-badge {% if h.passed %}hcb-pass{% else %}hcb-fail{% endif %}">
+            {% if h.passed %}Passed{% else %}Failed{% endif %}
+          </span>
+          <span class="hc-view">
+            View <span class="material-icons">chevron_right</span>
+          </span>
+        </div>
+
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="empty a a2">
+      <span class="material-icons">quiz</span>
+      <h3>No quizzes yet</h3>
+      <p>You haven't taken any quizzes yet.<br>Start one now and your results will appear here.</p>
+      <a href="{{ url_for('quiz_setup') }}" class="empty-btn">
+        <span class="material-icons">play_arrow</span> Take Your First Quiz
+      </a>
+    </div>
+
+    {% endif %}
+
+  </div>
+
+</body>
+</html>
