@@ -1,4 +1,5 @@
 import json
+import threading
 import re
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1242,18 +1243,23 @@ def admin_generate_questions(note_id):
         return redirect(url_for('admin_questions_review'))
  
     # run generation
-    result = generate_questions_for_note(note, supabase)
- 
-    if result['success']:
-        skipped = result.get('skipped', 0)
-        msg = f"Generated {result['count']} questions for {note['course_code']}."
-        if skipped:
-            msg += f" ({skipped} malformed questions skipped.)"
-        flash(msg, 'success')
-    else:
-        flash(f"Generation failed: {result['error']}", 'error')
- 
-    return redirect(url_for('admin_questions_review'))
+   # REPLACE with this
+def _run_generation(note, supabase):
+    generate_questions_for_note(note, supabase)
+
+thread = threading.Thread(
+    target=_run_generation,
+    args=(note, supabase),
+    daemon=True
+)
+thread.start()
+
+flash(
+    f"Generation started for {note['course_code']}. "
+    f"Refresh the page in 60 seconds to see results.",
+    'info'
+)
+return redirect(url_for('admin_questions_review'))
  
  
 # ── ADMIN QUESTION REVIEW PAGE ────────────────────────────────────────
