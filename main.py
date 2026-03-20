@@ -1552,7 +1552,6 @@ def quiz_setup():
         sem_res   = supabase.table('questions') \
             .select('semester') \
             .eq('status', 'approved') \
-            .ilike('department', dept) \
             .eq('level', level) \
             .execute()
         semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
@@ -1563,7 +1562,6 @@ def quiz_setup():
         yr_res = supabase.table('questions') \
             .select('academic_year') \
             .eq('status', 'approved') \
-            .ilike('department', dept) \
             .eq('level', level) \
             .execute()
         academic_years = sorted(
@@ -1577,7 +1575,6 @@ def quiz_setup():
         cc_res       = supabase.table('questions') \
             .select('course_code') \
             .eq('status', 'approved') \
-            .ilike('department', dept) \
             .eq('level', level) \
             .execute()
         course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
@@ -1609,7 +1606,6 @@ def quiz_question_count():
         q = supabase.table('questions') \
             .select('id', count='exact') \
             .eq('status', 'approved') \
-            .ilike('department', dept) \
             .eq('level', level)
 
         if semester:
@@ -1667,7 +1663,6 @@ def quiz_start():
         q = supabase.table('questions') \
             .select('id, correct_option, option_a, option_b, option_c, option_d') \
             .eq('status', 'approved') \
-            .ilike('department', dept) \
             .eq('level', level) \
             .eq('semester', semester) \
             .eq('academic_year', acad_year)
