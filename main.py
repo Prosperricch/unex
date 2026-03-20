@@ -730,15 +730,19 @@ def user_dashboard():
 
     try:
         qr_res = supabase.table('quiz_results') \
-            .select('percentage') \
+            .select('percentage, created_at') \
             .eq('user_id', uid) \
+            .order('created_at', desc=True) \
             .execute()
         results    = qr_res.data or []
         quiz_count = len(results)
         best_score = f"{max(r['percentage'] for r in results):.0f}%" if results else '—'
+        # last 5 scores for trend chart (oldest first for left→right display)
+        last5 = [round(float(r['percentage'])) for r in results[:5]][::-1]
     except Exception:
         quiz_count = 0
         best_score = '—'
+        last5 = []
 
     return render_template(
         'user_dashboard.html',
@@ -752,6 +756,7 @@ def user_dashboard():
         notes_count    = notes_count,
         quiz_count     = quiz_count,
         best_score     = best_score,
+        last5_scores   = last5,
     )
 
 
@@ -1525,15 +1530,30 @@ def admin_update_question(q_id):
 @app.route('/user/quiz/setup', methods=['GET'])
 @student_required
 def quiz_setup():
-    dept  = session.get('student_dept', '')
-    level = session.get('student_level', '')
+    dept  = session.get('student_dept', '').strip().lower()
+    level = session.get('student_level', '').strip()
 
-    # fetch dropdowns from ALL approved questions — no dept/level filter
-    # so manually created questions always show up regardless of exact string match
+    # check for existing in_progress session — retake protection (#2)
+    try:
+        active = supabase.table('quiz_sessions') \
+            .select('id') \
+            .eq('user_id', session.get('student_id')) \
+            .eq('status', 'in_progress') \
+            .execute()
+        if active.data:
+            existing_id = active.data[0]['id']
+            flash("You have an unfinished quiz. Resuming it now.", 'info')
+            return redirect(url_for('quiz_session', session_id=existing_id))
+    except Exception:
+        pass
+
+    # filter dropdowns by student's level — case-insensitive dept match (#1 level filter)
     try:
         sem_res   = supabase.table('questions') \
             .select('semester') \
             .eq('status', 'approved') \
+            .ilike('department', dept) \
+            .eq('level', level) \
             .execute()
         semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
     except Exception:
@@ -1543,6 +1563,8 @@ def quiz_setup():
         yr_res = supabase.table('questions') \
             .select('academic_year') \
             .eq('status', 'approved') \
+            .ilike('department', dept) \
+            .eq('level', level) \
             .execute()
         academic_years = sorted(
             set(r['academic_year'] for r in (yr_res.data or []) if r['academic_year']),
@@ -1555,6 +1577,8 @@ def quiz_setup():
         cc_res       = supabase.table('questions') \
             .select('course_code') \
             .eq('status', 'approved') \
+            .ilike('department', dept) \
+            .eq('level', level) \
             .execute()
         course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
     except Exception:
@@ -1563,7 +1587,7 @@ def quiz_setup():
     return render_template(
         'quiz_setup.html',
         student_name   = session.get('student_name', ''),
-        student_dept   = dept,
+        student_dept   = session.get('student_dept', ''),
         student_level  = level,
         semesters      = semesters,
         academic_years = academic_years,
@@ -1575,6 +1599,8 @@ def quiz_setup():
 def quiz_question_count():
     if not session.get('student_logged_in'):
         return jsonify({'count': 0, 'error': 'not logged in'})
+    dept        = session.get('student_dept', '').strip().lower()
+    level       = session.get('student_level', '').strip()
     semester    = request.args.get('semester', '').strip()
     acad_year   = request.args.get('academic_year', '').strip()
     course_code = request.args.get('course_code', '').strip().upper()
@@ -1582,7 +1608,9 @@ def quiz_question_count():
     try:
         q = supabase.table('questions') \
             .select('id', count='exact') \
-            .eq('status', 'approved')
+            .eq('status', 'approved') \
+            .ilike('department', dept) \
+            .eq('level', level)
 
         if semester:
             q = q.eq('semester', semester)
@@ -1602,8 +1630,8 @@ def quiz_question_count():
 @student_required
 def quiz_start():
     uid         = session.get('student_id')
-    dept        = session.get('student_dept', '')
-    level       = session.get('student_level', '')
+    dept        = session.get('student_dept', '').strip().lower()
+    level       = session.get('student_level', '').strip()
     semester    = request.form.get('semester', '').strip()
     acad_year   = request.form.get('academic_year', '').strip()
     course_code = request.form.get('course_code', '').strip().upper()
@@ -1621,10 +1649,26 @@ def quiz_start():
     if time_limit and time_limit.isdigit():
         time_limit_int = max(5, min(int(time_limit), 300))
 
+    # retake protection — redirect to existing in_progress session (#2)
+    try:
+        active = supabase.table('quiz_sessions') \
+            .select('id') \
+            .eq('user_id', uid) \
+            .eq('status', 'in_progress') \
+            .execute()
+        if active.data:
+            flash("You already have an active quiz. Complete it before starting a new one.", 'info')
+            return redirect(url_for('quiz_session', session_id=active.data[0]['id']))
+    except Exception:
+        pass
+
+    # fetch pool filtered by dept + level (#1 level filter)
     try:
         q = supabase.table('questions') \
             .select('id, correct_option, option_a, option_b, option_c, option_d') \
             .eq('status', 'approved') \
+            .ilike('department', dept) \
+            .eq('level', level) \
             .eq('semester', semester) \
             .eq('academic_year', acad_year)
 
@@ -1637,14 +1681,22 @@ def quiz_start():
         flash(f"Could not load questions: {str(e)}", 'error')
         return redirect(url_for('quiz_setup'))
 
-    if len(pool) < 10:
+    if len(pool) < 1:
         flash(
-            f"Not enough approved questions for that selection "
-            f"(found {len(pool)}, need at least 10). "
-            f"Ask your admin to generate and approve questions first.",
+            "No approved questions found for your department and level with that selection. "
+            "Ask your admin to add questions for your course.",
             'error'
         )
         return redirect(url_for('quiz_setup'))
+
+    # minimum questions warning — tell them exactly how many they'll get (#5)
+    total = min(70, len(pool))
+    if total < 70:
+        flash(
+            f"Only {total} approved questions are available for this selection. "
+            f"Your quiz will have {total} questions instead of 70.",
+            'info'
+        )
 
     total    = min(70, len(pool))
     selected = _random.sample(pool, total)
