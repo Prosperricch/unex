@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Settings</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange:     #f97316;
+      --orange-dk:  #ea580c;
+      --orange-dim: rgba(249,115,22,0.10);
+      --orange-bd:  rgba(249,115,22,0.22);
+      --gold:       #d4a017;
+      --gold-dim:   rgba(212,160,23,0.10);
+      --red:        #ef4444;
+      --red-dim:    rgba(239,68,68,0.08);
+      --red-bd:     rgba(239,68,68,0.20);
+      --green:      #22c55e;
+      --bg:         #0c0e14;
+      --s1:         #13161f;
+      --s2:         #191d28;
+      --bd:         rgba(255,255,255,0.06);
+      --bd2:        rgba(255,255,255,0.10);
+      --txt:        #eef0f6;
+      --txt2:       rgba(238,240,246,0.55);
+      --txt3:       rgba(238,240,246,0.28);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(212,160,23,0.045) 0%, transparent 60%);
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 62px;
+      background: rgba(12,14,20,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--bd);
+      display: flex; align-items: center;
+      padding: 0 28px; gap: 14px;
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem; font-weight: 900;
+      letter-spacing: -1.2px; color: var(--txt);
+      margin-right: auto;
+    }
+    .nav-logo em { color: var(--orange); font-style: normal; }
+
+    .nav-back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.83rem; font-weight: 500;
+      color: var(--txt2);
+      padding: 7px 13px;
+      border-radius: 9px;
+      border: 1px solid var(--bd2);
+      background: var(--s1);
+      transition: color .2s, border-color .2s;
+    }
+    .nav-back:hover { color: var(--txt); border-color: var(--bd2); }
+    .nav-back .material-icons { font-size: 0.95rem; }
+
+    .nav-avatar {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .burger {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--bd2);
+      background: var(--s1);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--txt2);
+      transition: color .2s, background .2s; flex-shrink: 0;
+      border: none;
+    }
+    .burger:hover { color: var(--txt); background: var(--s2); }
+    .burger .material-icons { font-size: 1.1rem; }
+
+    /* ── DRAWER ── */
+    .drawer-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    }
+    .drawer-backdrop.open { display: block; }
+
+    .drawer {
+      position: fixed; top: 0; right: -300px; bottom: 0;
+      width: 280px; z-index: 400;
+      background: var(--s1); border-left: 1px solid var(--bd2);
+      display: flex; flex-direction: column;
+      padding: 24px 0 32px;
+      transition: right .38s cubic-bezier(.22,1,.36,1);
+    }
+    .drawer.open { right: 0; }
+
+    .drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px 20px; border-bottom: 1px solid var(--bd);
+    }
+    .drawer-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 800; letter-spacing: -0.3px;
+    }
+    .drawer-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--s2); border: 1px solid var(--bd);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--txt2); transition: color .2s;
+    }
+    .drawer-close:hover { color: var(--txt); }
+    .drawer-close .material-icons { font-size: 1rem; }
+
+    .drawer-nav {
+      flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .d-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 14px; border-radius: 11px;
+      font-size: 0.9rem; font-weight: 500; color: var(--txt2);
+      transition: background .18s, color .18s;
+    }
+    .d-item:hover  { background: var(--s2); color: var(--txt); }
+    .d-item.active { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-bd); }
+    .d-item .material-icons { font-size: 1.1rem; flex-shrink: 0; }
+
+    .drawer-divider { height: 1px; background: var(--bd); margin: 8px 12px; }
+    .drawer-foot { padding: 0 12px; }
+    .d-logout {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 14px; border-radius: 11px;
+      font-size: 0.9rem; font-weight: 500; color: #f87171;
+      background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.14);
+      cursor: pointer; transition: background .18s;
+    }
+    .d-logout:hover { background: rgba(239,68,68,0.13); }
+    .d-logout .material-icons { font-size: 1.1rem; }
+
+    /* ── PAGE ── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 760px; margin: 0 auto;
+      padding: 36px 28px 80px;
+    }
+
+    /* ── page header ── */
+    .ph {
+      margin-bottom: 32px;
+    }
+    .ph-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 6px;
+    }
+    .ph-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.8px; line-height: 1.08;
+    }
+    .ph-sub {
+      font-size: 0.85rem; color: var(--txt2);
+      margin-top: 5px; line-height: 1.5;
+    }
+
+    /* ── TAB BAR ── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border-radius: 8px;
+      font-size: 0.83rem; font-weight: 600;
+      color: var(--txt2); white-space: nowrap;
+      background: none; border: none; cursor: pointer;
+      transition: background .18s, color .18s;
+      flex-shrink: 0;
+    }
+    .tab-btn:hover { background: var(--s2); color: var(--txt); }
+    .tab-btn.active { background: var(--s2); color: var(--txt); border: 1px solid var(--bd2); }
+    .tab-btn.tab-danger.active { color: var(--red); border-color: var(--red-bd); background: var(--red-dim); }
+    .tab-btn .material-icons { font-size: 0.95rem; }
+
+    /* ── PANEL ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── SETTINGS CARD ── */
+    .scard {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 16px;
+      position: relative; overflow: hidden;
+    }
+
+    /* dot-grid texture */
+    .scard::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    .scard-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 800; letter-spacing: -0.2px;
+      margin-bottom: 4px; position: relative; z-index: 1;
+    }
+    .scard-sub {
+      font-size: 0.78rem; color: var(--txt2);
+      margin-bottom: 22px; line-height: 1.5;
+      position: relative; z-index: 1;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      position: relative; z-index: 1;
+    }
+    .form-grid.single { grid-template-columns: 1fr; }
+
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg.full { grid-column: 1 / -1; }
+
+    .fg label {
+      font-size: 0.71rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--txt3); padding-left: 1px;
+    }
+
+    .iw { position: relative; display: flex; align-items: center; }
+
+    .iw .li {
+      position: absolute; left: 12px; top:0; bottom:0;
+      display: flex; align-items: center;
+      pointer-events: none; z-index: 2;
+      color: rgba(238,240,246,0.28);
+      transition: color .2s;
+    }
+    .iw .li .material-icons { font-size: 0.9rem; line-height:1; display:block; }
+
+    .iw .ti {
+      position: absolute; right: 8px; top:0; bottom:0;
+      display: flex; align-items: center; z-index: 2;
+    }
+    .iw .ti button {
+      background: none; border: none; cursor: pointer;
+      color: rgba(238,240,246,0.3);
+      display: flex; align-items: center;
+      padding: 5px; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .iw .ti button:hover { color: var(--txt); background: rgba(255,255,255,0.06); }
+    .iw .ti button .material-icons { font-size: 0.9rem; line-height:1; display:block; }
+
+    input, select {
+      width: 100%;
+      padding: 11px 12px 11px 36px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--bd2);
+      border-radius: 10px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.88rem; font-weight: 400;
+      color: var(--txt); outline: none;
+      -webkit-appearance: none; appearance: none;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    input.no-icon { padding-left: 13px; }
+    input.has-trail { padding-right: 38px; }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' fill='none'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='rgba(238,240,246,.3)' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+    }
+    select option { background: #191d28; color: var(--txt); }
+
+    input:focus, select:focus {
+      border-color: var(--orange);
+      background: rgba(249,115,22,0.05);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+    }
+    .iw:focus-within .li { color: var(--orange); }
+    input::placeholder { color: rgba(238,240,246,0.2); font-weight: 300; }
+
+    /* ── SUBMIT BUTTONS ── */
+    .form-foot {
+      display: flex; justify-content: flex-end;
+      margin-top: 20px;
+      position: relative; z-index: 1;
+    }
+
+    .btn-save {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 24px;
+      background: var(--orange);
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.88rem; font-weight: 700;
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-save::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .btn-save:hover {
+      background: var(--orange-dk);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(249,115,22,0.32);
+    }
+    .btn-save:active { transform: none; box-shadow: none; }
+    .btn-save .material-icons { font-size: 0.95rem; line-height:1; }
+
+    /* ── DANGER ZONE ── */
+    .scard.danger {
+      border-color: var(--red-bd);
+      background: rgba(239,68,68,0.04);
+    }
+    .scard.danger::before { display: none; }
+
+    .scard.danger .scard-title { color: var(--red); }
+
+    .danger-confirm {
+      font-size: 0.78rem; color: var(--txt2);
+      background: rgba(239,68,68,0.06);
+      border: 1px solid var(--red-bd);
+      border-radius: 9px; padding: 12px 14px;
+      margin-bottom: 16px; line-height: 1.55;
+      position: relative; z-index: 1;
+    }
+    .danger-confirm strong { color: #f87171; }
+
+    .btn-delete {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 24px;
+      background: var(--red-dim);
+      color: var(--red);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.88rem; font-weight: 700;
+      border: 1px solid var(--red-bd); border-radius: 10px; cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .btn-delete:hover { background: rgba(239,68,68,0.16); color: #fca5a5; }
+    .btn-delete .material-icons { font-size: 0.95rem; line-height:1; }
+
+    /* ── TOASTS ── */
+    .tw {
+      position: fixed; top: 72px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 9px;
+      pointer-events: none; max-width: 320px; width: calc(100% - 32px);
+    }
+    .toast {
+      position: relative; display: flex; align-items: flex-start; gap: 11px;
+      background: var(--s2); border: 1px solid var(--bd2);
+      border-radius: 12px; padding: 13px 13px 17px 15px;
+      pointer-events: all; overflow: hidden;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.5);
+      animation: tin .36s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast.th { animation: tout .26s ease forwards; }
+    @keyframes tin  { from{opacity:0;transform:translateX(18px) scale(.96)} to{opacity:1;transform:none} }
+    @keyframes tout { from{opacity:1;transform:none} to{opacity:0;transform:translateX(18px) scale(.96)} }
+    .toast::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; border-radius:12px 0 0 12px; }
+    .toast.ts::before { background:#22c55e; }
+    .toast.te::before { background:#ef4444; }
+    .toast.ti::before { background:var(--orange); }
+    .t-i .material-icons { font-size:1rem; line-height:1; margin-top:1px; }
+    .toast.ts .t-i .material-icons { color:#22c55e; }
+    .toast.te .t-i .material-icons { color:#ef4444; }
+    .toast.ti .t-i .material-icons { color:var(--orange); }
+    .t-b { flex:1; min-width:0; }
+    .t-t { font-size:.83rem; font-weight:600; color:var(--txt); }
+    .t-m { font-size:.75rem; color:var(--txt2); line-height:1.4; margin-top:1px; }
+    .t-x { background:none; border:none; cursor:pointer; color:var(--txt3); display:flex; align-items:center; padding:2px; border-radius:5px; flex-shrink:0; margin-top:1px; transition:color .14s; }
+    .t-x:hover { color:var(--txt); }
+    .t-x .material-icons { font-size:.85rem; line-height:1; }
+    .t-p { position:absolute; bottom:0; left:0; height:2px; animation:tp var(--dur,3.5s) linear forwards; }
+    .toast.ts .t-p { background:#22c55e; }
+    .toast.te .t-p { background:#ef4444; }
+    .toast.ti .t-p { background:var(--orange); }
+    @keyframes tp { from{width:100%} to{width:0} }
+
+    /* ── PAGE ENTER ANIM ── */
+    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1 { animation-delay:.04s; }
+    .a2 { animation-delay:.10s; }
+    .a3 { animation-delay:.17s; }
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .page { padding: 24px 16px 64px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .fg.full { grid-column: 1; }
+      .nav { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fd"
+       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
+       style="display:none"></div>
+
+  <div class="ambient"></div>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="nav">
+    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-back">
+      <span class="material-icons">arrow_back</span>
+      Dashboard
+    </a>
+    <div class="nav-avatar">{{ student_name[0] | upper }}</div>
+    <button class="burger" id="burgerBtn" aria-label="Open menu">
+      <span class="material-icons">menu</span>
+    </button>
+  </nav>
+
+  <!-- ══ DRAWER ══ -->
+  <div class="drawer-backdrop" id="backdrop"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <span class="drawer-title">Menu</span>
+      <button class="drawer-close" id="drawerClose">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a class="d-item" href="{{ url_for('user_dashboard') }}">
+        <span class="material-icons">dashboard</span> Dashboard
+      </a>
+      <a class="d-item" href="{{ url_for('user_notes') }}">
+        <span class="material-icons">menu_book</span> Notes
+      </a>
+      <a class="d-item" href="#">
+        <span class="material-icons">quiz</span> Quizzes
+      </a>
+      <a class="d-item" href="#">
+        <span class="material-icons">insights</span> Progress
+      </a>
+      <div class="drawer-divider"></div>
+      <a class="d-item" href="{{ url_for('sponsors_page') }}">
+        <span class="material-icons">handshake</span> Sponsors
+      </a>
+      <a class="d-item active" href="{{ url_for('user_settings_page') }}">
+        <span class="material-icons">settings</span> Settings
+      </a>
+    </nav>
+    <div class="drawer-foot">
+      <a class="d-logout" href="{{ url_for('user_logout') }}"
+         onclick="return confirm('Log out of U-NEX?')">
+        <span class="material-icons">logout</span> Log out
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ PAGE ══ -->
+  <div class="page">
+
+    <!-- page header -->
+    <div class="ph a a1">
+      <p class="ph-label">Account</p>
+      <h1 class="ph-title">Settings</h1>
+      <p class="ph-sub">Manage your profile, security and account preferences.</p>
+    </div>
+
+    <!-- tab bar -->
+    <div class="tabs a a2">
+      <button class="tab-btn active" data-tab="profile">
+        <span class="material-icons">person_outline</span> Profile
+      </button>
+      <button class="tab-btn" data-tab="email">
+        <span class="material-icons">mail_outline</span> Email
+      </button>
+      <button class="tab-btn" data-tab="password">
+        <span class="material-icons">lock_outline</span> Password
+      </button>
+      <button class="tab-btn tab-danger" data-tab="danger">
+        <span class="material-icons">delete_outline</span> Delete Account
+      </button>
+    </div>
+
+    <!-- ── PROFILE TAB ── -->
+    <div class="panel active a a3" id="tab-profile">
+      <div class="scard">
+        <div class="scard-title">Profile Information</div>
+        <div class="scard-sub">Update your name, matric number, department and level.</div>
+        <form method="POST" action="{{ url_for('user_settings_profile') }}" novalidate>
+          <div class="form-grid">
+
+            <div class="fg full">
+              <label>Full Name</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">person_outline</span></span>
+                <input type="text" name="full_name"
+                       value="{{ student_name }}"
+                       placeholder="Your full name" required>
+              </div>
+            </div>
+
+            <div class="fg full">
+              <label>Matric Number</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">badge</span></span>
+                <input type="text" name="matric_number"
+                       value="{{ student_matric }}"
+                       placeholder="e.g. CSC/2021/001" required>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Department</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">school</span></span>
+                <select name="department" required>
+                  <option value="" disabled>Select department</option>
+                  {% for dept in departments %}
+                    <option value="{{ dept }}"
+                      {% if dept == student_dept %}selected{% endif %}>
+                      {{ dept | title }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Level</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">layers</span></span>
+                <select name="level" required>
+                  <option value="" disabled>Level</option>
+                  {% for lvl in ['100','200','300','400'] %}
+                    <option value="{{ lvl }}"
+                      {% if lvl == student_level %}selected{% endif %}>
+                      {{ lvl }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div class="form-foot">
+            <button type="submit" class="btn-save">
+              <span class="material-icons">check</span>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── EMAIL TAB ── -->
+    <div class="panel" id="tab-email">
+      <div class="scard">
+        <div class="scard-title">Change Email Address</div>
+        <div class="scard-sub">
+          Your current email is <strong style="color:var(--txt)">{{ student_email }}</strong>.
+          Enter your password to confirm any change.
+        </div>
+        <form method="POST" action="{{ url_for('user_settings_email') }}" novalidate>
+          <div class="form-grid single">
+
+            <div class="fg">
+              <label>New Email Address</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">mail_outline</span></span>
+                <input type="email" name="new_email"
+                       placeholder="new@email.com" required>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Confirm New Email</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">mail_outline</span></span>
+                <input type="email" name="confirm_email"
+                       placeholder="Repeat new email" required>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Current Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_outline</span></span>
+                <input type="password" name="current_password_email"
+                       placeholder="Confirm with your password"
+                       class="has-trail" required>
+                <span class="ti">
+                  <button type="button" data-t="epw" aria-label="Show">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+                <input type="password" id="epw" name="_epw_hidden"
+                       style="display:none" aria-hidden="true">
+              </div>
+            </div>
+
+          </div>
+          <div class="form-foot">
+            <button type="submit" class="btn-save">
+              <span class="material-icons">check</span>
+              Update Email
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── PASSWORD TAB ── -->
+    <div class="panel" id="tab-password">
+      <div class="scard">
+        <div class="scard-title">Change Password</div>
+        <div class="scard-sub">Choose a strong password of at least 8 characters.</div>
+        <form method="POST" action="{{ url_for('user_settings_password') }}" novalidate>
+          <div class="form-grid single">
+
+            <div class="fg">
+              <label>Current Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_outline</span></span>
+                <input type="password" id="cpw" name="current_password"
+                       placeholder="Your current password"
+                       class="has-trail" required>
+                <span class="ti">
+                  <button type="button" data-t="cpw" aria-label="Show">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>New Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_reset</span></span>
+                <input type="password" id="npw" name="new_password"
+                       placeholder="Min. 8 characters"
+                       class="has-trail" required minlength="8">
+                <span class="ti">
+                  <button type="button" data-t="npw" aria-label="Show">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Confirm New Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_reset</span></span>
+                <input type="password" id="rpw" name="confirm_new_password"
+                       placeholder="Repeat new password"
+                       class="has-trail" required>
+                <span class="ti">
+                  <button type="button" data-t="rpw" aria-label="Show">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+          <div class="form-foot">
+            <button type="submit" class="btn-save">
+              <span class="material-icons">check</span>
+              Change Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── DANGER TAB ── -->
+    <div class="panel" id="tab-danger">
+      <div class="scard danger">
+        <div class="scard-title">Delete Account</div>
+        <div class="scard-sub">
+          This is permanent and cannot be undone. All your data will be erased.
+        </div>
+        <div class="danger-confirm">
+          Type <strong>delete my account</strong> in the field below and enter your password to confirm.
+        </div>
+        <form method="POST" action="{{ url_for('user_settings_delete') }}" novalidate>
+          <div class="form-grid single">
+
+            <div class="fg">
+              <label>Type to confirm</label>
+              <input type="text" name="delete_confirm" class="no-icon"
+                     placeholder="delete my account" required
+                     style="position:relative;z-index:1">
+            </div>
+
+            <div class="fg">
+              <label>Password</label>
+              <div class="iw">
+                <span class="li"><span class="material-icons">lock_outline</span></span>
+                <input type="password" id="dpw" name="delete_password"
+                       placeholder="Your password"
+                       class="has-trail" required>
+                <span class="ti">
+                  <button type="button" data-t="dpw" aria-label="Show">
+                    <span class="material-icons">visibility</span>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+          <div class="form-foot">
+            <button type="submit" class="btn-delete"
+                    onclick="return confirm('This will permanently delete your account. Are you absolutely sure?')">
+              <span class="material-icons">delete_forever</span>
+              Delete My Account
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <div class="tw" id="tw"></div>
+
+  <script>
+    /* ── tabs ── */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    /* ── password toggles ── */
+    document.querySelectorAll('[data-t]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inp  = document.getElementById(btn.dataset.t);
+        if (!inp) return;
+        const icon = btn.querySelector('.material-icons');
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        icon.textContent = show ? 'visibility_off' : 'visibility';
+      });
+    });
+
+    /* ── burger / drawer ── */
+    const burger   = document.getElementById('burgerBtn');
+    const drawer   = document.getElementById('drawer');
+    const backdrop = document.getElementById('backdrop');
+    const closeBtn = document.getElementById('drawerClose');
+
+    function openDrawer()  { drawer.classList.add('open'); backdrop.classList.add('open'); }
+    function closeDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('open'); }
+
+    burger.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+
+    /* ── if flash has an error/success, open relevant tab ──
+       Convention: profile errors open profile tab (default),
+       email errors contain "email", password errors contain "password",
+       delete errors contain "delete" or "account" */
+    (function() {
+      try {
+        const msgs = JSON.parse(document.getElementById('fd').dataset.messages);
+        if (msgs.length) {
+          const allText = msgs.map(([,m]) => m.toLowerCase()).join(' ');
+          if (allText.includes('email')) {
+            document.querySelector('[data-tab="email"]').click();
+          } else if (allText.includes('password') && !allText.includes('profile')) {
+            document.querySelector('[data-tab="password"]').click();
+          } else if (allText.includes('delete') || allText.includes('permanently')) {
+            document.querySelector('[data-tab="danger"]').click();
+          }
+        }
+      } catch(e) {}
+    })();
+
+    /* ── toast engine ── */
+    const TICONS = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const TCLS   = { success:'ts', error:'te', info:'ti' };
+
+    function showToast({ cat, msg, dur=4200 }) {
+      const k = TCLS[cat] || 'ti';
+      const wrap = document.getElementById('tw');
+      const el = document.createElement('div');
+      el.className = `toast ${k}`;
+      el.style.setProperty('--dur', dur + 'ms');
+      el.innerHTML = `
+        <div class="t-i"><span class="material-icons">${TICONS[cat] || TICONS.info}</span></div>
+        <div class="t-b"><div class="t-t">${msg}</div></div>
+        <button class="t-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+        <div class="t-p"></div>`;
+      el.querySelector('.t-x').addEventListener('click', () => hide(el));
+      wrap.appendChild(el);
+      const t = setTimeout(() => hide(el), dur);
+      el._t = t;
+    }
+
+    function hide(el) {
+      if (!el || el.classList.contains('th')) return;
+      clearTimeout(el._t);
+      el.classList.add('th');
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+    }
+
+    (function() {
+      try {
+        const msgs = JSON.parse(document.getElementById('fd').dataset.messages);
+        msgs.forEach(([cat, msg], i) => setTimeout(() => showToast({ cat, msg }), i * 280));
+      } catch(e) {}
+    })();
+  </script>
+
+</body>
+</html>
