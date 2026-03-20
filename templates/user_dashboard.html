@@ -586,6 +586,28 @@
       </div>
     </div>
 
+    <!-- score trend -->
+    {% if last5_scores and last5_scores | length > 1 %}
+    <div class="sc sc-trend a a4" style="margin-bottom:32px;padding:22px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div class="sc-lbl" style="margin-bottom:3px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);">Score Trend</div>
+          <div style="font-size:.82rem;color:var(--txt2);">Your last {{ last5_scores | length }} quizzes</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:56px;">
+        {% for score in last5_scores %}
+        {% set h = ((score / 100) * 56) | int %}
+        {% set col = '#22c55e' if score >= 50 else '#ef4444' %}
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:.65rem;font-weight:700;color:var(--txt2);">{{ score }}%</div>
+          <div style="width:100%;height:{{ h }}px;background:{{ col }};border-radius:4px 4px 0 0;min-height:4px;opacity:.85;"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     <!-- tools -->
     <p class="sh a a4">Tools</p>
     <div class="tools a a4">
