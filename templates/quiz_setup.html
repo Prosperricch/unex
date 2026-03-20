@@ -341,9 +341,9 @@
             <div class="iw">
               <span class="li"><span class="material-icons">calendar_today</span></span>
               <select name="semester" id="sel-semester" required>
-                <option value="" disabled selected>Select semester</option>
+                <option value="" disabled {% if not semesters %}selected{% endif %}>Select semester</option>
                 {% for s in semesters %}
-                <option value="{{ s }}">{{ s }}</option>
+                <option value="{{ s }}" {% if loop.first %}selected{% endif %}>{{ s }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -354,9 +354,9 @@
             <div class="iw">
               <span class="li"><span class="material-icons">event</span></span>
               <select name="academic_year" id="sel-year" required>
-                <option value="" disabled selected>Select year</option>
+                <option value="" disabled {% if not academic_years %}selected{% endif %}>Select year</option>
                 {% for y in academic_years %}
-                <option value="{{ y }}">{{ y }}</option>
+                <option value="{{ y }}" {% if loop.first %}selected{% endif %}>{{ y }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -497,6 +497,9 @@
         countTimer = setTimeout(fetchCount, 300);
       });
     });
+
+    /* run on page load so badge shows immediately if dropdowns are pre-filled */
+    fetchCount();
 
     /* flash toasts */
     const TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
