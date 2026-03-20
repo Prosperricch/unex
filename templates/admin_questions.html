@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Question Bank - U-NEX Admin</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary:           #f97316;
+      --primary-dk:        #ea580c;
+      --dark:              #111827;
+      --gray:              #6b7280;
+      --light:             #f9fafb;
+      --sidebar-bg:        #1f2937;
+      --sidebar-width:     260px;
+      --sidebar-collapsed: 80px;
+
+      /* status colours */
+      --green:      #22c55e;
+      --green-bg:   #f0fdf4;
+      --green-bd:   #bbf7d0;
+      --yellow:     #eab308;
+      --yellow-bg:  #fefce8;
+      --yellow-bd:  #fef08a;
+      --red:        #ef4444;
+      --red-bg:     #fef2f2;
+      --red-bd:     #fecaca;
+      --blue:       #3b82f6;
+      --blue-bg:    #eff6ff;
+      --blue-bd:    #bfdbfe;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ═══ SIDEBAR ═══ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      transition: width 0.3s ease;
+      z-index: 100;
+    }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .nav-list { padding: 20px 0; }
+
+    .nav-item {
+      display: flex; align-items: center;
+      padding: 14px 24px;
+      color: #d1d5db;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+    .nav-item .material-icons {
+      margin-right: 16px;
+      font-size: 1.4rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* ═══ MAIN ═══ */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.3s ease;
+      padding: 40px 5vw;
+    }
+    .main-content.collapsed { margin-left: var(--sidebar-collapsed); }
+
+    /* page title row */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .page-header p {
+      font-size: 0.95rem;
+      color: var(--gray);
+    }
+
+    /* ═══ TWO-COL LAYOUT ═══ */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ─── NOTES PANEL ─── */
+    .notes-panel {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      overflow: hidden;
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+    .notes-panel::-webkit-scrollbar { width: 4px; }
+    .notes-panel::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+    .np-head {
+      position: sticky; top: 0;
+      padding: 16px 18px;
+      background: white;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 1;
+    }
+    .np-head-title {
+      font-size: 0.9rem; font-weight: 700; color: var(--dark);
+    }
+    .np-count {
+      font-size: 0.72rem; font-weight: 600;
+      background: #f3f4f6; color: var(--gray);
+      padding: 2px 8px; border-radius: 100px;
+    }
+
+    .note-row {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.15s;
+    }
+    .note-row:last-child { border-bottom: none; }
+    .note-row:hover { background: #fafafa; }
+
+    .nr-top {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 8px;
+      margin-bottom: 4px;
+    }
+    .nr-code {
+      font-size: 0.88rem; font-weight: 700; color: var(--dark);
+    }
+
+    /* gen status badge */
+    .gbadge {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 100px;
+      border: 1px solid; white-space: nowrap; flex-shrink: 0;
+    }
+    .gb-done    { background: var(--green-bg);  border-color: var(--green-bd);  color: #166534; }
+    .gb-proc    { background: var(--blue-bg);   border-color: var(--blue-bd);   color: #1e40af; }
+    .gb-fail    { background: var(--red-bg);    border-color: var(--red-bd);    color: #991b1b; }
+    .gb-pending { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
+    .gb-none    { background: #f9fafb;          border-color: #e5e7eb;          color: var(--gray); }
+
+    .nr-meta {
+      font-size: 0.73rem; color: var(--gray);
+      margin-bottom: 10px; line-height: 1.4;
+    }
+
+    .nr-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .nra-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border-radius: 7px;
+      font-size: 0.72rem; font-weight: 600;
+      border: 1px solid; cursor: pointer; background: none;
+      transition: all 0.15s;
+    }
+    .nra-btn .material-icons { font-size: 0.78rem; }
+
+    .nra-gen {
+      background: #fff7ed; border-color: #fed7aa; color: #c2410c;
+    }
+    .nra-gen:hover { background: #ffedd5; }
+
+    .nra-approve {
+      background: var(--green-bg); border-color: var(--green-bd); color: #166534;
+    }
+    .nra-approve:hover { background: #dcfce7; }
+
+    .nra-del {
+      background: var(--red-bg); border-color: var(--red-bd); color: #991b1b;
+    }
+    .nra-del:hover { background: #fee2e2; }
+
+    /* ─── QUESTIONS PANEL ─── */
+    .q-panel { min-width: 0; }
+
+    /* controls card */
+    .q-controls {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .q-filters {
+      margin-bottom: 14px;
+    }
+    .q-filters form {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+
+    .f-select, .f-input {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.82rem; color: var(--dark);
+      outline: none;
+      -webkit-appearance: none; appearance: none;
+      transition: border-color 0.2s;
+    }
+    .f-select {
+      cursor: pointer; padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center;
+    }
+    .f-input { flex: 1; min-width: 160px; }
+    .f-input::placeholder { color: #9ca3af; }
+    .f-select:focus, .f-input:focus { border-color: var(--primary); outline: none; }
+
+    .f-btn {
+      padding: 7px 18px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 600;
+      background: var(--primary); color: white;
+      border: none; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .f-btn:hover { background: var(--primary-dk); }
+
+    /* status tabs */
+    .status-tabs {
+      display: flex; gap: 4px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .status-tabs::-webkit-scrollbar { display: none; }
+
+    .stab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 600;
+      color: var(--gray); white-space: nowrap;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .stab:hover { background: #f3f4f6; color: var(--dark); }
+    .stab.active {
+      background: #f3f4f6; color: var(--dark);
+      border-color: #e5e7eb;
+    }
+    .stab-n {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 1px 6px; border-radius: 100px;
+    }
+    .s-pending  .stab-n { background: var(--yellow-bg); color: #854d0e; }
+    .s-approved .stab-n { background: var(--green-bg);  color: #166534; }
+    .s-flagged  .stab-n { background: var(--red-bg);    color: #991b1b; }
+    .s-all      .stab-n { background: #f3f4f6;          color: var(--gray); }
+
+    /* question card */
+    .qcard {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      padding: 20px 22px;
+      margin-bottom: 12px;
+      border-left: 4px solid #e5e7eb;
+      transition: box-shadow 0.2s;
+    }
+    .qcard:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
+    .qcard.st-approved { border-left-color: var(--green); }
+    .qcard.st-flagged  { border-left-color: var(--red); }
+    .qcard.st-pending  { border-left-color: var(--yellow); }
+
+    .qc-head {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .qc-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .qpill {
+      font-size: 0.64rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 100px; border: 1px solid;
+    }
+    .qp-course { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+    .qp-easy   { background: var(--green-bg);  border-color: var(--green-bd);  color: #166534; }
+    .qp-medium { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
+    .qp-hard   { background: var(--red-bg);    border-color: var(--red-bd);    color: #991b1b; }
+    .qp-meta   { background: #f9fafb;          border-color: #e5e7eb;          color: var(--gray); }
+
+    .qc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .qa {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #e5e7eb; background: #f9fafb;
+      cursor: pointer; color: var(--gray);
+      transition: all 0.15s;
+    }
+    .qa .material-icons { font-size: 0.95rem; }
+
+    .qa.a-approve:hover,
+    .qa.a-approve.on  { background: var(--green-bg);  border-color: var(--green-bd);  color: #166534; }
+    .qa.a-flag:hover,
+    .qa.a-flag.on     { background: var(--yellow-bg); border-color: var(--yellow-bd); color: #854d0e; }
+    .qa.a-del:hover   { background: var(--red-bg);    border-color: var(--red-bd);    color: #991b1b; }
+
+    .qc-question {
+      font-size: 0.92rem; font-weight: 500;
+      line-height: 1.6; color: var(--dark);
+      margin-bottom: 14px;
+    }
+
+    .qc-options {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px; margin-bottom: 12px;
+    }
+
+    .qopt {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 11px; border-radius: 8px;
+      background: #f9fafb; border: 1px solid #f3f4f6;
+      font-size: 0.82rem; line-height: 1.4; color: var(--gray);
+    }
+    .qopt.correct {
+      background: var(--green-bg);
+      border-color: var(--green-bd); color: var(--dark);
+    }
+    .qopt-ltr {
+      font-size: 0.7rem; font-weight: 800;
+      flex-shrink: 0; margin-top: 1px; min-width: 14px;
+      color: var(--gray);
+    }
+    .qopt.correct .qopt-ltr { color: #166534; }
+
+    .qc-expl {
+      font-size: 0.8rem; color: var(--gray);
+      background: #f9fafb;
+      border: 1px solid #f3f4f6;
+      border-radius: 8px; padding: 10px 12px;
+      line-height: 1.55;
+    }
+    .qc-expl strong { color: var(--primary); font-weight: 600; }
+
+    /* empty state */
+    .empty {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .empty .material-icons { font-size: 2.8rem; color: #d1d5db; margin-bottom: 12px; display: block; }
+    .empty h3 { font-size: 1rem; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
+    .empty p  { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
+
+    /* ═══ TOASTS — top right ═══ */
+    .tw {
+      position: fixed; top: 20px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 9px;
+      pointer-events: none; max-width: 320px; width: calc(100% - 32px);
+    }
+    .toast {
+      position: relative; display: flex; align-items: flex-start; gap: 11px;
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 12px; padding: 13px 13px 17px 15px;
+      pointer-events: all; overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+      animation: tin .34s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast.th { animation: tout .24s ease forwards; }
+    @keyframes tin  { from{opacity:0;transform:translateX(16px) scale(.96)} to{opacity:1;transform:none} }
+    @keyframes tout { from{opacity:1;transform:none} to{opacity:0;transform:translateX(16px) scale(.96)} }
+    .toast::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; border-radius:12px 0 0 12px; }
+    .toast.ts::before { background:var(--green); }
+    .toast.te::before { background:var(--red); }
+    .toast.ti::before { background:var(--primary); }
+    .t-i .material-icons { font-size:1rem; line-height:1; margin-top:1px; }
+    .toast.ts .t-i .material-icons { color:var(--green); }
+    .toast.te .t-i .material-icons { color:var(--red); }
+    .toast.ti .t-i .material-icons { color:var(--primary); }
+    .t-b { flex:1; min-width:0; }
+    .t-t { font-size:.83rem; font-weight:600; color:var(--dark); }
+    .t-x { background:none; border:none; cursor:pointer; color:#9ca3af; display:flex; align-items:center; padding:2px; border-radius:5px; flex-shrink:0; transition:color .12s; }
+    .t-x:hover { color:var(--dark); }
+    .t-x .material-icons { font-size:.85rem; line-height:1; }
+    .t-p { position:absolute; bottom:0; left:0; height:2px; animation:tp var(--dur,3.5s) linear forwards; }
+    .toast.ts .t-p { background:var(--green); }
+    .toast.te .t-p { background:var(--red); }
+    .toast.ti .t-p { background:var(--primary); }
+    @keyframes tp { from{width:100%} to{width:0} }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .notes-panel { position: static; max-height: none; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: var(--sidebar-collapsed); }
+      .main-content { margin-left: var(--sidebar-collapsed); padding: 24px 4vw; }
+      .nav-item span:not(.material-icons) { display: none; }
+      .sidebar-header { font-size: 1.1rem; padding: 16px; }
+      .qc-options { grid-template-columns: 1fr; }
+      .q-filters form { flex-direction: column; align-items: stretch; }
+      .f-input { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fd"
+       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
+       style="display:none"></div>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">U-NEX Admin</div>
+    <nav class="nav-list">
+      <a href="{{ url_for('admin_dashboard_page') }}" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('add_notes') }}" class="nav-item">
+        <span class="material-icons">upload_file</span>
+        <span>Add Notes</span>
+      </a>
+      <a href="{{ url_for('edit_notes') }}" class="nav-item">
+        <span class="material-icons">edit</span>
+        <span>Edit Notes</span>
+      </a>
+      <a href="{{ url_for('register_code') }}" class="nav-item">
+        <span class="material-icons">school</span>
+        <span>Course Codes</span>
+      </a>
+      <a href="{{ url_for('admin_questions_review') }}" class="nav-item active">
+        <span class="material-icons">quiz</span>
+        <span>Question Bank</span>
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="nav-item">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>Question Bank</h1>
+      <p>Generate questions from uploaded notes, review them, and approve before students see them.</p>
+    </div>
+
+    <div class="layout">
+
+      <!-- ── NOTES LIST ── -->
+      <div class="notes-panel">
+        <div class="np-head">
+          <span class="np-head-title">Uploaded Notes</span>
+          <span class="np-count">{{ notes_list | length }}</span>
+        </div>
+
+        {% for note in notes_list %}
+        <div class="note-row">
+          <div class="nr-top">
+            <span class="nr-code">{{ note.course_code }}</span>
+            {% set gs = note.gen_status %}
+            {% if   gs == 'done'       %}<span class="gbadge gb-done">✓ {{ note.gen_count }}q</span>
+            {% elif gs == 'processing' %}<span class="gbadge gb-proc">⟳ Running</span>
+            {% elif gs == 'failed'     %}<span class="gbadge gb-fail">✗ Failed</span>
+            {% elif gs == 'pending'    %}<span class="gbadge gb-pending">Queued</span>
+            {% else                    %}<span class="gbadge gb-none">No questions</span>
+            {% endif %}
+          </div>
+
+          <div class="nr-meta">
+            {{ note.department | title }} · L{{ note.level }}<br>
+            {{ note.semester }} · {{ note.academic_year }}
+          </div>
+
+          <div class="nr-actions">
+            <form method="POST"
+                  action="{{ url_for('admin_generate_questions', note_id=note.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirmGen('{{ note.course_code }}', '{{ gs }}')">
+              <button type="submit" class="nra-btn nra-gen">
+                <span class="material-icons">auto_awesome</span>
+                {% if gs == 'done' %}Regen{% else %}Generate{% endif %}
+              </button>
+            </form>
+
+            {% if gs == 'done' and note.gen_count > 0 %}
+            <form method="POST"
+                  action="{{ url_for('admin_approve_all', note_id=note.id) }}"
+                  style="display:inline">
+              <button type="submit" class="nra-btn nra-approve">
+                <span class="material-icons">done_all</span> Approve All
+              </button>
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('admin_delete_all_questions', note_id=note.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete ALL questions for {{ note.course_code }}? Cannot be undone.')">
+              <button type="submit" class="nra-btn nra-del">
+                <span class="material-icons">delete_sweep</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+        <div style="padding:28px 18px;text-align:center;color:var(--gray);font-size:.85rem;">
+          No notes uploaded yet.<br>
+          <a href="{{ url_for('add_notes') }}" style="color:var(--primary);font-weight:600;">Upload notes →</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── QUESTIONS ── -->
+      <div class="q-panel">
+
+        <div class="q-controls">
+          <!-- filters -->
+          <div class="q-filters">
+            <form method="GET" action="{{ url_for('admin_questions_review') }}">
+              <input type="hidden" name="status" value="{{ filters.status }}">
+              <select class="f-select" name="course_code">
+                <option value="">All courses</option>
+                {% for cc in course_codes %}
+                <option value="{{ cc }}" {% if cc == filters.course_code %}selected{% endif %}>{{ cc }}</option>
+                {% endfor %}
+              </select>
+              <select class="f-select" name="difficulty">
+                <option value="">All difficulties</option>
+                <option value="easy"   {% if filters.difficulty == 'easy'   %}selected{% endif %}>Easy</option>
+                <option value="medium" {% if filters.difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="hard"   {% if filters.difficulty == 'hard'   %}selected{% endif %}>Hard</option>
+              </select>
+              <input class="f-input" type="text" name="search"
+                     placeholder="Search question text…"
+                     value="{{ filters.search }}">
+              <button type="submit" class="f-btn">Filter</button>
+            </form>
+          </div>
+
+          <!-- status tabs -->
+          {% set base = '?course_code=' ~ filters.course_code ~ '&difficulty=' ~ filters.difficulty ~ '&search=' ~ filters.search %}
+          <div class="status-tabs">
+            <a href="{{ url_for('admin_questions_review') ~ base }}&status=pending"
+               class="stab s-pending {% if filters.status == 'pending' %}active{% endif %}">
+              Pending <span class="stab-n">{{ status_counts.get('pending', 0) }}</span>
+            </a>
+            <a href="{{ url_for('admin_questions_review') ~ base }}&status=approved"
+               class="stab s-approved {% if filters.status == 'approved' %}active{% endif %}">
+              Approved <span class="stab-n">{{ status_counts.get('approved', 0) }}</span>
+            </a>
+            <a href="{{ url_for('admin_questions_review') ~ base }}&status=flagged"
+               class="stab s-flagged {% if filters.status == 'flagged' %}active{% endif %}">
+              Flagged <span class="stab-n">{{ status_counts.get('flagged', 0) }}</span>
+            </a>
+            <a href="{{ url_for('admin_questions_review') ~ base }}&status=all"
+               class="stab s-all {% if filters.status == 'all' %}active{% endif %}">
+              All <span class="stab-n">{{ status_counts.values() | sum }}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- question cards -->
+        {% if questions_list %}
+          {% for q in questions_list %}
+          <div class="qcard st-{{ q.status }}" id="qc-{{ q.id }}">
+
+            <div class="qc-head">
+              <div class="qc-pills">
+                <span class="qpill qp-course">{{ q.course_code }}</span>
+                <span class="qpill qp-{{ q.difficulty }}">{{ q.difficulty }}</span>
+                <span class="qpill qp-meta">L{{ q.level }}</span>
+                <span class="qpill qp-meta">{{ q.semester }}</span>
+              </div>
+              <div class="qc-actions">
+                <button class="qa a-approve {% if q.status == 'approved' %}on{% endif %}"
+                        title="Approve"
+                        onclick="setStatus({{ q.id }}, 'approve', this)">
+                  <span class="material-icons">check</span>
+                </button>
+                <button class="qa a-flag {% if q.status == 'flagged' %}on{% endif %}"
+                        title="Flag as bad"
+                        onclick="setStatus({{ q.id }}, 'flag', this)">
+                  <span class="material-icons">flag</span>
+                </button>
+                <button class="qa a-del"
+                        title="Delete"
+                        onclick="deleteQ({{ q.id }})">
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="qc-question">{{ q.question_text }}</div>
+
+            <div class="qc-options">
+              {% for ltr, key in [('A','option_a'),('B','option_b'),('C','option_c'),('D','option_d')] %}
+              <div class="qopt {% if q.correct_option == ltr | lower %}correct{% endif %}">
+                <span class="qopt-ltr">{{ ltr }}</span>
+                <span>{{ q[key] }}</span>
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if q.explanation %}
+            <div class="qc-expl">
+              <strong>Why:</strong> {{ q.explanation }}
+            </div>
+            {% endif %}
+
+          </div>
+          {% endfor %}
+
+        {% else %}
+          <div class="empty">
+            <span class="material-icons">quiz</span>
+            <h3>No questions found</h3>
+            <p>
+              Select a note on the left and click <strong>Generate</strong>
+              to create questions from it.<br>
+              Questions will appear here for review before students can see them.
+            </p>
+          </div>
+        {% endif %}
+
+      </div><!-- /q-panel -->
+    </div><!-- /layout -->
+  </main>
+
+  <div class="tw" id="tw"></div>
+
+  <script>
+    function confirmGen(code, status) {
+      if (status === 'done') {
+        return confirm(
+          code + ' already has questions.\n\n' +
+          'This will ADD more on top. Use "Delete All" first for a clean regeneration.\n\nContinue?'
+        );
+      }
+      return confirm('Generate 70 questions for ' + code + '?\nThis may take 30–60 seconds.');
+    }
+
+    async function setStatus(id, action, btn) {
+      try {
+        const res  = await fetch('/admin/questions/' + action + '/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const card = document.getElementById('qc-' + id);
+        card.classList.remove('st-pending', 'st-approved', 'st-flagged');
+        card.classList.add('st-' + data.new_status);
+
+        card.querySelectorAll('.qa').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+
+        showToast('success', 'Question ' + data.new_status + '.');
+      } catch(e) {
+        showToast('error', 'Error: ' + e.message);
+      }
+    }
+
+    async function deleteQ(id) {
+      if (!confirm('Permanently delete this question?')) return;
+      try {
+        const res  = await fetch('/admin/questions/delete/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const card = document.getElementById('qc-' + id);
+        card.style.transition = 'opacity .25s, transform .25s';
+        card.style.opacity    = '0';
+        card.style.transform  = 'translateX(14px)';
+        setTimeout(() => card.remove(), 260);
+        showToast('info', 'Question deleted.');
+      } catch(e) {
+        showToast('error', 'Error: ' + e.message);
+      }
+    }
+
+    /* toast engine */
+    const TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const TC = { success:'ts', error:'te', info:'ti' };
+
+    function showToast(cat, msg, dur) {
+      dur = dur || 3800;
+      const wrap = document.getElementById('tw');
+      const el   = document.createElement('div');
+      el.className = 'toast ' + (TC[cat] || 'ti');
+      el.style.setProperty('--dur', dur + 'ms');
+      el.innerHTML =
+        '<div class="t-i"><span class="material-icons">' + (TI[cat]||TI.info) + '</span></div>' +
+        '<div class="t-b"><div class="t-t">' + msg + '</div></div>' +
+        '<button class="t-x"><span class="material-icons">close</span></button>' +
+        '<div class="t-p"></div>';
+      el.querySelector('.t-x').addEventListener('click', function(){ hide(el); });
+      wrap.appendChild(el);
+      var t = setTimeout(function(){ hide(el); }, dur);
+      el._t = t;
+    }
+
+    function hide(el) {
+      if (!el || el.classList.contains('th')) return;
+      clearTimeout(el._t);
+      el.classList.add('th');
+      el.addEventListener('animationend', function(){ el.remove(); }, { once: true });
+    }
+
+    (function() {
+      try {
+        var msgs = JSON.parse(document.getElementById('fd').dataset.messages);
+        msgs.forEach(function(m, i) {
+          setTimeout(function(){ showToast(m[0], m[1]); }, i * 260);
+        });
+      } catch(e) {}
+    })();
+  </script>
+
+</body>
+</html>
