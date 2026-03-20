@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • Quiz Results</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange:     #f97316;
+      --orange-dk:  #ea580c;
+      --orange-dim: rgba(249,115,22,0.10);
+      --orange-bd:  rgba(249,115,22,0.22);
+      --gold:       #d4a017;
+      --gold-dim:   rgba(212,160,23,0.10);
+      --green:      #22c55e;
+      --green-dim:  rgba(34,197,94,0.10);
+      --green-bd:   rgba(34,197,94,0.22);
+      --red:        #ef4444;
+      --red-dim:    rgba(239,68,68,0.08);
+      --red-bd:     rgba(239,68,68,0.20);
+      --blue:       #60a5fa;
+      --blue-dim:   rgba(96,165,250,0.10);
+      --bg:         #0c0e14;
+      --s1:         #13161f;
+      --s2:         #191d28;
+      --bd:         rgba(255,255,255,0.06);
+      --bd2:        rgba(255,255,255,0.10);
+      --txt:        #eef0f6;
+      --txt2:       rgba(238,240,246,0.55);
+      --txt3:       rgba(238,240,246,0.28);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 10% 10%, rgba(249,115,22,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 40% at 90% 90%, rgba(34,197,94,0.05) 0%, transparent 60%);
+    }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 60px;
+      background: rgba(12,14,20,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--bd);
+      display: flex; align-items: center;
+      padding: 0 28px; gap: 12px;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.45rem; font-weight: 900;
+      letter-spacing: -1.1px; margin-right: auto;
+    }
+    .nav-logo em { color: var(--orange); font-style: normal; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 500; color: var(--txt2);
+      padding: 7px 13px; border-radius: 9px;
+      border: 1px solid var(--bd2); background: var(--s1);
+      transition: color .2s;
+    }
+    .nav-btn:hover { color: var(--txt); }
+    .nav-btn .material-icons { font-size: 0.95rem; }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 900; color: #fff;
+    }
+
+    /* PAGE */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+
+    /* ── SCORE HERO ── */
+    .score-hero {
+      background: var(--s1);
+      border: 1px solid var(--bd2);
+      border-radius: 20px;
+      padding: 36px;
+      margin-bottom: 20px;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; gap: 32px;
+    }
+
+    .score-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        48deg, transparent 0, transparent 24px,
+        rgba(255,255,255,0.018) 24px, rgba(255,255,255,0.018) 25px
+      );
+      pointer-events: none;
+    }
+
+    .score-hero::after {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 240px; height: 240px; border-radius: 50%;
+      pointer-events: none;
+    }
+    .score-hero.passed::after  { background: radial-gradient(circle, rgba(34,197,94,0.16) 0%, transparent 70%); }
+    .score-hero.failed::after  { background: radial-gradient(circle, rgba(239,68,68,0.14) 0%, transparent 70%); }
+
+    .score-ring {
+      flex-shrink: 0;
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      border: 3px solid;
+    }
+    .score-hero.passed  .score-ring { border-color: var(--green); background: var(--green-dim); }
+    .score-hero.failed  .score-ring { border-color: var(--red);   background: var(--red-dim); }
+
+    .score-pct {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem; font-weight: 900; line-height: 1;
+    }
+    .score-hero.passed .score-pct { color: var(--green); }
+    .score-hero.failed .score-pct { color: var(--red); }
+    .score-lbl { font-size: 0.68rem; color: var(--txt3); margin-top: 2px; }
+
+    .score-info { flex: 1; position: relative; z-index: 1; }
+
+    .score-verdict {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 900; letter-spacing: -0.6px;
+      margin-bottom: 6px;
+    }
+    .score-hero.passed .score-verdict { color: var(--green); }
+    .score-hero.failed .score-verdict { color: var(--red); }
+
+    .score-sub {
+      font-size: 0.88rem; color: var(--txt2);
+      margin-bottom: 18px; line-height: 1.5;
+    }
+
+    .score-stats {
+      display: flex; flex-wrap: wrap; gap: 12px;
+    }
+    .ss-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 13px; border-radius: 9px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--bd);
+      font-size: 0.8rem;
+    }
+    .ss-item .material-icons { font-size: 0.95rem; color: var(--txt3); }
+    .ss-val { font-weight: 700; color: var(--txt); }
+    .ss-lbl { color: var(--txt2); }
+
+    /* ── ACTION BUTTONS ── */
+    .actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .act-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 10px 20px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600;
+      border: 1px solid var(--bd2); background: var(--s1);
+      color: var(--txt2); cursor: pointer;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .act-btn:hover { color: var(--txt); background: var(--s2); }
+    .act-btn.primary {
+      background: var(--orange); border-color: var(--orange); color: #fff;
+    }
+    .act-btn.primary:hover { background: var(--orange-dk); }
+    .act-btn .material-icons { font-size: 1rem; }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs {
+      display: flex; gap: 4px;
+      background: var(--s1); border: 1px solid var(--bd);
+      border-radius: 12px; padding: 5px;
+      margin-bottom: 16px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+
+    .ftab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--txt2); white-space: nowrap;
+      border: 1px solid transparent;
+      cursor: pointer; background: none;
+      transition: all .15s;
+    }
+    .ftab:hover  { background: var(--s2); color: var(--txt); }
+    .ftab.active { background: var(--s2); color: var(--txt); border-color: var(--bd2); }
+    .ftab-n {
+      font-size: 0.65rem; font-weight: 700;
+      padding: 1px 6px; border-radius: 100px;
+    }
+    .ft-all     .ftab-n { background: var(--bd);         color: var(--txt2); }
+    .ft-correct .ftab-n { background: var(--green-dim);  color: var(--green); }
+    .ft-wrong   .ftab-n { background: var(--red-dim);    color: var(--red); }
+    .ft-skip    .ftab-n { background: var(--bd);         color: var(--txt3); }
+
+    /* ── QUESTION REVIEW CARD ── */
+    .rcard {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--bd);
+      transition: border-color .2s;
+    }
+    .rcard.rc-correct { border-left-color: var(--green); }
+    .rcard.rc-wrong   { border-left-color: var(--red); }
+    .rcard.rc-skip    { border-left-color: var(--txt3); }
+
+    .rc-head {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .rc-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .rcpill {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 100px; border: 1px solid;
+    }
+    .rcp-course  { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
+    .rcp-easy    { background: var(--green-dim);  border-color: var(--green-bd);  color: var(--green); }
+    .rcp-medium  { background: rgba(234,179,8,.10); border-color: rgba(234,179,8,.25); color: #eab308; }
+    .rcp-hard    { background: var(--red-dim);    border-color: var(--red-bd);    color: var(--red); }
+
+    .rc-status {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .rc-status.correct { color: var(--green); }
+    .rc-status.wrong   { color: var(--red); }
+    .rc-status.skip    { color: var(--txt3); }
+    .rc-status .material-icons { font-size: 0.95rem; }
+
+    .rc-question {
+      font-size: 0.9rem; font-weight: 500;
+      line-height: 1.6; color: var(--txt);
+      margin-bottom: 14px;
+    }
+
+    .rc-options {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px; margin-bottom: 12px;
+    }
+    .rcopt {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 11px; border-radius: 8px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--bd);
+      font-size: 0.8rem; line-height: 1.4; color: var(--txt2);
+    }
+    .rcopt.is-correct {
+      background: var(--green-dim); border-color: var(--green-bd); color: var(--txt);
+    }
+    .rcopt.is-wrong-sel {
+      background: var(--red-dim); border-color: var(--red-bd); color: var(--txt);
+    }
+    .rcopt-ltr {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 900;
+      flex-shrink: 0; margin-top: 1px; min-width: 14px;
+      color: var(--txt3);
+    }
+    .rcopt.is-correct   .rcopt-ltr { color: var(--green); }
+    .rcopt.is-wrong-sel .rcopt-ltr { color: var(--red); }
+
+    .rc-expl {
+      font-size: 0.78rem; color: var(--txt2);
+      background: rgba(255,255,255,0.022);
+      border: 1px solid var(--bd);
+      border-radius: 8px; padding: 10px 13px;
+      line-height: 1.55;
+    }
+    .rc-expl strong { color: var(--orange); font-weight: 600; }
+
+    /* empty state */
+    .empty {
+      text-align: center; padding: 48px 20px;
+      background: var(--s1); border: 1px solid var(--bd);
+      border-radius: 14px;
+    }
+    .empty .material-icons { font-size: 2rem; color: var(--txt3); display: block; margin-bottom: 10px; }
+    .empty p { font-size: 0.85rem; color: var(--txt2); }
+
+    /* ANIMS */
+    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.10s}
+    .a3{animation-delay:.16s} .a4{animation-delay:.20s}
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    @media (max-width: 640px) {
+      .score-hero { flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px; }
+      .rc-options { grid-template-columns: 1fr; }
+      .page { padding: 24px 14px 64px; }
+      .nav  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('quiz_setup') }}" class="nav-btn">
+      <span class="material-icons">quiz</span> New Quiz
+    </a>
+    <a href="{{ url_for('quiz_history') }}" class="nav-btn">
+      <span class="material-icons">history</span> History
+    </a>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-btn">
+      <span class="material-icons">dashboard</span> Dashboard
+    </a>
+    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar">
+      {{ student_name[0] | upper }}
+    </a>
+  </nav>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- SCORE HERO -->
+    {% set pct = result.percentage | float %}
+    <div class="score-hero {% if result.passed %}passed{% else %}failed{% endif %} a a1">
+
+      <div class="score-ring">
+        <div class="score-pct">{{ pct | int }}%</div>
+        <div class="score-lbl">Score</div>
+      </div>
+
+      <div class="score-info">
+        <div class="score-verdict">
+          {% if result.passed %}Well done!{% else %}Keep practising.{% endif %}
+        </div>
+        <div class="score-sub">
+          You scored <strong style="color:var(--txt)">{{ result.score }} out of {{ result.total }}</strong>
+          {% if quiz_sess.course_code %}on {{ quiz_sess.course_code }}{% endif %}
+          · {{ quiz_sess.semester }} {{ quiz_sess.academic_year }}
+        </div>
+
+        <div class="score-stats">
+          <div class="ss-item">
+            <span class="material-icons">check_circle</span>
+            <span class="ss-val">{{ result.score }}</span>
+            <span class="ss-lbl">correct</span>
+          </div>
+          <div class="ss-item">
+            <span class="material-icons">cancel</span>
+            <span class="ss-val">{{ result.total - result.score }}</span>
+            <span class="ss-lbl">wrong / skipped</span>
+          </div>
+          {% if result.time_taken_seconds %}
+          <div class="ss-item">
+            <span class="material-icons">timer</span>
+            <span class="ss-val">
+              {% set m = (result.time_taken_seconds // 60) %}
+              {% set s = (result.time_taken_seconds % 60) %}
+              {{ m }}m {{ s }}s
+            </span>
+            <span class="ss-lbl">time taken</span>
+          </div>
+          {% endif %}
+          <div class="ss-item">
+            <span class="material-icons">school</span>
+            <span class="ss-val">{{ quiz_sess.mode | title }}</span>
+            <span class="ss-lbl">mode</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions a a2">
+      <a href="{{ url_for('quiz_setup') }}" class="act-btn primary">
+        <span class="material-icons">replay</span> Retake Quiz
+      </a>
+      <a href="{{ url_for('user_notes') }}" class="act-btn">
+        <span class="material-icons">menu_book</span> Review Notes
+      </a>
+      <a href="{{ url_for('quiz_history') }}" class="act-btn">
+        <span class="material-icons">history</span> View History
+      </a>
+      <a href="{{ url_for('user_dashboard') }}" class="act-btn">
+        <span class="material-icons">dashboard</span> Dashboard
+      </a>
+    </div>
+
+    <!-- FILTER TABS -->
+    {% set correct_count  = review | selectattr('is_correct') | list | length %}
+    {% set wrong_count    = review | rejectattr('is_correct') | selectattr('selected') | list | length %}
+    {% set skip_count     = review | rejectattr('selected') | list | length %}
+
+    <div class="filter-tabs a a3">
+      <button class="ftab ft-all active" data-filter="all">
+        All <span class="ftab-n">{{ review | length }}</span>
+      </button>
+      <button class="ftab ft-correct" data-filter="correct">
+        Correct <span class="ftab-n">{{ correct_count }}</span>
+      </button>
+      <button class="ftab ft-wrong" data-filter="wrong">
+        Wrong <span class="ftab-n">{{ wrong_count }}</span>
+      </button>
+      <button class="ftab ft-skip" data-filter="skip">
+        Skipped <span class="ftab-n">{{ skip_count }}</span>
+      </button>
+    </div>
+
+    <!-- REVIEW LIST -->
+    <div id="reviewList" class="a a4">
+      {% for q in review %}
+      {% set status = 'correct' if q.is_correct else ('skip' if not q.selected else 'wrong') %}
+      <div class="rcard rc-{{ status }}" data-status="{{ status }}">
+
+        <div class="rc-head">
+          <div class="rc-pills">
+            <span class="rcpill rcp-course">{{ q.course_code }}</span>
+            <span class="rcpill rcp-{{ q.difficulty }}">{{ q.difficulty }}</span>
+            <span style="font-size:.68rem;color:var(--txt3)">Q{{ q.position }}</span>
+          </div>
+          <div class="rc-status {{ status }}">
+            {% if status == 'correct' %}
+              <span class="material-icons">check_circle</span> Correct
+            {% elif status == 'wrong' %}
+              <span class="material-icons">cancel</span> Wrong
+            {% else %}
+              <span class="material-icons">radio_button_unchecked</span> Skipped
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="rc-question">{{ q.question_text }}</div>
+
+        <div class="rc-options">
+          {% for ltr in ['a','b','c','d'] %}
+          {% set opt_text = q.options.get(ltr, '') %}
+          {% if opt_text %}
+          <div class="rcopt
+            {%- if ltr == q.correct %} is-correct{% endif %}
+            {%- if q.selected and ltr == q.selected and ltr != q.correct %} is-wrong-sel{% endif %}">
+            <span class="rcopt-ltr">{{ ltr | upper }}</span>
+            <span>
+              {{ opt_text }}
+              {% if ltr == q.correct %}&nbsp;<span style="font-size:.72rem;color:var(--green)">✓ correct</span>{% endif %}
+              {% if q.selected and ltr == q.selected and ltr != q.correct %}&nbsp;<span style="font-size:.72rem;color:var(--red)">✗ your answer</span>{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if q.explanation %}
+        <div class="rc-expl">
+          <strong>Why:</strong> {{ q.explanation }}
+        </div>
+        {% endif %}
+
+      </div>
+      {% else %}
+      <div class="empty">
+        <span class="material-icons">quiz</span>
+        <p>No review data available.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <script>
+    /* filter tabs */
+    document.querySelectorAll('.ftab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.rcard').forEach(card => {
+          const show = filter === 'all' || card.dataset.status === filter;
+          card.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
