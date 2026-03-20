@@ -1530,55 +1530,19 @@ def admin_update_question(q_id):
 @app.route('/user/quiz/setup', methods=['GET'])
 @student_required
 def quiz_setup():
-    dept  = session.get('student_dept', '').strip().lower()
     level = session.get('student_level', '').strip()
 
-    # check for existing in_progress session — retake protection (#2)
     try:
-        active = supabase.table('quiz_sessions') \
-            .select('id') \
-            .eq('user_id', session.get('student_id')) \
-            .eq('status', 'in_progress') \
-            .execute()
-        if active.data:
-            existing_id = active.data[0]['id']
-            flash("You have an unfinished quiz. Resuming it now.", 'info')
-            return redirect(url_for('quiz_session', session_id=existing_id))
-    except Exception:
-        pass
-
-    # filter dropdowns by student's level — case-insensitive dept match (#1 level filter)
-    try:
-        sem_res   = supabase.table('questions') \
-            .select('semester') \
-            .eq('status', 'approved') \
-            .eq('level', level) \
-            .execute()
-        semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
+        q = supabase.table('questions').select('semester, academic_year, course_code')             .eq('status', 'approved')
+        if level:
+            q = q.eq('level', level)
+        all_q = q.execute().data or []
+        semesters      = sorted(set(r['semester']     for r in all_q if r.get('semester')))
+        academic_years = sorted(set(r['academic_year'] for r in all_q if r.get('academic_year')), reverse=True)
+        course_codes   = sorted(set(r['course_code']   for r in all_q if r.get('course_code')))
     except Exception:
         semesters = []
-
-    try:
-        yr_res = supabase.table('questions') \
-            .select('academic_year') \
-            .eq('status', 'approved') \
-            .eq('level', level) \
-            .execute()
-        academic_years = sorted(
-            set(r['academic_year'] for r in (yr_res.data or []) if r['academic_year']),
-            reverse=True
-        )
-    except Exception:
         academic_years = []
-
-    try:
-        cc_res       = supabase.table('questions') \
-            .select('course_code') \
-            .eq('status', 'approved') \
-            .eq('level', level) \
-            .execute()
-        course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
-    except Exception:
         course_codes = []
 
     return render_template(
@@ -1596,18 +1560,16 @@ def quiz_setup():
 def quiz_question_count():
     if not session.get('student_logged_in'):
         return jsonify({'count': 0, 'error': 'not logged in'})
-    dept        = session.get('student_dept', '').strip().lower()
-    level       = session.get('student_level', '').strip()
+    level       = request.args.get('level', session.get('student_level', '')).strip()
     semester    = request.args.get('semester', '').strip()
     acad_year   = request.args.get('academic_year', '').strip()
     course_code = request.args.get('course_code', '').strip().upper()
 
     try:
-        q = supabase.table('questions') \
-            .select('id', count='exact') \
-            .eq('status', 'approved') \
-            .eq('level', level)
+        q = supabase.table('questions')             .select('id', count='exact')             .eq('status', 'approved')
 
+        if level:
+            q = q.eq('level', level)
         if semester:
             q = q.eq('semester', semester)
         if acad_year:
@@ -1626,8 +1588,8 @@ def quiz_question_count():
 @student_required
 def quiz_start():
     uid         = session.get('student_id')
-    dept        = session.get('student_dept', '').strip().lower()
-    level       = session.get('student_level', '').strip()
+    dept        = session.get('student_dept', '')
+    level       = request.form.get('level', session.get('student_level', '')).strip()
     semester    = request.form.get('semester', '').strip()
     acad_year   = request.form.get('academic_year', '').strip()
     course_code = request.form.get('course_code', '').strip().upper()
@@ -1645,20 +1607,6 @@ def quiz_start():
     if time_limit and time_limit.isdigit():
         time_limit_int = max(5, min(int(time_limit), 300))
 
-    # retake protection — redirect to existing in_progress session (#2)
-    try:
-        active = supabase.table('quiz_sessions') \
-            .select('id') \
-            .eq('user_id', uid) \
-            .eq('status', 'in_progress') \
-            .execute()
-        if active.data:
-            flash("You already have an active quiz. Complete it before starting a new one.", 'info')
-            return redirect(url_for('quiz_session', session_id=active.data[0]['id']))
-    except Exception:
-        pass
-
-    # fetch pool filtered by dept + level (#1 level filter)
     try:
         q = supabase.table('questions') \
             .select('id, correct_option, option_a, option_b, option_c, option_d') \
@@ -1678,20 +1626,11 @@ def quiz_start():
 
     if len(pool) < 1:
         flash(
-            "No approved questions found for your department and level with that selection. "
-            "Ask your admin to add questions for your course.",
+            f"No approved questions found for that selection. "
+            f"Ask your admin to add questions for Level {level}.",
             'error'
         )
         return redirect(url_for('quiz_setup'))
-
-    # minimum questions warning — tell them exactly how many they'll get (#5)
-    total = min(70, len(pool))
-    if total < 70:
-        flash(
-            f"Only {total} approved questions are available for this selection. "
-            f"Your quiz will have {total} questions instead of 70.",
-            'info'
-        )
 
     total    = min(70, len(pool))
     selected = _random.sample(pool, total)
