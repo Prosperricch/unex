@@ -1216,17 +1216,18 @@ def admin_generate_questions(note_id):
         flash(f"Could not fetch note: {str(e)}", 'error')
         return redirect(url_for('admin_questions_review'))
 
-    def _run_generation(n, sb):
-        generate_questions_for_note(n, sb)
+    # run synchronously — reliable on Render sync workers
+    result = generate_questions_for_note(note, supabase)
 
-    t = threading.Thread(target=_run_generation, args=(note, supabase), daemon=True)
-    t.start()
+    if result['success']:
+        skipped = result.get('skipped', 0)
+        msg = f"Generated {result['count']} questions for {note['course_code']}."
+        if skipped:
+            msg += f" ({skipped} malformed questions skipped.)"
+        flash(msg, 'success')
+    else:
+        flash(f"Generation failed: {result['error']}", 'error')
 
-    flash(
-        f"Generation started for {note['course_code']}. "
-        f"Refresh the page in 60 seconds to see the results.",
-        'info'
-    )
     return redirect(url_for('admin_questions_review'))
 
 
@@ -1296,12 +1297,27 @@ def admin_questions_review():
     except Exception:
         course_codes = []
 
+    # fetch course codes and departments for the create form dropdowns
+    try:
+        cc_form_res      = supabase.table('added_course_code').select('code').order('code').execute()
+        all_course_codes = [r['code'] for r in (cc_form_res.data or [])]
+    except Exception:
+        all_course_codes = []
+
+    try:
+        dept_form_res   = supabase.table('departments').select('name').order('name').execute()
+        all_departments = [r['name'] for r in (dept_form_res.data or [])]
+    except Exception:
+        all_departments = []
+
     return render_template(
         'admin_questions.html',
-        notes_list     = notes_list,
-        questions_list = questions_list,
-        status_counts  = status_counts,
-        course_codes   = course_codes,
+        notes_list       = notes_list,
+        questions_list   = questions_list,
+        status_counts    = status_counts,
+        course_codes     = course_codes,
+        all_course_codes = all_course_codes,
+        all_departments  = all_departments,
         filters={
             'status':      status_filter,
             'course_code': course_filter,
@@ -1395,6 +1411,117 @@ def admin_delete_all_questions(note_id):
 
 
 # ── QUIZ SETUP ────────────────────────────────────────────────────────────
+# ── MANUAL QUESTION CREATE ────────────────────────────────────────────────
+@app.route('/admin/questions/create', methods=['POST'])
+@admin_required
+def admin_create_question():
+    question_text = request.form.get('question_text', '').strip()
+    option_a      = request.form.get('option_a', '').strip()
+    option_b      = request.form.get('option_b', '').strip()
+    option_c      = request.form.get('option_c', '').strip()
+    option_d      = request.form.get('option_d', '').strip()
+    correct_option= request.form.get('correct_option', '').strip().lower()
+    explanation   = request.form.get('explanation', '').strip()
+    difficulty    = request.form.get('difficulty', 'medium').strip().lower()
+    course_code   = request.form.get('course_code', '').strip().upper()
+    department    = request.form.get('department', '').strip()
+    level         = request.form.get('level', '').strip()
+    semester      = request.form.get('semester', '').strip()
+    academic_year = request.form.get('academic_year', '').strip()
+
+    # validate
+    errors = []
+    if not question_text:
+        errors.append("Question text is required.")
+    if not all([option_a, option_b, option_c, option_d]):
+        errors.append("All four options are required.")
+    if correct_option not in ('a', 'b', 'c', 'd'):
+        errors.append("Please select which option is correct.")
+    if difficulty not in ('easy', 'medium', 'hard'):
+        difficulty = 'medium'
+    if not course_code:
+        errors.append("Course code is required.")
+    if not department:
+        errors.append("Department is required.")
+    if not level:
+        errors.append("Level is required.")
+    if not semester:
+        errors.append("Semester is required.")
+    if not academic_year:
+        errors.append("Academic year is required.")
+
+    if errors:
+        for msg in errors:
+            flash(msg, 'error')
+        return redirect(url_for('admin_questions_review'))
+
+    try:
+        supabase.table('questions').insert({
+            "course_code":    course_code,
+            "department":     department,
+            "level":          level,
+            "semester":       semester,
+            "academic_year":  academic_year,
+            "question_text":  question_text,
+            "option_a":       option_a,
+            "option_b":       option_b,
+            "option_c":       option_c,
+            "option_d":       option_d,
+            "correct_option": correct_option,
+            "explanation":    explanation,
+            "difficulty":     difficulty,
+            "status":         "approved",  # manually created = auto-approved
+            "created_at":     "now()"
+        }).execute()
+        flash(f"Question added successfully for {course_code}.", 'success')
+    except Exception as e:
+        flash(f"Could not save question: {str(e)}", 'error')
+
+    return redirect(url_for('admin_questions_review'))
+
+
+# ── MANUAL QUESTION UPDATE ────────────────────────────────────────────────
+@app.route('/admin/questions/update/<int:q_id>', methods=['POST'])
+@admin_required
+def admin_update_question(q_id):
+    question_text  = request.form.get('question_text', '').strip()
+    option_a       = request.form.get('option_a', '').strip()
+    option_b       = request.form.get('option_b', '').strip()
+    option_c       = request.form.get('option_c', '').strip()
+    option_d       = request.form.get('option_d', '').strip()
+    correct_option = request.form.get('correct_option', '').strip().lower()
+    explanation    = request.form.get('explanation', '').strip()
+    difficulty     = request.form.get('difficulty', 'medium').strip().lower()
+
+    if not question_text or not all([option_a, option_b, option_c, option_d]):
+        flash("Question text and all four options are required.", 'error')
+        return redirect(url_for('admin_questions_review'))
+
+    if correct_option not in ('a', 'b', 'c', 'd'):
+        flash("Please select which option is correct.", 'error')
+        return redirect(url_for('admin_questions_review'))
+
+    if difficulty not in ('easy', 'medium', 'hard'):
+        difficulty = 'medium'
+
+    try:
+        supabase.table('questions').update({
+            "question_text":  question_text,
+            "option_a":       option_a,
+            "option_b":       option_b,
+            "option_c":       option_c,
+            "option_d":       option_d,
+            "correct_option": correct_option,
+            "explanation":    explanation,
+            "difficulty":     difficulty,
+        }).eq('id', q_id).execute()
+        flash("Question updated successfully.", 'success')
+    except Exception as e:
+        flash(f"Could not update question: {str(e)}", 'error')
+
+    return redirect(url_for('admin_questions_review'))
+
+
 @app.route('/user/quiz/setup', methods=['GET'])
 @student_required
 def quiz_setup():
