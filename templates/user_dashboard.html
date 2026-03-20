@@ -511,17 +511,17 @@
       <a class="d-item" href="{{ url_for('user_notes') }}">
         <span class="material-icons">menu_book</span> Notes
       </a>
-      <a class="d-item" href="#">
+      <a class="d-item" href="{{ url_for('quiz_setup') }}">
         <span class="material-icons">quiz</span> Quizzes
       </a>
-      <a class="d-item" href="#">
+      <a class="d-item" href="{{ url_for('quiz_history') }}">
         <span class="material-icons">insights</span> Progress
       </a>
       <div class="drawer-divider"></div>
       <a class="d-item" href="{{ url_for('sponsors_page') }}">
         <span class="material-icons">handshake</span> Sponsors
       </a>
-      <a class="d-item" href="#">
+      <a class="d-item" href="{{ url_for('user_settings_page') }}">
         <span class="material-icons">settings</span> Settings
       </a>
     </nav>
@@ -597,7 +597,7 @@
         <div class="tc-title">Lecture Notes</div>
         <div class="tc-desc">Browse notes for your courses — organised by semester and course code.</div>
       </a>
-      <a class="tc tc-q" href="#">
+      <a class="tc tc-q" href="{{ url_for('quiz_setup') }}">
         <div class="tc-top">
           <div class="tc-icon"><span class="material-icons">quiz</span></div>
           <div class="tc-arr"><span class="material-icons">arrow_forward</span></div>
