@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U-NEX • Dashboard</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --orange:     #f97316;
@@ -33,7 +33,7 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--txt);
       min-height: 100vh;
@@ -72,18 +72,6 @@
     }
     .nav-logo em { color: var(--orange); font-style: normal; }
 
-    .nav-notif {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--bd2);
-      background: var(--s1);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--txt2);
-      transition: color .2s, border-color .2s;
-    }
-    .nav-notif:hover { color: var(--txt); border-color: var(--bd2); }
-    .nav-notif .material-icons { font-size: 1.05rem; }
-
     .nav-avatar {
       width: 36px; height: 36px;
       border-radius: 10px;
@@ -91,8 +79,10 @@
       display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
       font-size: 0.95rem; font-weight: 900; color: #fff;
-      cursor: pointer; flex-shrink: 0;
+      cursor: pointer; flex-shrink: 0; text-decoration: none;
+      transition: opacity .2s, box-shadow .2s;
     }
+    .nav-avatar:hover { opacity: .88; box-shadow: 0 0 0 3px rgba(249,115,22,0.35); }
 
     /* burger */
     .burger {
@@ -254,9 +244,9 @@
     .id-info { flex: 1; position: relative; z-index: 1; min-width: 0; }
     .id-name {
       font-family: 'Syne', sans-serif;
-      font-size: 1.25rem; font-weight: 900;
+      font-size: 1.15rem; font-weight: 900;
       letter-spacing: -0.4px; margin-bottom: 10px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.25; word-break: break-word;
     }
     .id-tags { display: flex; flex-wrap: wrap; gap: 7px; }
 
@@ -426,123 +416,7 @@
       position: relative; z-index: 1;
     }
 
-    /* ── bottom two-col ── */
-    .bottom {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
 
-    /* profile detail card */
-    .pdc {
-      background: var(--s1);
-      border: 1px solid var(--bd);
-      border-radius: 16px;
-      padding: 24px 22px;
-      position: relative; overflow: hidden;
-    }
-
-    /* dot grid */
-    .pdc::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
-      background-size: 20px 20px;
-      pointer-events: none;
-    }
-
-    .pdc-rows {
-      display: flex; flex-direction: column; gap: 10px;
-      position: relative; z-index: 1;
-    }
-
-    .pdc-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 13px;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--bd);
-      border-radius: 9px;
-    }
-    .pdc-k {
-      font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.09em; text-transform: uppercase;
-      color: var(--txt3);
-    }
-    .pdc-v {
-      font-size: 0.84rem; font-weight: 600; color: var(--txt);
-    }
-
-    /* quick links card */
-    .qlc {
-      background: var(--s1);
-      border: 1px solid var(--bd);
-      border-radius: 16px;
-      padding: 24px 22px;
-      position: relative; overflow: hidden;
-    }
-
-    /* grid pattern */
-    .qlc::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image:
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.022) 0, transparent 1px),
-        repeating-linear-gradient(0deg,  rgba(255,255,255,0.022) 0, transparent 1px);
-      background-size: 26px 26px;
-      pointer-events: none;
-    }
-
-    .ql-list {
-      display: flex; flex-direction: column; gap: 8px;
-      position: relative; z-index: 1;
-    }
-
-    .ql-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 13px; border-radius: 10px;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--bd);
-      font-size: 0.85rem; font-weight: 500; color: var(--txt2);
-      transition: background .17s, color .17s, border-color .17s, transform .15s;
-      cursor: pointer;
-    }
-    .ql-item:hover {
-      background: rgba(255,255,255,0.05);
-      border-color: var(--bd2); color: var(--txt);
-      transform: translateX(3px);
-    }
-
-    .ql-ico {
-      width: 30px; height: 30px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .ql-ico .material-icons { font-size: 0.95rem; }
-
-    .i-o { background: var(--orange-dim); }
-    .i-o .material-icons { color: var(--orange); }
-    .i-g { background: var(--gold-dim); }
-    .i-g .material-icons { color: #f0c030; }
-    .i-gr{ background: var(--green-dim); }
-    .i-gr .material-icons { color: var(--green); }
-    .i-b { background: var(--blue-dim); }
-    .i-b .material-icons { color: var(--blue); }
-
-    .ql-lbl { flex: 1; }
-    .ql-ch .material-icons { font-size: 0.85rem; color: var(--txt3); }
-
-    .ql-out {
-      margin-top: 10px;
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 13px; border-radius: 10px;
-      background: rgba(239,68,68,0.07);
-      border: 1px solid rgba(239,68,68,0.15);
-      font-size: 0.85rem; font-weight: 500; color: #f87171;
-      cursor: pointer;
-      transition: background .17s;
-      position: relative; z-index: 1;
-    }
-    .ql-out:hover { background: rgba(239,68,68,0.13); }
-    .ql-out .material-icons { font-size: 0.95rem; }
 
     /* ── stagger animations ── */
     .a { opacity:0; transform:translateY(16px);
@@ -597,7 +471,6 @@
       .stats { grid-template-columns: 1fr 1fr; }
       .stats .sc:last-child { grid-column: 1/-1; }
       .tools { grid-template-columns: 1fr; }
-      .bottom { grid-template-columns: 1fr; }
     }
     @media (max-width: 440px) {
       .id-card { flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -616,10 +489,7 @@
   <!-- ══ NAVBAR ══ -->
   <nav class="nav">
     <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
-    <div class="nav-notif">
-      <span class="material-icons">notifications_none</span>
-    </div>
-    <div class="nav-avatar">{{ student_name[0] | upper }}</div>
+    <a href="#" class="nav-avatar" title="Settings">{{ student_name[0] | upper }}</a>
     <button class="burger" id="burgerBtn" aria-label="Open menu">
       <span class="material-icons">menu</span>
     </button>
@@ -737,72 +607,7 @@
       </a>
     </div>
 
-    <!-- profile + quick links -->
-    <p class="sh a a5">Details &amp; Actions</p>
-    <div class="bottom a a5">
 
-      <div class="pdc">
-        <p class="sh" style="margin-bottom:16px">Account</p>
-        <div class="pdc-rows">
-          <div class="pdc-row">
-            <span class="pdc-k">Full Name</span>
-            <span class="pdc-v">{{ student_name }}</span>
-          </div>
-          <div class="pdc-row">
-            <span class="pdc-k">Email</span>
-            <span class="pdc-v" style="font-size:.78rem">{{ student_email }}</span>
-          </div>
-          <div class="pdc-row">
-            <span class="pdc-k">Matric No.</span>
-            <span class="pdc-v">{{ student_matric }}</span>
-          </div>
-          <div class="pdc-row">
-            <span class="pdc-k">Department</span>
-            <span class="pdc-v">{{ student_dept | title }}</span>
-          </div>
-          <div class="pdc-row">
-            <span class="pdc-k">Level</span>
-            <span class="pdc-v">{{ student_level }}L</span>
-          </div>
-          <div class="pdc-row">
-            <span class="pdc-k">Status</span>
-            <span class="pdc-v" style="color:var(--green)">● Active</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="qlc">
-        <p class="sh" style="margin-bottom:16px">Quick Links</p>
-        <div class="ql-list">
-          <a class="ql-item" href="{{ url_for('user_notes') }}">
-            <div class="ql-ico i-o"><span class="material-icons">menu_book</span></div>
-            <span class="ql-lbl">Browse Notes</span>
-            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
-          </a>
-          <a class="ql-item" href="#">
-            <div class="ql-ico i-g"><span class="material-icons">quiz</span></div>
-            <span class="ql-lbl">Start a Quiz</span>
-            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
-          </a>
-          <a class="ql-item" href="#">
-            <div class="ql-ico i-gr"><span class="material-icons">insights</span></div>
-            <span class="ql-lbl">My Progress</span>
-            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
-          </a>
-          <a class="ql-item" href="#">
-            <div class="ql-ico i-b"><span class="material-icons">settings</span></div>
-            <span class="ql-lbl">Settings</span>
-            <div class="ql-ch"><span class="material-icons">chevron_right</span></div>
-          </a>
-        </div>
-        <a class="ql-out" href="{{ url_for('user_logout') }}"
-           onclick="return confirm('Log out of U-NEX?')">
-          <span class="material-icons">logout</span>
-          Log out
-        </a>
-      </div>
-
-    </div>
 
   </div><!-- /page -->
 
