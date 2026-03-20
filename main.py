@@ -1528,11 +1528,11 @@ def quiz_setup():
     dept  = session.get('student_dept', '')
     level = session.get('student_level', '')
 
+    # fetch dropdowns from ALL approved questions — no dept/level filter
+    # so manually created questions always show up regardless of exact string match
     try:
-        sem_res = supabase.table('questions') \
+        sem_res   = supabase.table('questions') \
             .select('semester') \
-            .eq('department', dept) \
-            .eq('level', level) \
             .eq('status', 'approved') \
             .execute()
         semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
@@ -1542,8 +1542,6 @@ def quiz_setup():
     try:
         yr_res = supabase.table('questions') \
             .select('academic_year') \
-            .eq('department', dept) \
-            .eq('level', level) \
             .eq('status', 'approved') \
             .execute()
         academic_years = sorted(
@@ -1554,10 +1552,8 @@ def quiz_setup():
         academic_years = []
 
     try:
-        cc_res = supabase.table('questions') \
+        cc_res       = supabase.table('questions') \
             .select('course_code') \
-            .eq('department', dept) \
-            .eq('level', level) \
             .eq('status', 'approved') \
             .execute()
         course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
@@ -1578,8 +1574,6 @@ def quiz_setup():
 @app.route('/user/quiz/count', methods=['GET'])
 @student_required
 def quiz_question_count():
-    dept        = session.get('student_dept', '')
-    level       = session.get('student_level', '')
     semester    = request.args.get('semester', '').strip()
     acad_year   = request.args.get('academic_year', '').strip()
     course_code = request.args.get('course_code', '').strip().upper()
@@ -1587,9 +1581,7 @@ def quiz_question_count():
     try:
         q = supabase.table('questions') \
             .select('id', count='exact') \
-            .eq('status', 'approved') \
-            .eq('department', dept) \
-            .eq('level', level)
+            .eq('status', 'approved')
 
         if semester:
             q = q.eq('semester', semester)
@@ -1632,8 +1624,6 @@ def quiz_start():
         q = supabase.table('questions') \
             .select('id, correct_option, option_a, option_b, option_c, option_d') \
             .eq('status', 'approved') \
-            .eq('department', dept) \
-            .eq('level', level) \
             .eq('semester', semester) \
             .eq('academic_year', acad_year)
 
