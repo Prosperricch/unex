@@ -1572,8 +1572,9 @@ def quiz_setup():
 
 
 @app.route('/user/quiz/count', methods=['GET'])
-@student_required
 def quiz_question_count():
+    if not session.get('student_logged_in'):
+        return jsonify({'count': 0, 'error': 'not logged in'})
     semester    = request.args.get('semester', '').strip()
     acad_year   = request.args.get('academic_year', '').strip()
     course_code = request.args.get('course_code', '').strip().upper()
