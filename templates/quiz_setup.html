@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-NEX • Quiz</title>
+  <title>U-NEX • Quiz Setup</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --orange:     #f97316;
       --orange-dk:  #ea580c;
-      --orange-dim: rgba(249,115,22,0.12);
-      --orange-bd:  rgba(249,115,22,0.28);
+      --orange-dim: rgba(249,115,22,0.10);
+      --orange-bd:  rgba(249,115,22,0.22);
       --gold:       #d4a017;
+      --gold-dim:   rgba(212,160,23,0.10);
       --green:      #22c55e;
-      --green-dim:  rgba(34,197,94,0.12);
-      --green-bd:   rgba(34,197,94,0.28);
-      --red:        #ef4444;
-      --red-dim:    rgba(239,68,68,0.10);
+      --green-dim:  rgba(34,197,94,0.10);
+      --green-bd:   rgba(34,197,94,0.22);
       --bg:         #0c0e14;
       --s1:         #13161f;
       --s2:         #191d28;
-      --s3:         #1e2333;
       --bd:         rgba(255,255,255,0.06);
       --bd2:        rgba(255,255,255,0.10);
       --txt:        #eef0f6;
@@ -36,585 +34,528 @@
       color: var(--txt);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(212,160,23,0.05) 0%, transparent 60%);
     }
 
-    /* TOP BAR */
-    .topbar {
+    /* NAV */
+    .nav {
       position: sticky; top: 0; z-index: 200;
-      height: 56px;
-      background: rgba(12,14,20,0.95);
-      backdrop-filter: blur(16px);
+      height: 62px;
+      background: rgba(12,14,20,0.88);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--bd);
       display: flex; align-items: center;
-      padding: 0 20px; gap: 14px;
+      padding: 0 28px; gap: 12px;
     }
-
-    .tb-title {
+    .nav-logo {
       font-family: 'Syne', sans-serif;
-      font-size: 0.95rem; font-weight: 800;
-      margin-right: auto;
+      font-size: 1.5rem; font-weight: 900;
+      letter-spacing: -1.2px; margin-right: auto;
     }
-    .tb-title span { color: var(--orange); }
-
-    /* timer */
-    .timer {
+    .nav-logo em { color: var(--orange); font-style: normal; }
+    .nav-btn {
       display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 500; color: var(--txt2);
+      padding: 7px 13px; border-radius: 9px;
+      border: 1px solid var(--bd2); background: var(--s1);
+      transition: color .2s;
+    }
+    .nav-btn:hover { color: var(--txt); }
+    .nav-btn .material-icons { font-size: 0.95rem; }
+    .nav-avatar {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
-      font-size: 1.1rem; font-weight: 900;
-      letter-spacing: 0.05em;
-      color: var(--txt);
-      background: var(--s1); border: 1px solid var(--bd2);
-      padding: 5px 14px; border-radius: 9px;
-      min-width: 90px; justify-content: center;
-    }
-    .timer .material-icons { font-size: 1rem; color: var(--txt2); }
-    .timer.warn  { color: var(--orange); border-color: var(--orange-bd); background: var(--orange-dim); }
-    .timer.crit  { color: var(--red);    border-color: rgba(239,68,68,0.28); background: var(--red-dim); animation: pulse-crit .5s ease-in-out infinite alternate; }
-    @keyframes pulse-crit { from{opacity:1} to{opacity:.6} }
-
-    .tb-progress {
-      font-size: 0.78rem; color: var(--txt2); white-space: nowrap;
-    }
-    .tb-progress strong { color: var(--txt); }
-
-    .submit-top {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 16px; border-radius: 9px;
-      font-size: 0.82rem; font-weight: 700;
-      background: var(--orange); color: #fff;
-      border: none; cursor: pointer;
-      transition: background .2s;
-      flex-shrink: 0;
-    }
-    .submit-top:hover { background: var(--orange-dk); }
-    .submit-top .material-icons { font-size: 0.9rem; }
-
-    /* LAYOUT */
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 240px;
-      gap: 0;
-      min-height: calc(100vh - 56px);
+      font-size: 0.95rem; font-weight: 900; color: #fff;
     }
 
-    /* QUESTION PANEL */
-    .q-panel {
-      padding: 28px 28px 60px;
-      border-right: 1px solid var(--bd);
-      overflow-y: auto;
+    /* PAGE */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 680px; margin: 0 auto;
+      padding: 40px 24px 80px;
     }
 
-    .q-meta {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 16px;
+    .ph { margin-bottom: 32px; }
+    .ph-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: .13em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 6px;
     }
-    .q-num {
+    .ph-title {
       font-family: 'Syne', sans-serif;
-      font-size: 0.72rem; font-weight: 900;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--orange);
+      font-size: clamp(1.7rem, 3vw, 2.3rem);
+      font-weight: 900; letter-spacing: -0.8px; line-height: 1.08;
     }
-    .q-pill {
-      font-size: 0.62rem; font-weight: 700;
-      letter-spacing: .07em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 100px; border: 1px solid;
-    }
-    .qp-easy   { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
-    .qp-medium { background: rgba(234,179,8,.10); border-color: rgba(234,179,8,.25); color: #eab308; }
-    .qp-hard   { background: var(--red-dim); border-color: rgba(239,68,68,.25); color: var(--red); }
-    .qp-course { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
+    .ph-sub { font-size: 0.85rem; color: var(--txt2); margin-top: 5px; }
 
-    .q-text {
-      font-size: 1.05rem; font-weight: 500;
-      line-height: 1.65; color: var(--txt);
+    /* INFO STRIP */
+    .info-strip {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--orange-dim);
+      border: 1px solid var(--orange-bd);
+      border-radius: 12px;
+      padding: 12px 16px;
       margin-bottom: 24px;
+      font-size: 0.83rem; color: var(--txt2);
+    }
+    .info-strip .material-icons { color: var(--orange); font-size: 1.1rem; flex-shrink: 0; }
+    .info-strip strong { color: var(--txt); }
+
+    /* CARD */
+    .card {
+      background: var(--s1);
+      border: 1px solid var(--bd);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 16px;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
     }
 
-    /* OPTIONS */
-    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem; font-weight: 800;
+      margin-bottom: 4px; position: relative; z-index: 1;
+    }
+    .card-sub {
+      font-size: 0.78rem; color: var(--txt2);
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
 
-    .opt {
-      display: flex; align-items: flex-start; gap: 13px;
-      padding: 14px 16px; border-radius: 12px;
+    /* FORM */
+    .fgrid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 13px; position: relative; z-index: 1;
+    }
+    .fgrid.single { grid-template-columns: 1fr; }
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg.full { grid-column: 1 / -1; }
+
+    .fg label {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--txt3);
+    }
+
+    .iw { position: relative; display: flex; align-items: center; }
+    .iw .li {
+      position: absolute; left: 12px; top:0; bottom:0;
+      display: flex; align-items: center;
+      pointer-events: none; z-index: 2;
+      color: var(--txt3); transition: color .2s;
+    }
+    .iw .li .material-icons { font-size: 0.95rem; line-height:1; display:block; }
+
+    input, select {
+      width: 100%;
+      padding: 11px 12px 11px 36px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--bd2);
+      border-radius: 10px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.88rem; color: var(--txt);
+      outline: none; -webkit-appearance: none; appearance: none;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    select {
+      cursor: pointer; padding-right: 34px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' fill='none'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='rgba(238,240,246,.3)' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    select option { background: #191d28; }
+    input:focus, select:focus {
+      border-color: var(--orange);
+      background: rgba(249,115,22,0.05);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+    }
+    .iw:focus-within .li { color: var(--orange); }
+    input::placeholder { color: var(--txt3); font-weight: 300; }
+    input.no-icon { padding-left: 13px; }
+
+    /* MODE TOGGLE */
+    .mode-row {
+      display: flex; gap: 10px;
+      position: relative; z-index: 1;
+    }
+    .mode-opt {
+      flex: 1;
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 15px; border-radius: 11px;
       border: 1.5px solid var(--bd2);
       background: rgba(255,255,255,0.03);
       cursor: pointer;
-      transition: border-color .15s, background .15s, transform .1s;
-      user-select: none;
+      transition: border-color .2s, background .2s;
     }
-    .opt:hover { border-color: rgba(249,115,22,0.35); background: rgba(249,115,22,0.04); }
-    .opt.selected {
+    .mode-opt input[type="radio"] { display: none; }
+    .mode-opt.selected {
       border-color: var(--orange-bd);
       background: var(--orange-dim);
     }
-    /* practice mode — show correct/wrong immediately */
-    .opt.correct-ans {
-      border-color: var(--green-bd);
-      background: var(--green-dim);
-    }
-    .opt.wrong-ans {
-      border-color: rgba(239,68,68,0.28);
-      background: var(--red-dim);
-    }
-
-    .opt-ltr {
-      width: 28px; height: 28px; border-radius: 7px;
-      background: var(--s2); border: 1px solid var(--bd2);
+    .mode-ico {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--s2); border: 1px solid var(--bd);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.72rem; font-weight: 900;
-      flex-shrink: 0; color: var(--txt2);
-      transition: background .15s, border-color .15s, color .15s;
+      flex-shrink: 0;
     }
-    .opt.selected   .opt-ltr { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .opt.correct-ans .opt-ltr { background: var(--green); border-color: var(--green); color: #fff; }
-    .opt.wrong-ans   .opt-ltr { background: var(--red);   border-color: var(--red);   color: #fff; }
-
-    .opt-text { font-size: 0.9rem; line-height: 1.5; color: var(--txt2); padding-top: 3px; }
-    .opt.selected    .opt-text { color: var(--txt); }
-    .opt.correct-ans .opt-text { color: var(--txt); }
-    .opt.wrong-ans   .opt-text { color: var(--txt); }
-
-    /* practice explanation */
-    .practice-expl {
-      display: none;
-      padding: 12px 16px; border-radius: 10px;
-      background: var(--green-dim); border: 1px solid var(--green-bd);
-      font-size: 0.82rem; line-height: 1.55; color: var(--txt2);
-      margin-top: -4px; margin-bottom: 10px;
+    .mode-ico .material-icons { font-size: 1.05rem; color: var(--txt2); }
+    .mode-opt.selected .mode-ico {
+      background: var(--orange-dim);
+      border-color: var(--orange-bd);
     }
-    .practice-expl.show { display: block; }
-    .practice-expl strong { color: var(--green); }
+    .mode-opt.selected .mode-ico .material-icons { color: var(--orange); }
+    .mode-label { font-size: 0.85rem; font-weight: 600; }
+    .mode-desc  { font-size: 0.72rem; color: var(--txt2); margin-top: 1px; }
 
-    /* NAV BUTTONS */
-    .q-nav {
+    /* QUESTION COUNT BADGE */
+    .count-badge {
       display: flex; align-items: center; gap: 10px;
+      padding: 13px 16px; border-radius: 12px;
+      background: var(--s2); border: 1px solid var(--bd);
+      margin-top: 16px; position: relative; z-index: 1;
+      transition: border-color .3s;
     }
-    .nav-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 10px 18px; border-radius: 10px;
-      font-size: 0.85rem; font-weight: 600;
-      border: 1px solid var(--bd2); background: var(--s1);
-      color: var(--txt2); cursor: pointer;
-      transition: color .2s, border-color .2s, background .2s;
-    }
-    .nav-btn:hover { color: var(--txt); border-color: var(--bd2); background: var(--s2); }
-    .nav-btn.primary {
-      background: var(--orange); border-color: var(--orange); color: #fff;
-    }
-    .nav-btn.primary:hover { background: var(--orange-dk); }
-    .nav-btn:disabled { opacity: .35; cursor: not-allowed; }
-    .nav-btn .material-icons { font-size: 1rem; }
+    .count-badge.has-questions { border-color: var(--green-bd); background: var(--green-dim); }
+    .count-badge.no-questions  { border-color: rgba(239,68,68,0.22); background: rgba(239,68,68,0.07); }
 
-    /* GRID PANEL */
-    .grid-panel {
-      padding: 20px 16px;
-      overflow-y: auto;
-      background: var(--s1);
-    }
+    .cb-ico { font-size: 1.3rem; flex-shrink: 0; }
+    .count-badge.has-questions .cb-ico { color: var(--green); }
+    .count-badge.no-questions  .cb-ico { color: #ef4444; }
 
-    .gp-title {
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--txt3); margin-bottom: 12px;
+    .cb-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 900; line-height: 1;
     }
+    .count-badge.has-questions .cb-val { color: var(--green); }
+    .count-badge.no-questions  .cb-val { color: #ef4444; }
+    .cb-lbl { font-size: 0.78rem; color: var(--txt2); }
 
-    .q-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-      margin-bottom: 20px;
-    }
-
-    .gq {
-      aspect-ratio: 1;
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.68rem; font-weight: 700;
-      cursor: pointer;
-      border: 1px solid var(--bd);
-      background: var(--s2);
-      color: var(--txt3);
-      transition: all .12s;
-    }
-    .gq:hover            { border-color: var(--bd2); color: var(--txt); }
-    .gq.answered         { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
-    .gq.current          { background: var(--orange); border-color: var(--orange); color: #fff; }
-
-    .gp-legend {
-      display: flex; flex-direction: column; gap: 7px;
-      margin-top: 16px;
-    }
-    .leg-item {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 0.72rem; color: var(--txt2);
-    }
-    .leg-dot {
-      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
-    }
-    .ld-current  { background: var(--orange); }
-    .ld-answered { background: var(--orange-dim); border: 1px solid var(--orange-bd); }
-    .ld-unanswered { background: var(--s2); border: 1px solid var(--bd); }
-
-    /* SAVING INDICATOR */
-    .saving {
-      position: fixed; bottom: 16px; left: 50%;
-      transform: translateX(-50%);
-      background: var(--s2); border: 1px solid var(--bd2);
-      border-radius: 100px; padding: 7px 18px;
-      font-size: 0.78rem; color: var(--txt2);
-      display: flex; align-items: center; gap: 7px;
-      opacity: 0; transition: opacity .3s;
-      pointer-events: none; z-index: 100;
-    }
-    .saving.show { opacity: 1; }
-    .saving .material-icons { font-size: 0.9rem; animation: spin .7s linear infinite; }
+    .cb-loading .cb-ico { color: var(--txt3); animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 760px) {
-      .layout { grid-template-columns: 1fr; }
-      .grid-panel { order: -1; border-bottom: 1px solid var(--bd); padding: 14px 16px; }
-      .q-grid { grid-template-columns: repeat(10, 1fr); }
-      .gp-legend { flex-direction: row; flex-wrap: wrap; }
-      .q-panel { padding: 20px 16px 60px; border-right: none; }
+    /* SUBMIT */
+    .submit-btn {
+      width: 100%; margin-top: 8px;
+      padding: 15px 20px;
+      background: var(--orange); color: #fff;
+      font-family: system-ui, sans-serif;
+      font-size: 1rem; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      position: relative; overflow: hidden;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .submit-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .submit-btn:hover {
+      background: var(--orange-dk);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(249,115,22,0.35);
+    }
+    .submit-btn:active { transform: none; box-shadow: none; }
+    .submit-btn:disabled {
+      background: var(--s2); color: var(--txt3);
+      cursor: not-allowed; transform: none; box-shadow: none;
+    }
+    .submit-btn .material-icons { font-size: 1.1rem; line-height:1; }
+
+    /* ANIMS */
+    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.10s}
+    .a3{animation-delay:.16s} .a4{animation-delay:.22s}
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    @media (max-width: 560px) {
+      .page { padding: 24px 16px 64px; }
+      .fgrid { grid-template-columns: 1fr; }
+      .fg.full { grid-column: 1; }
+      .mode-row { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
-  {# store session data for JS #}
-  <div id="quiz-data"
-       data-session-id="{{ quiz_sess.id }}"
-       data-total="{{ total }}"
-       data-mode="{{ quiz_sess.mode }}"
-       data-time-limit="{{ quiz_sess.time_limit_minutes or '' }}"
-       data-started="{{ quiz_sess.started_at }}"
+  <div class="ambient"></div>
+
+  <div id="fd"
+       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
        style="display:none"></div>
 
-  {# questions JSON for JS #}
-  <script>
-    const QUESTIONS = {{ questions | tojson }};
-    const ANSWERS   = {{ answers   | tojson }};
-  </script>
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('user_dashboard') }}" class="nav-btn">
+      <span class="material-icons">arrow_back</span> Dashboard
+    </a>
+    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar">
+      {{ student_name[0] | upper }}
+    </a>
+  </nav>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="tb-title">
-      Quiz <span>·</span> {{ quiz_sess.course_code or quiz_sess.department | title }}
+  <!-- PAGE -->
+  <div class="page">
+
+    <div class="ph a a1">
+      <p class="ph-label">Quiz</p>
+      <h1 class="ph-title">Set up your quiz.</h1>
+      <p class="ph-sub">
+        {{ student_dept | title }} · Level {{ student_level }} ·
+        Questions are pulled from approved notes for your selection.
+      </p>
     </div>
 
-    {% if quiz_sess.time_limit_minutes %}
-    <div class="timer" id="timer">
-      <span class="material-icons">timer</span>
-      <span id="timerDisplay">--:--</span>
-    </div>
-    {% endif %}
-
-    <div class="tb-progress">
-      <strong id="answeredCount">{{ answered_count }}</strong>/{{ total }} answered
+    <div class="info-strip a a1">
+      <span class="material-icons">info</span>
+      <span>You will get <strong>up to 70 questions</strong> shuffled uniquely for you.
+      Options are also randomised so every attempt is different.</span>
     </div>
 
-    <button class="submit-top" onclick="confirmSubmit()">
-      <span class="material-icons">send</span>
-      Submit
-    </button>
-  </div>
+    <form method="POST" action="{{ url_for('quiz_start') }}" id="setupForm">
 
-  <!-- LAYOUT -->
-  <div class="layout">
+      <!-- FILTERS -->
+      <div class="card a a2">
+        <div class="card-title">Select Your Content</div>
+        <div class="card-sub">Choose what you want to be tested on.</div>
+        <div class="fgrid">
 
-    <!-- QUESTION PANEL -->
-    <div class="q-panel" id="qPanel">
-      <div class="q-meta">
-        <span class="q-num" id="qNum">Question 1</span>
-        <span class="q-pill qp-course" id="qCourse"></span>
-        <span class="q-pill" id="qDiff"></span>
+          <div class="fg full">
+            <label>Level <span style="color:var(--orange)">*</span></label>
+            <div class="iw">
+              <span class="li"><span class="material-icons">layers</span></span>
+              <select name="level" id="sel-level" required>
+                <option value="100" {% if student_level == '100' %}selected{% endif %}>100 Level</option>
+                <option value="200" {% if student_level == '200' %}selected{% endif %}>200 Level</option>
+                <option value="300" {% if student_level == '300' %}selected{% endif %}>300 Level</option>
+                <option value="400" {% if student_level == '400' %}selected{% endif %}>400 Level</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Semester <span style="color:var(--orange)">*</span></label>
+            <div class="iw">
+              <span class="li"><span class="material-icons">calendar_today</span></span>
+              <select name="semester" id="sel-semester" required>
+                <option value="" disabled {% if not semesters %}selected{% endif %}>Select semester</option>
+                {% for s in semesters %}
+                <option value="{{ s }}" {% if loop.first %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Academic Year <span style="color:var(--orange)">*</span></label>
+            <div class="iw">
+              <span class="li"><span class="material-icons">event</span></span>
+              <select name="academic_year" id="sel-year" required>
+                <option value="" disabled {% if not academic_years %}selected{% endif %}>Select year</option>
+                {% for y in academic_years %}
+                <option value="{{ y }}" {% if loop.first %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="fg full">
+            <label>Course Code <span style="color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0">(optional — leave blank for all courses)</span></label>
+            <div class="iw">
+              <span class="li"><span class="material-icons">book</span></span>
+              <select name="course_code" id="sel-course">
+                <option value="">All courses</option>
+                {% for cc in course_codes %}
+                <option value="{{ cc }}">{{ cc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- live question count -->
+        <div class="count-badge cb-loading" id="countBadge">
+          <span class="material-icons cb-ico">sync</span>
+          <div>
+            <div class="cb-val" id="countVal">—</div>
+            <div class="cb-lbl">approved questions available</div>
+          </div>
+        </div>
       </div>
 
-      <div class="q-text" id="qText"></div>
+      <!-- TIME & MODE -->
+      <div class="card a a3">
+        <div class="card-title">Time &amp; Mode</div>
+        <div class="card-sub">Set your own time limit, or go untimed.</div>
 
-      <div class="options" id="optionsContainer"></div>
+        <div class="fgrid" style="margin-bottom:20px">
+          <div class="fg full">
+            <label>Time Limit (minutes) — leave blank for no time limit</label>
+            <div class="iw">
+              <span class="li"><span class="material-icons">timer</span></span>
+              <input type="number" name="time_limit" id="timeInput"
+                     placeholder="e.g. 45"
+                     min="5" max="300" class="no-icon"
+                     style="padding-left:36px">
+            </div>
+          </div>
+        </div>
 
-      <div class="practice-expl" id="practiceExpl">
-        <strong>Explanation:</strong> <span id="explText"></span>
+        <div class="mode-row">
+          <label class="mode-opt selected" id="modeExam">
+            <input type="radio" name="mode" value="exam" checked>
+            <div class="mode-ico"><span class="material-icons">assignment</span></div>
+            <div>
+              <div class="mode-label">Exam Mode</div>
+              <div class="mode-desc">See all results at the end</div>
+            </div>
+          </label>
+          <label class="mode-opt" id="modePractice">
+            <input type="radio" name="mode" value="practice">
+            <div class="mode-ico"><span class="material-icons">school</span></div>
+            <div>
+              <div class="mode-label">Practice Mode</div>
+              <div class="mode-desc">See correct answer after each question</div>
+            </div>
+          </label>
+        </div>
       </div>
 
-      <div class="q-nav">
-        <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>
-          <span class="material-icons">arrow_back</span> Prev
+      <!-- START -->
+      <div class="a a4">
+        <button type="submit" class="submit-btn" id="startBtn" disabled>
+          <span class="material-icons">play_arrow</span>
+          Start Quiz
         </button>
-        <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">
-          Next <span class="material-icons">arrow_forward</span>
-        </button>
       </div>
-    </div>
 
-    <!-- GRID PANEL -->
-    <div class="grid-panel">
-      <div class="gp-title">Questions</div>
-      <div class="q-grid" id="qGrid"></div>
-      <div class="gp-legend">
-        <div class="leg-item"><div class="leg-dot ld-current"></div> Current</div>
-        <div class="leg-item"><div class="leg-dot ld-answered"></div> Answered</div>
-        <div class="leg-item"><div class="leg-dot ld-unanswered"></div> Unanswered</div>
-      </div>
-    </div>
-
+    </form>
   </div>
-
-  <!-- saving indicator -->
-  <div class="saving" id="savingInd">
-    <span class="material-icons">sync</span> Saving…
-  </div>
-
-  <!-- hidden submit form -->
-  <form method="POST" action="{{ url_for('quiz_submit', session_id=quiz_sess.id) }}" id="submitForm">
-  </form>
 
   <script>
-    const qData    = document.getElementById('quiz-data');
-    const SESSION_ID   = parseInt(qData.dataset.sessionId);
-    const TOTAL        = parseInt(qData.dataset.total);
-    const MODE         = qData.dataset.mode;
-    const TIME_LIMIT   = qData.dataset.timeLimit ? parseInt(qData.dataset.timeLimit) : null;
-    const STARTED_AT   = qData.dataset.started;
-
-    let currentIdx = 0;
-    // local answers cache  { question_id: selected_letter }
-    const localAnswers = {};
-    // seed from server
-    Object.entries(ANSWERS).forEach(([qid, sel]) => {
-      if (sel) localAnswers[parseInt(qid)] = sel;
+    /* mode toggle */
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('modeExam').classList.toggle('selected', radio.value === 'exam' && radio.checked);
+        document.getElementById('modePractice').classList.toggle('selected', radio.value === 'practice' && radio.checked);
+        document.querySelectorAll('input[name="mode"]').forEach(r => {
+          r.closest('.mode-opt').classList.toggle('selected', r.checked);
+        });
+      });
     });
 
-    /* ── BUILD GRID ── */
-    const grid = document.getElementById('qGrid');
-    QUESTIONS.forEach((q, i) => {
-      const cell = document.createElement('div');
-      cell.className = 'gq';
-      cell.id = `gq-${i}`;
-      cell.textContent = i + 1;
-      cell.addEventListener('click', () => goTo(i));
-      grid.appendChild(cell);
-    });
+    /* live count */
+    let countTimer = null;
+    const badge    = document.getElementById('countBadge');
+    const countVal = document.getElementById('countVal');
+    const startBtn = document.getElementById('startBtn');
 
-    /* ── RENDER QUESTION ── */
-    function render(idx) {
-      const q = QUESTIONS[idx];
-      if (!q) return;
-      currentIdx = idx;
+    function fetchCount() {
+      const sem   = document.getElementById('sel-semester').value;
+      const yr    = document.getElementById('sel-year').value;
+      const cc    = document.getElementById('sel-course').value;
+      const level = document.getElementById('sel-level').value;
 
-      document.getElementById('qNum').textContent = `Question ${idx + 1} of ${TOTAL}`;
-      document.getElementById('qText').textContent = q.question_text;
+      if (!sem || !yr) {
+        badge.className     = 'count-badge';
+        countVal.textContent = '—';
+        startBtn.disabled   = true;
+        return;
+      }
 
-      const courseEl = document.getElementById('qCourse');
-      courseEl.textContent = q.course_code;
+      badge.className     = 'count-badge cb-loading';
+      countVal.textContent = '…';
 
-      const diffEl = document.getElementById('qDiff');
-      diffEl.textContent = q.difficulty;
-      diffEl.className = `q-pill qp-${q.difficulty}`;
+      const url = `/user/quiz/count?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}&level=${encodeURIComponent(level)}`;
 
-      // options
-      const container = document.getElementById('optionsContainer');
-      container.innerHTML = '';
-      const letters = ['a','b','c','d'];
-      letters.forEach(ltr => {
-        const text    = q.options[ltr];
-        const div     = document.createElement('div');
-        const selected = localAnswers[q.question_id] === ltr;
-        div.className = 'opt' + (selected ? ' selected' : '');
-        div.dataset.ltr = ltr;
-        div.innerHTML = `<div class="opt-ltr">${ltr.toUpperCase()}</div><div class="opt-text">${text}</div>`;
-        div.addEventListener('click', () => selectOption(idx, ltr, div));
-        container.appendChild(div);
-      });
-
-      // practice explanation
-      const expl = document.getElementById('practiceExpl');
-      expl.classList.remove('show');
-
-      // nav buttons
-      document.getElementById('prevBtn').disabled = idx === 0;
-      document.getElementById('nextBtn').textContent = idx === TOTAL - 1 ? 'Last Question' : '';
-      document.getElementById('nextBtn').innerHTML = idx === TOTAL - 1
-        ? 'Last Question'
-        : 'Next <span class="material-icons">arrow_forward</span>';
-      if (idx === TOTAL - 1) document.getElementById('nextBtn').disabled = true;
-      else document.getElementById('nextBtn').disabled = false;
-
-      updateGrid();
-    }
-
-    function updateGrid() {
-      QUESTIONS.forEach((q, i) => {
-        const cell = document.getElementById(`gq-${i}`);
-        if (i === currentIdx) {
-          cell.className = 'gq current';
-        } else if (localAnswers[q.question_id]) {
-          cell.className = 'gq answered';
-        } else {
-          cell.className = 'gq';
-        }
-      });
-    }
-
-    /* ── SELECT OPTION ── */
-    function selectOption(idx, ltr, clickedDiv) {
-      const q = QUESTIONS[idx];
-
-      // update local cache
-      localAnswers[q.question_id] = ltr;
-
-      // update UI
-      document.querySelectorAll('#optionsContainer .opt').forEach(o => {
-        o.classList.toggle('selected', o.dataset.ltr === ltr);
-        o.classList.remove('correct-ans', 'wrong-ans');
-      });
-
-      // update answered count
-      const count = Object.keys(localAnswers).length;
-      document.getElementById('answeredCount').textContent = count;
-
-      updateGrid();
-      saveAnswer(SESSION_ID, q.question_id, ltr, idx);
-    }
-
-    /* ── SAVE ANSWER ── */
-    let saveTimer = null;
-    function saveAnswer(sid, qid, ltr, idx) {
-      showSaving(true);
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        fetch('{{ url_for("quiz_save_answer") }}', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            session_id:      sid,
-            question_id:     qid,
-            selected_option: ltr
-          })
+      fetch(url, { credentials: 'same-origin' })
+        .then(r => {
+          if (r.status === 302 || r.redirected) {
+            /* redirected to login — session expired */
+            window.location.href = '/user/login';
+            return null;
+          }
+          return r.json();
         })
-        .then(r => r.json())
         .then(data => {
-          showSaving(false);
-          if (MODE === 'practice' && data.success) {
-            showPracticeFeedback(idx, ltr, data.is_correct);
+          if (!data) return;
+          const n = data.count !== undefined ? data.count : 0;
+          countVal.textContent = n;
+          if (n >= 1) {
+            badge.className   = 'count-badge has-questions';
+            startBtn.disabled = false;
+          } else {
+            badge.className   = 'count-badge no-questions';
+            startBtn.disabled = true;
+            if (data.error) console.error('Count error:', data.error);
           }
         })
-        .catch(() => showSaving(false));
-      }, 200);
+        .catch(err => {
+          /* network error — still let user try if fields are filled */
+          console.error('fetchCount failed:', err);
+          badge.className     = 'count-badge has-questions';
+          countVal.textContent = '?';
+          startBtn.disabled   = false;
+        });
     }
 
-    function showPracticeFeedback(idx, selectedLtr, isCorrect) {
-      /* Feature 1: only show feedback in practice mode, never in exam mode */
-      if (MODE !== 'practice') return;
-
-      document.querySelectorAll('#optionsContainer .opt').forEach(o => {
-        if (o.dataset.ltr === selectedLtr) {
-          o.classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
-          o.classList.remove('selected');
-        }
+    ['sel-level','sel-semester','sel-year','sel-course'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        clearTimeout(countTimer);
+        countTimer = setTimeout(fetchCount, 300);
       });
+    });
 
-      const expl = document.getElementById('practiceExpl');
-      document.getElementById('explText').textContent =
-        isCorrect ? 'Correct! Well done.' : 'Incorrect. Review your notes on this topic.';
-      expl.classList.add('show');
+    /* run on page load so badge shows immediately if dropdowns are pre-filled */
+    fetchCount();
+
+    /* flash toasts */
+    const TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
+    const TC = { success:'ts', error:'te', info:'ti' };
+
+    function showToast(cat, msg) {
+      /* reuse same toast style as dashboard */
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position:fixed;top:80px;right:20px;z-index:9999;
+        background:#191d28;border:1px solid rgba(255,255,255,0.10);
+        border-radius:12px;padding:13px 16px;
+        font-size:.85rem;color:#eef0f6;
+        box-shadow:0 8px 28px rgba(0,0,0,0.5);
+        animation:slideIn .3s ease;
+        display:flex;align-items:center;gap:10px;max-width:320px;
+      `;
+      const colors = { success:'#22c55e', error:'#ef4444', info:'#f97316' };
+      el.style.borderLeftColor = colors[cat] || '#f97316';
+      el.style.borderLeftWidth = '3px';
+      el.innerHTML = `<span style="color:${colors[cat]||'#f97316'};font-size:1rem" class="material-icons">${TI[cat]||TI.info}</span><span>${msg}</span>`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
     }
 
-    function showSaving(show) {
-      document.getElementById('savingInd').classList.toggle('show', show);
-    }
-
-    /* ── NAVIGATION ── */
-    function navigate(dir) {
-      const next = currentIdx + dir;
-      if (next >= 0 && next < TOTAL) goTo(next);
-    }
-
-    function goTo(idx) {
-      render(idx);
-      document.getElementById('qPanel').scrollTop = 0;
-    }
-
-    /* ── TIMER ── */
-    if (TIME_LIMIT) {
-      const timerEl = document.getElementById('timer');
-      const display = document.getElementById('timerDisplay');
-
-      const startedMs   = new Date(STARTED_AT.replace(' ', 'T') + (STARTED_AT.includes('+') ? '' : 'Z')).getTime();
-      const limitMs     = TIME_LIMIT * 60 * 1000;
-      const endMs       = startedMs + limitMs;
-
-      let warned5min = false;
-      let warned1min = false;
-
-      function updateTimer() {
-        const remaining = Math.max(0, endMs - Date.now());
-        const mins = Math.floor(remaining / 60000);
-        const secs = Math.floor((remaining % 60000) / 1000);
-        display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-
-        if (remaining <= 0) {
-          display.textContent = '00:00';
-          timerEl.className = 'timer crit';
-          clearInterval(timerInterval);
-          document.getElementById('submitForm').submit();
-          return;
-        }
-
-        /* Feature 4: warning popups at 5 min and 1 min */
-        if (!warned5min && remaining <= 5 * 60 * 1000) {
-          warned5min = true;
-          timerEl.className = 'timer crit';
-          showTimerWarning('⏰ 5 minutes left! Start wrapping up.');
-        } else if (!warned1min && remaining <= 60 * 1000) {
-          warned1min = true;
-          showTimerWarning('🚨 1 minute left! Submit now.');
-        } else if (remaining > 5 * 60 * 1000) {
-          if (remaining <= 15 * 60 * 1000) timerEl.className = 'timer warn';
-        }
-      }
-
-      function showTimerWarning(msg) {
-        const w = document.createElement('div');
-        w.style.cssText = [
-          'position:fixed','top:70px','left:50%','transform:translateX(-50%)',
-          'background:#1e2333','border:1px solid rgba(249,115,22,0.4)',
-          'color:#eef0f6','padding:12px 24px','border-radius:12px',
-          'font-size:.9rem','font-weight:600','z-index:9999',
-          'box-shadow:0 8px 28px rgba(0,0,0,0.6)',
-          'animation:fadeInDown .3s ease'
-        ].join(';');
-        w.textContent = msg;
-        document.body.appendChild(w);
-        setTimeout(() => {
-          w.style.transition = 'opacity .4s';
-          w.style.opacity = '0';
-          setTimeout(() => w.remove(), 400);
-        }, 4000);
-      }
-
-      updateTimer();
-      const timerInterval = setInterval(updateTimer, 1000);
-    }
-
-    /* ── SUBMIT ── */
-    function confirmSubmit() {
-      const answered  = Object.keys(localAnswers).length;
-      const unanswered = TOTAL - answered;
-
-      let msg = `Submit your quiz?\n\n✓ Answered: ${answered}/${TOTAL}`;
-      if (unanswered > 0) msg += `\n✗ Unanswered: ${unanswered} (will be marked wrong)`;
-
-      if (confirm(msg)) {
-        document.getElementById('submitForm').submit();
-      }
-    }
-
-    /* ── INIT ── */
-    render(0);
+    (function(){
+      try {
+        JSON.parse(document.getElementById('fd').dataset.messages)
+          .forEach(([cat,msg],i) => setTimeout(() => showToast(cat,msg), i*280));
+      } catch(e){}
+    })();
   </script>
 
 </body>
