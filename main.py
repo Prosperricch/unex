@@ -1,4 +1,5 @@
 import json
+import random as _random
 import re
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1435,7 +1436,523 @@ def admin_delete_all_questions(note_id):
         flash(f"Error: {str(e)}", 'error')
     return redirect(url_for('admin_questions_review'))
 
-
+# ── QUIZ SETUP PAGE ───────────────────────────────────────────────────
+@app.route('/user/quiz/setup', methods=['GET'])
+@student_required
+def quiz_setup():
+    dept  = session.get('student_dept', '')
+    level = session.get('student_level', '')
+ 
+    # distinct semesters and academic years available for this dept/level
+    try:
+        sem_res = supabase.table('questions') \
+            .select('semester') \
+            .eq('department', dept) \
+            .eq('level', level) \
+            .eq('status', 'approved') \
+            .execute()
+        semesters = sorted(set(r['semester'] for r in (sem_res.data or []) if r['semester']))
+    except Exception:
+        semesters = []
+ 
+    try:
+        yr_res = supabase.table('questions') \
+            .select('academic_year') \
+            .eq('department', dept) \
+            .eq('level', level) \
+            .eq('status', 'approved') \
+            .execute()
+        academic_years = sorted(
+            set(r['academic_year'] for r in (yr_res.data or []) if r['academic_year']),
+            reverse=True
+        )
+    except Exception:
+        academic_years = []
+ 
+    try:
+        cc_res = supabase.table('questions') \
+            .select('course_code') \
+            .eq('department', dept) \
+            .eq('level', level) \
+            .eq('status', 'approved') \
+            .execute()
+        course_codes = sorted(set(r['course_code'] for r in (cc_res.data or []) if r['course_code']))
+    except Exception:
+        course_codes = []
+ 
+    return render_template(
+        'quiz_setup.html',
+        student_name  = session.get('student_name', ''),
+        student_dept  = dept,
+        student_level = level,
+        semesters     = semesters,
+        academic_years= academic_years,
+        course_codes  = course_codes,
+    )
+ 
+ 
+# ── AJAX: COUNT AVAILABLE QUESTIONS ──────────────────────────────────
+@app.route('/user/quiz/count', methods=['GET'])
+@student_required
+def quiz_question_count():
+    """Returns how many approved questions match the chosen filters."""
+    dept        = session.get('student_dept', '')
+    level       = session.get('student_level', '')
+    semester    = request.args.get('semester', '').strip()
+    acad_year   = request.args.get('academic_year', '').strip()
+    course_code = request.args.get('course_code', '').strip().upper()
+ 
+    try:
+        q = supabase.table('questions') \
+            .select('id', count='exact') \
+            .eq('status', 'approved') \
+            .eq('department', dept) \
+            .eq('level', level)
+ 
+        if semester:
+            q = q.eq('semester', semester)
+        if acad_year:
+            q = q.eq('academic_year', acad_year)
+        if course_code:
+            q = q.eq('course_code', course_code)
+ 
+        res   = q.execute()
+        count = res.count if res.count is not None else 0
+        return jsonify({'count': count})
+    except Exception as e:
+        return jsonify({'count': 0, 'error': str(e)})
+ 
+ 
+# ── START A QUIZ SESSION ──────────────────────────────────────────────
+@app.route('/user/quiz/start', methods=['POST'])
+@student_required
+def quiz_start():
+    uid         = session.get('student_id')
+    dept        = session.get('student_dept', '')
+    level       = session.get('student_level', '')
+    semester    = request.form.get('semester', '').strip()
+    acad_year   = request.form.get('academic_year', '').strip()
+    course_code = request.form.get('course_code', '').strip().upper()
+    time_limit  = request.form.get('time_limit', '').strip()
+    mode        = request.form.get('mode', 'exam').strip()
+ 
+    # validate
+    if not semester or not acad_year:
+        flash("Please select a semester and academic year.", 'error')
+        return redirect(url_for('quiz_setup'))
+ 
+    if mode not in ('exam', 'practice'):
+        mode = 'exam'
+ 
+    time_limit_int = None
+    if time_limit and time_limit.isdigit():
+        time_limit_int = max(5, min(int(time_limit), 300))  # 5–300 minutes
+ 
+    # ── fetch approved questions matching filters ─────────────────────
+    try:
+        q = supabase.table('questions') \
+            .select('id, correct_option, option_a, option_b, option_c, option_d') \
+            .eq('status', 'approved') \
+            .eq('department', dept) \
+            .eq('level', level) \
+            .eq('semester', semester) \
+            .eq('academic_year', acad_year)
+ 
+        if course_code:
+            q = q.eq('course_code', course_code)
+ 
+        pool_res = q.execute()
+        pool     = pool_res.data or []
+    except Exception as e:
+        flash(f"Could not load questions: {str(e)}", 'error')
+        return redirect(url_for('quiz_setup'))
+ 
+    if len(pool) < 10:
+        flash(
+            f"Not enough approved questions for that selection "
+            f"(found {len(pool)}, need at least 10). "
+            f"Ask your admin to generate and approve questions first.",
+            'error'
+        )
+        return redirect(url_for('quiz_setup'))
+ 
+    # ── pick up to 70, shuffle ────────────────────────────────────────
+    total = min(70, len(pool))
+    selected = _random.sample(pool, total)
+    _random.shuffle(selected)
+ 
+    # ── create quiz session ───────────────────────────────────────────
+    try:
+        sess_res = supabase.table('quiz_sessions').insert({
+            "user_id":            uid,
+            "department":         dept,
+            "level":              level,
+            "semester":           semester,
+            "academic_year":      acad_year,
+            "course_code":        course_code or None,
+            "total_questions":    total,
+            "time_limit_minutes": time_limit_int,
+            "mode":               mode,
+            "status":             "in_progress",
+            "started_at":         "now()"
+        }).execute()
+ 
+        session_id = sess_res.data[0]['id']
+    except Exception as e:
+        flash(f"Could not create quiz session: {str(e)}", 'error')
+        return redirect(url_for('quiz_setup'))
+ 
+    # ── assign shuffled questions to session ──────────────────────────
+    options_order = ['a', 'b', 'c', 'd']
+    session_questions = []
+ 
+    for pos, q in enumerate(selected, start=1):
+        # shuffle the display order of the 4 options for this student
+        shuffled = options_order.copy()
+        _random.shuffle(shuffled)
+ 
+        # map display letter → actual option column
+        shuffled_map = {
+            'a': shuffled[0],
+            'b': shuffled[1],
+            'c': shuffled[2],
+            'd': shuffled[3],
+        }
+ 
+        session_questions.append({
+            "session_id":      session_id,
+            "question_id":     q['id'],
+            "position":        pos,
+            "shuffled_options": json.dumps(shuffled_map)
+        })
+ 
+    try:
+        # insert in batches
+        for i in range(0, len(session_questions), 25):
+            supabase.table('quiz_session_questions') \
+                .insert(session_questions[i:i+25]).execute()
+    except Exception as e:
+        # clean up orphan session
+        supabase.table('quiz_sessions').delete().eq('id', session_id).execute()
+        flash(f"Could not assign questions: {str(e)}", 'error')
+        return redirect(url_for('quiz_setup'))
+ 
+    return redirect(url_for('quiz_session', session_id=session_id))
+ 
+ 
+# ── QUIZ SESSION PAGE ─────────────────────────────────────────────────
+@app.route('/user/quiz/session/<int:session_id>', methods=['GET'])
+@student_required
+def quiz_session(session_id):
+    uid = session.get('student_id')
+ 
+    # fetch session and verify ownership
+    try:
+        sess_res = supabase.table('quiz_sessions') \
+            .select('*').eq('id', session_id).eq('user_id', uid).single().execute()
+        quiz_sess = sess_res.data
+        if not quiz_sess:
+            flash("Quiz session not found.", 'error')
+            return redirect(url_for('user_dashboard'))
+    except Exception as e:
+        flash(f"Could not load session: {str(e)}", 'error')
+        return redirect(url_for('user_dashboard'))
+ 
+    # redirect if already completed
+    if quiz_sess['status'] == 'completed':
+        return redirect(url_for('quiz_results', session_id=session_id))
+ 
+    # fetch this session's questions with full question data
+    try:
+        sq_res = supabase.table('quiz_session_questions') \
+            .select(
+                'position, question_id, shuffled_options, '
+                'questions(question_text, option_a, option_b, option_c, option_d, difficulty, course_code)'
+            ) \
+            .eq('session_id', session_id) \
+            .order('position').execute()
+        sq_list = sq_res.data or []
+    except Exception as e:
+        flash(f"Could not load questions: {str(e)}", 'error')
+        return redirect(url_for('user_dashboard'))
+ 
+    # fetch existing answers so student can resume
+    try:
+        ans_res = supabase.table('quiz_attempts') \
+            .select('question_id, selected_option') \
+            .eq('session_id', session_id).execute()
+        answers = {r['question_id']: r['selected_option'] for r in (ans_res.data or [])}
+    except Exception:
+        answers = {}
+ 
+    # build question list for template
+    questions = []
+    for sq in sq_list:
+        q      = sq.get('questions', {})
+        s_map  = json.loads(sq['shuffled_options'])  # {'a': 'option_c', ...}
+        q_id   = sq['question_id']
+ 
+        # resolve display text for each shuffled option
+        opt_texts = {
+            display_ltr: q.get(f'option_{real_col}', '')
+            for display_ltr, real_col in s_map.items()
+        }
+ 
+        # what did the student pick (in display letters)?
+        selected = answers.get(q_id)
+ 
+        questions.append({
+            'position':        sq['position'],
+            'question_id':     q_id,
+            'question_text':   q.get('question_text', ''),
+            'options':         opt_texts,          # {'a': 'text', 'b': 'text', ...}
+            'shuffled_map':    s_map,              # {'a': 'option_c', ...}
+            'selected':        selected,
+            'difficulty':      q.get('difficulty', ''),
+            'course_code':     q.get('course_code', ''),
+        })
+ 
+    return render_template(
+        'quiz_session.html',
+        quiz_sess    = quiz_sess,
+        questions    = questions,
+        answers      = answers,
+        total        = len(questions),
+        answered_count = len(answers),
+        student_name = session.get('student_name', ''),
+    )
+ 
+ 
+# ── AJAX: SAVE SINGLE ANSWER ──────────────────────────────────────────
+@app.route('/user/quiz/answer', methods=['POST'])
+@student_required
+def quiz_save_answer():
+    """Called every time the student selects an option. Upserts the answer."""
+    uid         = session.get('student_id')
+    data        = request.get_json()
+    session_id  = data.get('session_id')
+    question_id = data.get('question_id')
+    selected    = data.get('selected_option', '').lower()
+ 
+    if not all([session_id, question_id, selected]):
+        return jsonify({'success': False, 'error': 'Missing fields'}), 400
+ 
+    if selected not in ('a', 'b', 'c', 'd'):
+        return jsonify({'success': False, 'error': 'Invalid option'}), 400
+ 
+    # verify session belongs to this student
+    try:
+        owns = supabase.table('quiz_sessions') \
+            .select('id, status') \
+            .eq('id', session_id) \
+            .eq('user_id', uid).single().execute()
+        if not owns.data or owns.data['status'] != 'in_progress':
+            return jsonify({'success': False, 'error': 'Session not active'}), 403
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+    # get the shuffled map to find the real correct option
+    try:
+        sq = supabase.table('quiz_session_questions') \
+            .select('shuffled_options, questions(correct_option)') \
+            .eq('session_id', session_id) \
+            .eq('question_id', question_id).single().execute()
+ 
+        s_map   = json.loads(sq.data['shuffled_options'])
+        # real column the student selected (e.g. 'option_c')
+        real_col        = s_map.get(selected, '')
+        # actual correct column stored on the question (e.g. 'c')
+        correct_col     = sq.data['questions']['correct_option']
+        is_correct      = (real_col == correct_col)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+    # upsert answer
+    try:
+        supabase.table('quiz_attempts').upsert({
+            "session_id":      session_id,
+            "question_id":     question_id,
+            "selected_option": selected,
+            "is_correct":      is_correct,
+            "answered_at":     "now()"
+        }, on_conflict="session_id,question_id").execute()
+ 
+        return jsonify({'success': True, 'is_correct': is_correct})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+ 
+ 
+# ── SUBMIT QUIZ ───────────────────────────────────────────────────────
+@app.route('/user/quiz/submit/<int:session_id>', methods=['POST'])
+@student_required
+def quiz_submit(session_id):
+    uid = session.get('student_id')
+ 
+    # verify ownership
+    try:
+        sess_res = supabase.table('quiz_sessions') \
+            .select('*').eq('id', session_id).eq('user_id', uid).single().execute()
+        quiz_sess = sess_res.data
+        if not quiz_sess or quiz_sess['status'] != 'in_progress':
+            flash("Session not found or already submitted.", 'error')
+            return redirect(url_for('user_dashboard'))
+    except Exception as e:
+        flash(f"Error: {str(e)}", 'error')
+        return redirect(url_for('user_dashboard'))
+ 
+    # count correct answers
+    try:
+        ans_res = supabase.table('quiz_attempts') \
+            .select('is_correct') \
+            .eq('session_id', session_id).execute()
+        attempts = ans_res.data or []
+    except Exception as e:
+        flash(f"Could not fetch answers: {str(e)}", 'error')
+        return redirect(url_for('quiz_session', session_id=session_id))
+ 
+    total        = quiz_sess['total_questions']
+    score        = sum(1 for a in attempts if a['is_correct'])
+    percentage   = round((score / total) * 100, 2) if total > 0 else 0
+    passed       = percentage >= 50
+ 
+    # calculate time taken
+    try:
+        from datetime import datetime as _dt, timezone as _tz
+        started  = _dt.fromisoformat(quiz_sess['started_at'].replace('Z', '+00:00'))
+        now_utc  = _dt.now(_tz.utc)
+        time_taken = int((now_utc - started).total_seconds())
+    except Exception:
+        time_taken = None
+ 
+    # mark session complete and save result
+    try:
+        supabase.table('quiz_sessions').update({
+            "status":       "completed",
+            "submitted_at": "now()"
+        }).eq('id', session_id).execute()
+ 
+        supabase.table('quiz_results').insert({
+            "session_id":         session_id,
+            "user_id":            uid,
+            "score":              score,
+            "total":              total,
+            "percentage":         percentage,
+            "passed":             passed,
+            "time_taken_seconds": time_taken,
+            "created_at":         "now()"
+        }).execute()
+    except Exception as e:
+        flash(f"Could not save result: {str(e)}", 'error')
+        return redirect(url_for('quiz_session', session_id=session_id))
+ 
+    return redirect(url_for('quiz_results', session_id=session_id))
+ 
+ 
+# ── RESULTS PAGE (stub — full page built next) ────────────────────────
+@app.route('/user/quiz/results/<int:session_id>', methods=['GET'])
+@student_required
+def quiz_results(session_id):
+    uid = session.get('student_id')
+ 
+    try:
+        result_res = supabase.table('quiz_results') \
+            .select('*').eq('session_id', session_id).single().execute()
+        result = result_res.data
+        if not result or result['user_id'] != uid:
+            flash("Results not found.", 'error')
+            return redirect(url_for('user_dashboard'))
+    except Exception as e:
+        flash(f"Could not load results: {str(e)}", 'error')
+        return redirect(url_for('user_dashboard'))
+ 
+    sess_res = supabase.table('quiz_sessions') \
+        .select('*').eq('id', session_id).single().execute()
+    quiz_sess = sess_res.data or {}
+ 
+    # fetch all questions with answers for review
+    try:
+        sq_res = supabase.table('quiz_session_questions') \
+            .select(
+                'position, question_id, shuffled_options, '
+                'questions(question_text, option_a, option_b, option_c, option_d, correct_option, explanation, course_code, difficulty)'
+            ) \
+            .eq('session_id', session_id) \
+            .order('position').execute()
+        sq_list = sq_res.data or []
+    except Exception:
+        sq_list = []
+ 
+    try:
+        ans_res = supabase.table('quiz_attempts') \
+            .select('question_id, selected_option, is_correct') \
+            .eq('session_id', session_id).execute()
+        answers = {r['question_id']: r for r in (ans_res.data or [])}
+    except Exception:
+        answers = {}
+ 
+    # build review list
+    review = []
+    for sq in sq_list:
+        q       = sq.get('questions', {})
+        q_id    = sq['question_id']
+        s_map   = json.loads(sq['shuffled_options'])
+        ans     = answers.get(q_id, {})
+        sel     = ans.get('selected_option')
+ 
+        # build display options
+        opt_texts = {
+            d_ltr: q.get(f'option_{real_col}', '')
+            for d_ltr, real_col in s_map.items()
+        }
+ 
+        # find which display letter maps to the correct option
+        correct_real = q.get('correct_option', '')
+        correct_display = next(
+            (d for d, real in s_map.items() if real == correct_real), None
+        )
+ 
+        review.append({
+            'position':       sq['position'],
+            'question_text':  q.get('question_text', ''),
+            'options':        opt_texts,
+            'selected':       sel,
+            'correct':        correct_display,
+            'is_correct':     ans.get('is_correct', False),
+            'explanation':    q.get('explanation', ''),
+            'course_code':    q.get('course_code', ''),
+            'difficulty':     q.get('difficulty', ''),
+        })
+ 
+    return render_template(
+        'quiz_results.html',
+        result       = result,
+        quiz_sess    = quiz_sess,
+        review       = review,
+        student_name = session.get('student_name', ''),
+    )
+ 
+ 
+# ── QUIZ HISTORY ──────────────────────────────────────────────────────
+@app.route('/user/quiz/history', methods=['GET'])
+@student_required
+def quiz_history():
+    uid = session.get('student_id')
+ 
+    try:
+        hist_res = supabase.table('quiz_results') \
+            .select('*, quiz_sessions(course_code, semester, academic_year, mode, total_questions)') \
+            .eq('user_id', uid) \
+            .order('created_at', desc=True).execute()
+        history = hist_res.data or []
+    except Exception:
+        history = []
+ 
+    return render_template(
+        'quiz_history.html',
+        history      = history,
+        student_name = session.get('student_name', ''),
+    )
+ 
 
 if __name__ == '__main__':
     app.run(debug=True)
