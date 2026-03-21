@@ -3,47 +3,35 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-NEX • Quiz</title>
+  <title>U-NEX • Quiz Session</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ════════════════════════════════════════════════
-       DESIGN TOKENS — mirrors home page language
-    ════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       TOKENS — same as home page
+    ══════════════════════════════════════════ */
     :root {
-      --orange:      #f97316;
-      --orange-dk:   #ea580c;
-      --orange-dim:  rgba(249,115,22,0.10);
-      --orange-bd:   rgba(249,115,22,0.28);
-
-      --green:       #22c55e;
-      --green-dim:   rgba(34,197,94,0.10);
-      --green-bd:    rgba(34,197,94,0.28);
-
-      --red:         #ef4444;
-      --red-dim:     rgba(239,68,68,0.08);
-      --red-bd:      rgba(239,68,68,0.26);
-
-      /* dark backgrounds — same as home page hero #1e2026 family */
-      --bg:          #0c0e14;
-      --surface:     #13161f;
-      --surface-2:   #191d28;
-      --surface-3:   #1e2230;
-
-      /* borders */
-      --bd:          rgba(255,255,255,0.06);
-      --bd-2:        rgba(255,255,255,0.11);
-
-      /* text — same hierarchy as home page */
-      --txt:         #eef0f6;
-      --txt-2:       rgba(238,240,246,0.58);
-      --txt-3:       rgba(238,240,246,0.32);
-
-      /* spacing rhythm — generous like home page */
-      --rad-sm:      8px;
-      --rad-md:      12px;
-      --rad-lg:      16px;
-      --rad-xl:      20px;
+      --orange:   #f97316;
+      --orange-dk:#ea580c;
+      --bg:       #f9fafb;
+      --white:    #ffffff;
+      --dark:     #111827;
+      --gray-1:   #374151;
+      --gray-2:   #4b5563;
+      --gray-3:   #6b7280;
+      --gray-4:   #9ca3af;
+      --gray-5:   #d1d5db;
+      --gray-6:   #e5e7eb;
+      --gray-7:   #f3f4f6;
+      --gray-8:   #f9fafb;
+      --green:    #22c55e;
+      --green-bg: #f0fdf4;
+      --green-bd: #bbf7d0;
+      --red:      #ef4444;
+      --red-bg:   #fef2f2;
+      --red-bd:   #fecaca;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -52,389 +40,455 @@
       height: 100%;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
-      color: var(--txt);
+      color: var(--dark);
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
     }
 
     a { text-decoration: none; color: inherit; }
 
-    /* ════════════════════════════════════════════════
-       TOP BAR
-       — white bg on home = dark bg here; same height
-         feel, same confident weight
-    ════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       TOP NAV — white, full width, generous height
+       Logo on left, submit on far right edge
+    ══════════════════════════════════════════ */
     .topbar {
-      position: fixed; top:0; left:0; right:0; z-index:400;
-      height: 64px;
-      background: rgba(12,14,20,0.96);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--bd);
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: 72px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-6);
+      box-shadow: var(--shadow-sm);
       display: flex; align-items: center;
-      padding: 0 5vw; gap: 16px;
+      padding: 0 5vw;
     }
 
-    /* logo treatment — same weight as home .logo */
-    .tb-brand {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem; font-weight: 900;
-      letter-spacing: -1.2px;
-      color: var(--txt);
+    /* logo — left edge */
+    .tb-logo {
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: -1.4px; color: var(--dark);
       flex-shrink: 0;
     }
-    .tb-brand em { color: var(--orange); font-style: normal; }
+    .tb-logo span { color: var(--orange); }
 
-    /* divider dot */
-    .tb-dot {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--bd-2); flex-shrink: 0;
+    /* quiz info — centered in the bar */
+    .tb-mid {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px;
+      min-width: 0;
     }
 
-    /* course label — eyebrow style from home */
     .tb-course {
-      font-size: 0.78rem; font-weight: 700;
+      font-size: 0.8rem; font-weight: 700;
       letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--txt-3);
-      flex: 1; min-width: 0;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--gray-3);
+      white-space: nowrap;
     }
+
+    .tb-sep {
+      width: 1px; height: 20px;
+      background: var(--gray-6); flex-shrink: 0;
+    }
+
+    /* answered count */
+    .tb-count {
+      font-size: 0.85rem; color: var(--gray-3);
+      white-space: nowrap;
+    }
+    .tb-count strong { color: var(--dark); font-weight: 700; }
 
     /* timer */
     .timer {
       display: flex; align-items: center; gap: 6px;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem; font-weight: 900;
-      letter-spacing: 0.05em;
-      color: var(--txt);
-      background: var(--surface);
-      border: 1px solid var(--bd-2);
-      padding: 6px 14px; border-radius: var(--rad-md);
-      flex-shrink: 0; white-space: nowrap;
-    }
-    .timer .material-icons { font-size: 0.9rem; color: var(--txt-3); }
-    .timer.warn {
-      color: var(--orange); border-color: var(--orange-bd);
-      background: var(--orange-dim);
-    }
-    .timer.crit {
-      color: var(--red); border-color: var(--red-bd);
-      background: var(--red-dim);
-      animation: blink .55s ease-in-out infinite alternate;
-    }
-    @keyframes blink { from{opacity:1} to{opacity:.5} }
-
-    /* progress count */
-    .tb-count {
-      font-size: 0.8rem; color: var(--txt-3);
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--dark);
+      background: var(--gray-7);
+      border: 1px solid var(--gray-6);
+      padding: 6px 14px; border-radius: 10px;
       white-space: nowrap; flex-shrink: 0;
+      transition: background .3s, color .3s, border-color .3s;
     }
-    .tb-count strong { color: var(--txt); font-weight: 700; }
+    .timer .material-icons { font-size: 0.95rem; color: var(--gray-3); }
+    .timer.warn {
+      background: #fff7ed; border-color: #fed7aa;
+      color: var(--orange-dk);
+    }
+    .timer.warn .material-icons { color: var(--orange); }
+    .timer.crit {
+      background: var(--red-bg); border-color: var(--red-bd);
+      color: var(--red);
+      animation: pulse .55s ease-in-out infinite alternate;
+    }
+    .timer.crit .material-icons { color: var(--red); }
+    @keyframes pulse { from{opacity:1} to{opacity:.5} }
 
-    /* submit button — same style as home .visit-btn */
+    /* submit — right edge, orange, with text */
     .tb-submit {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 22px;
+      padding: 12px 28px;
       background: var(--orange); color: #fff;
-      border: none; border-radius: var(--rad-md);
-      font-size: 0.88rem; font-weight: 600;
+      border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 600;
       cursor: pointer; flex-shrink: 0;
-      transition: background .2s, transform .15s;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.30);
     }
-    .tb-submit:hover { background: var(--orange-dk); transform: translateY(-1px); }
-    .tb-submit .material-icons { font-size: 0.95rem; }
+    .tb-submit:hover {
+      background: var(--orange-dk);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.38);
+    }
+    .tb-submit:active { transform: none; }
+    .tb-submit .material-icons { font-size: 1rem; }
 
-    /* ════════════════════════════════════════════════
-       PROGRESS STRIP — thin like home accent-line
-    ════════════════════════════════════════════════ */
-    .prog-strip {
-      position: fixed; top: 64px; left:0; right:0; z-index:399;
-      height: 3px; background: var(--bd);
+    /* ══════════════════════════════════════════
+       PROGRESS BAR — orange thin strip below nav
+    ══════════════════════════════════════════ */
+    .prog-wrap {
+      position: fixed; top: 72px; left:0; right:0; z-index:499;
+      height: 4px; background: var(--gray-6);
     }
     .prog-fill {
       height: 100%; background: var(--orange);
-      border-radius: 0 3px 3px 0;
-      transition: width .35s ease;
+      border-radius: 0 4px 4px 0;
+      transition: width .4s ease;
     }
 
-    /* ════════════════════════════════════════════════
-       PAGE WRAPPER
-    ════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       PAGE
+    ══════════════════════════════════════════ */
     .page {
-      padding-top: 67px; /* topbar 64px + strip 3px */
+      padding-top: 76px; /* 72px nav + 4px bar */
       min-height: 100vh;
       display: flex; flex-direction: column;
     }
 
-    /* ════════════════════════════════════════════════
-       DESKTOP LAYOUT — side-by-side
-    ════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       LAYOUT — question | grid sidebar
+    ══════════════════════════════════════════ */
     .layout {
       display: grid;
-      grid-template-columns: 1fr 260px;
+      grid-template-columns: 1fr 280px;
       flex: 1;
-      min-height: calc(100vh - 67px);
+      min-height: calc(100vh - 76px);
     }
 
     /* ── QUESTION PANEL ── */
     .q-panel {
       padding: 48px 5vw 80px;
+      border-right: 1px solid var(--gray-6);
       overflow-y: auto;
-      border-right: 1px solid var(--bd);
     }
 
-    /* question number — eyebrow label style */
-    .q-eyebrow {
-      font-size: 0.72rem; font-weight: 700;
+    /* question eyebrow */
+    .q-meta {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .q-num {
+      font-size: 0.75rem; font-weight: 700;
       letter-spacing: 0.14em; text-transform: uppercase;
       color: var(--orange);
-      margin-bottom: 10px;
-      display: flex; align-items: center; gap: 10px;
     }
 
     /* badge pills */
     .badge {
-      font-size: 0.6rem; font-weight: 700;
+      display: inline-block;
+      font-size: 0.62rem; font-weight: 700;
       letter-spacing: 0.08em; text-transform: uppercase;
-      padding: 3px 9px; border-radius: 100px; border: 1px solid;
+      padding: 3px 10px; border-radius: 100px; border: 1px solid;
     }
-    .b-easy   { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
-    .b-medium { background: rgba(234,179,8,.09); border-color: rgba(234,179,8,.26); color: #eab308; }
-    .b-hard   { background: var(--red-dim);   border-color: var(--red-bd);   color: var(--red); }
-    .b-course { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
+    .b-easy   { background: var(--green-bg); border-color: var(--green-bd); color: #166534; }
+    .b-medium { background: #fefce8; border-color: #fef08a; color: #854d0e; }
+    .b-hard   { background: var(--red-bg); border-color: var(--red-bd); color: #991b1b; }
+    .b-course { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
 
-    /* question text — same weight/size feel as home h2 but scaled down */
+    /* question text — large, confident */
     .q-text {
-      font-size: 1.15rem; font-weight: 500;
-      line-height: 1.7; color: var(--txt);
+      font-size: 1.2rem; font-weight: 500;
+      line-height: 1.7; color: var(--dark);
       margin-bottom: 32px;
-      max-width: 640px;
+      max-width: 680px;
     }
 
     /* ── OPTIONS ── */
     .options {
-      display: flex; flex-direction: column; gap: 11px;
-      margin-bottom: 32px; max-width: 640px;
+      display: flex; flex-direction: column; gap: 12px;
+      margin-bottom: 36px; max-width: 680px;
     }
 
     .opt {
       display: flex; align-items: flex-start; gap: 14px;
-      padding: 16px 18px; border-radius: var(--rad-lg);
-      border: 1.5px solid var(--bd-2);
-      background: rgba(255,255,255,0.025);
+      padding: 16px 20px; border-radius: 12px;
+      border: 1.5px solid var(--gray-6);
+      background: var(--white);
       cursor: pointer; user-select: none;
-      transition: border-color .18s, background .18s, transform .12s;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .18s, background .18s,
+                  transform .12s, box-shadow .18s;
     }
     .opt:hover {
-      border-color: var(--orange-bd);
-      background: var(--orange-dim);
-      transform: translateX(3px);
+      border-color: var(--orange);
+      background: #fff7ed;
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
     }
     .opt.selected {
-      border-color: var(--orange-bd);
-      background: var(--orange-dim);
+      border-color: var(--orange);
+      background: #fff7ed;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
     }
     .opt.correct-ans {
       border-color: var(--green-bd);
-      background: var(--green-dim);
+      background: var(--green-bg);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
       transform: none;
     }
     .opt.wrong-ans {
       border-color: var(--red-bd);
-      background: var(--red-dim);
+      background: var(--red-bg);
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.10);
       transform: none;
     }
 
-    /* letter badge — same circle style as home tool-panel-tag */
+    /* letter circle */
     .opt-ltr {
-      width: 30px; height: 30px; border-radius: var(--rad-sm);
-      background: var(--surface-2); border: 1px solid var(--bd-2);
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--gray-7); border: 1px solid var(--gray-6);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.7rem; font-weight: 900; color: var(--txt-2);
+      font-size: 0.75rem; font-weight: 800; color: var(--gray-3);
       flex-shrink: 0;
       transition: background .18s, border-color .18s, color .18s;
     }
     .opt.selected    .opt-ltr { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .opt.correct-ans .opt-ltr { background: var(--green);  border-color: var(--green);  color: #fff; }
-    .opt.wrong-ans   .opt-ltr { background: var(--red);    border-color: var(--red);    color: #fff; }
+    .opt.correct-ans .opt-ltr { background: var(--green); border-color: var(--green); color: #fff; }
+    .opt.wrong-ans   .opt-ltr { background: var(--red); border-color: var(--red); color: #fff; }
 
-    /* option text */
     .opt-txt {
-      font-size: 0.92rem; line-height: 1.6; color: var(--txt-2);
-      padding-top: 4px;
+      font-size: 0.95rem; line-height: 1.6; color: var(--gray-2);
+      padding-top: 5px;
     }
     .opt.selected    .opt-txt,
     .opt.correct-ans .opt-txt,
-    .opt.wrong-ans   .opt-txt { color: var(--txt); }
+    .opt.wrong-ans   .opt-txt { color: var(--dark); }
 
-    /* practice explanation — card style */
+    /* practice explanation */
     .expl-card {
       display: none;
-      padding: 14px 18px; border-radius: var(--rad-md);
-      background: var(--green-dim); border: 1px solid var(--green-bd);
-      font-size: 0.85rem; line-height: 1.6; color: var(--txt-2);
-      margin-bottom: 20px; max-width: 640px;
+      padding: 16px 20px; border-radius: 12px;
+      background: var(--green-bg); border: 1px solid var(--green-bd);
+      font-size: 0.88rem; line-height: 1.65; color: var(--gray-2);
+      margin-bottom: 24px; max-width: 680px;
+      box-shadow: var(--shadow-sm);
     }
     .expl-card.show { display: block; }
-    .expl-card strong { color: var(--green); font-weight: 700; }
+    .expl-card strong { color: #166534; font-weight: 700; }
 
     /* ── NAV BUTTONS ── */
     .q-nav {
       display: flex; align-items: center; gap: 12px;
-      max-width: 640px;
+      max-width: 680px;
     }
 
-    /* secondary — same as home .btn-outline adapted to dark */
     .btn-nav {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 12px 22px; border-radius: var(--rad-md);
-      font-size: 0.88rem; font-weight: 600;
-      border: 1.5px solid var(--bd-2);
-      background: var(--surface); color: var(--txt-2);
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600;
+      border: 1.5px solid var(--gray-6);
+      background: var(--white); color: var(--gray-2);
       cursor: pointer;
-      transition: background .18s, color .18s, border-color .18s, transform .12s;
+      box-shadow: var(--shadow-sm);
+      transition: background .18s, color .18s,
+                  border-color .18s, transform .12s, box-shadow .18s;
     }
     .btn-nav:hover {
-      background: var(--surface-2); color: var(--txt);
-      border-color: var(--bd-2); transform: translateY(-1px);
+      background: var(--gray-7); color: var(--dark);
+      border-color: var(--gray-5);
+      transform: translateY(-2px); box-shadow: var(--shadow-md);
     }
     .btn-nav.primary {
       background: var(--orange); border-color: var(--orange); color: #fff;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.28);
     }
-    .btn-nav.primary:hover { background: var(--orange-dk); border-color: var(--orange-dk); }
-    .btn-nav:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+    .btn-nav.primary:hover {
+      background: var(--orange-dk); border-color: var(--orange-dk);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.36);
+    }
+    .btn-nav:disabled {
+      opacity: .4; cursor: not-allowed;
+      transform: none !important; box-shadow: none !important;
+    }
     .btn-nav .material-icons { font-size: 1rem; }
 
-    /* ── NUMBER GRID PANEL ── */
+    /* ══════════════════════════════════════════
+       GRID SIDEBAR — dark panel as secondary accent
+       This is where dark theme lives — not the main content
+    ══════════════════════════════════════════ */
     .grid-panel {
-      background: var(--surface);
-      border-left: 1px solid var(--bd);
-      padding: 28px 18px;
-      position: sticky; top: 67px;
-      height: calc(100vh - 67px);
+      background: #1e2026;  /* dark — home page hero bg */
+      padding: 32px 20px;
+      position: sticky; top: 76px;
+      height: calc(100vh - 76px);
       overflow-y: auto;
     }
 
-    /* label */
-    .gp-label {
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--txt-3); margin-bottom: 14px;
+    /* transparent glass layer on top of dark */
+    .grid-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(249,115,22,0.04);
+      pointer-events: none;
     }
 
-    /* grid */
+    .gp-label {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 16px; position: relative;
+    }
+
     .num-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 5px; margin-bottom: 22px;
+      gap: 6px; margin-bottom: 24px;
+      position: relative;
     }
 
     .gq {
       aspect-ratio: 1;
       display: flex; align-items: center; justify-content: center;
-      border-radius: var(--rad-sm);
-      font-size: 0.62rem; font-weight: 700;
+      border-radius: 8px;
+      font-size: 0.65rem; font-weight: 700;
       cursor: pointer;
-      border: 1px solid var(--bd);
-      background: var(--surface-2); color: var(--txt-3);
-      transition: all .12s;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.35);
+      transition: all .14s;
     }
-    .gq:hover    { border-color: var(--bd-2); color: var(--txt); }
-    .gq.answered { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
-    .gq.current  { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .gq:hover    { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+    .gq.answered {
+      background: rgba(249,115,22,0.20);
+      border-color: rgba(249,115,22,0.45);
+      color: #fb923c;
+    }
+    .gq.current  {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.25);
+    }
 
-    /* legend */
+    /* legend on dark bg */
     .legend {
-      display: flex; flex-direction: column; gap: 8px;
-      padding-top: 4px;
+      display: flex; flex-direction: column; gap: 10px;
+      position: relative;
     }
     .leg-row {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 0.72rem; color: var(--txt-2); line-height: 1.4;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.74rem; color: rgba(255,255,255,0.45);
     }
     .leg-dot {
-      width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0;
+      width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0;
     }
-    .ld-curr  { background: var(--orange); }
-    .ld-done  { background: var(--orange-dim); border: 1px solid var(--orange-bd); }
-    .ld-open  { background: var(--surface-2); border: 1px solid var(--bd); }
+    .ld-curr { background: var(--orange); }
+    .ld-done { background: rgba(249,115,22,0.25); border: 1px solid rgba(249,115,22,0.5); }
+    .ld-open { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
 
-    /* saving toast */
+    /* ══════════════════════════════════════════
+       SAVING INDICATOR
+    ══════════════════════════════════════════ */
     .saving {
-      position: fixed; bottom: 24px; left: 50%;
+      position: fixed; bottom: 28px; left: 50%;
       transform: translateX(-50%);
-      background: var(--surface-2);
-      border: 1px solid var(--bd-2);
-      border-radius: 100px; padding: 8px 20px;
-      font-size: 0.78rem; color: var(--txt-2);
-      display: flex; align-items: center; gap: 7px;
+      background: var(--white);
+      border: 1px solid var(--gray-6);
+      border-radius: 100px;
+      padding: 9px 22px;
+      font-size: 0.8rem; color: var(--gray-3);
+      display: flex; align-items: center; gap: 8px;
       opacity: 0; transition: opacity .25s;
-      pointer-events: none; z-index:500;
+      pointer-events: none; z-index:600;
       white-space: nowrap;
+      box-shadow: var(--shadow-md);
     }
     .saving.show { opacity: 1; }
-    .saving .material-icons { font-size: 0.88rem; animation: spin .7s linear infinite; }
+    .saving .material-icons { font-size: 0.9rem; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* timer warning popup */
-    .timer-warn-popup {
-      position: fixed; top: 78px; left: 50%;
+    .warn-popup {
+      position: fixed; top: 86px; left: 50%;
       transform: translateX(-50%);
-      background: var(--surface-3);
-      border: 1px solid var(--orange-bd);
-      color: var(--txt); padding: 12px 28px;
-      border-radius: var(--rad-lg);
-      font-size: 0.9rem; font-weight: 600;
-      z-index: 600; white-space: nowrap;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-      pointer-events: none;
+      background: var(--white);
+      border: 1.5px solid #fed7aa;
+      border-radius: 14px;
+      padding: 14px 28px;
+      font-size: 0.9rem; font-weight: 600; color: var(--orange-dk);
+      z-index: 700; white-space: nowrap; pointer-events: none;
+      box-shadow: var(--shadow-lg);
     }
 
-    /* ════════════════════════════════════════════════
-       MOBILE — stack vertically ≤ 700px
-    ════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       TRANSPARENT GLASS ACCENT CARDS
+       — subtle depth without going full dark
+    ══════════════════════════════════════════ */
+    .q-panel-inner {
+      max-width: 680px;
+    }
+
+    /* thin orange accent bar above question — like home page .accent-line */
+    .q-accent {
+      width: 48px; height: 4px;
+      background: var(--orange); border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    /* ══════════════════════════════════════════
+       MOBILE ≤ 700px
+    ══════════════════════════════════════════ */
     @media (max-width: 700px) {
 
-      /* topbar — tighter padding, hide course label */
-      .topbar {
-        padding: 0 4vw; gap: 10px; height: 56px;
-      }
-      .tb-brand { font-size: 1.2rem; }
-      .tb-dot, .tb-course { display: none; }
-      .tb-submit { padding: 8px 14px; font-size: 0.82rem; gap: 5px; }
-      .tb-submit span:not(.material-icons) { display: none; }
+      /* topbar — tighter, still generous */
+      .topbar { padding: 0 4vw; height: 64px; }
+      .tb-logo { font-size: 1.45rem; }
 
-      .prog-strip { top: 56px; }
-      .page { padding-top: 59px; }
+      /* hide middle section on mobile — show only count */
+      .tb-course, .tb-sep:first-of-type { display: none; }
 
-      /* single column */
+      /* stack layout */
       .layout { grid-template-columns: 1fr; }
 
-      /* number grid — compact strip */
+      /* grid panel becomes a dark strip at top */
       .grid-panel {
         position: static; height: auto;
-        border-left: none; border-bottom: 1px solid var(--bd);
         padding: 16px 4vw;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
       }
-      .num-grid { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+      .num-grid {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 4px;
+      }
       .legend { display: none; }
 
       /* question panel */
       .q-panel { padding: 28px 4vw 80px; }
-      .q-text { font-size: 1rem; margin-bottom: 24px; }
-      .options { gap: 9px; margin-bottom: 24px; }
-      .opt { padding: 13px 14px; }
+      .q-text  { font-size: 1.05rem; margin-bottom: 24px; }
+      .options { gap: 10px; margin-bottom: 28px; }
+      .opt     { padding: 13px 16px; }
 
-      /* nav buttons full width */
+      /* full-width nav buttons */
       .q-nav { gap: 10px; }
       .btn-nav { flex: 1; justify-content: center; }
+
+      /* progress bar offset */
+      .prog-wrap { top: 64px; }
+      .page      { padding-top: 68px; }
     }
 
-    /* very small — icon-only submit, tighter timer */
-    @media (max-width: 360px) {
-      .timer { padding: 5px 10px; font-size: 0.88rem; }
-      .tb-count { display: none; }
+    /* very small — compact submit */
+    @media (max-width: 400px) {
+      .tb-submit { padding: 10px 16px; font-size: 0.85rem; }
+      .timer     { padding: 5px 10px; font-size: 0.85rem; }
+      .tb-count  { display: none; }
     }
   </style>
 </head>
@@ -453,31 +507,39 @@
     const ANSWERS   = {{ answers   | tojson }};
   </script>
 
-  <!-- ══ TOP BAR ══ -->
+  <!-- ══ TOP NAV ══ -->
   <header class="topbar">
-    <div class="tb-brand"><em>U</em>-NEX</div>
-    <div class="tb-dot"></div>
-    <div class="tb-course">{{ quiz_sess.course_code or quiz_sess.department | title }}</div>
 
-    {% if quiz_sess.time_limit_minutes %}
-    <div class="timer" id="timer">
-      <span class="material-icons">timer</span>
-      <span id="timerDisplay">--:--</span>
+    <!-- left: logo -->
+    <div class="tb-logo">U-<span>NEX</span></div>
+
+    <!-- centre: course · count · timer -->
+    <div class="tb-mid">
+      <span class="tb-course">{{ quiz_sess.course_code or 'Quiz' }}</span>
+      <div class="tb-sep"></div>
+      <span class="tb-count">
+        <strong id="answeredCount">{{ answered_count }}</strong>/{{ total }} answered
+      </span>
+
+      {% if quiz_sess.time_limit_minutes %}
+      <div class="tb-sep"></div>
+      <div class="timer" id="timer">
+        <span class="material-icons">timer</span>
+        <span id="timerDisplay">--:--</span>
+      </div>
+      {% endif %}
     </div>
-    {% endif %}
 
-    <div class="tb-count">
-      <strong id="answeredCount">{{ answered_count }}</strong>/{{ total }}
-    </div>
-
+    <!-- right: submit -->
     <button class="tb-submit" onclick="confirmSubmit()">
       <span class="material-icons">send</span>
-      <span>Submit</span>
+      Submit Quiz
     </button>
+
   </header>
 
-  <!-- progress strip -->
-  <div class="prog-strip">
+  <!-- progress bar -->
+  <div class="prog-wrap">
     <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
 
@@ -487,8 +549,11 @@
       <!-- ── QUESTION PANEL ── -->
       <main class="q-panel" id="qPanel">
 
-        <div class="q-eyebrow">
-          <span id="qNum">Question 1 of {{ total }}</span>
+        <!-- orange accent bar — like home page -->
+        <div class="q-accent"></div>
+
+        <div class="q-meta">
+          <span class="q-num" id="qNum">Question 1 of {{ total }}</span>
           <span class="badge b-course" id="qCourse"></span>
           <span class="badge" id="qDiff"></span>
         </div>
@@ -512,7 +577,7 @@
 
       </main>
 
-      <!-- ── GRID PANEL ── -->
+      <!-- ── DARK GRID SIDEBAR (secondary accent) ── -->
       <aside class="grid-panel">
         <div class="gp-label">Questions</div>
         <div class="num-grid" id="numGrid"></div>
@@ -528,16 +593,14 @@
 
   <!-- saving indicator -->
   <div class="saving" id="savingInd">
-    <span class="material-icons">sync</span> Saving…
+    <span class="material-icons">sync</span> Saving answer…
   </div>
 
-  <!-- hidden submit form -->
   <form method="POST"
         action="{{ url_for('quiz_submit', session_id=quiz_sess.id) }}"
         id="submitForm"></form>
 
   <script>
-    /* ── state ── */
     const qd         = document.getElementById('qd');
     const SESSION_ID = parseInt(qd.dataset.sessionId);
     const TOTAL      = parseInt(qd.dataset.total);
@@ -549,7 +612,7 @@
     const ans = {};
     Object.entries(ANSWERS).forEach(([k,v]) => { if (v) ans[parseInt(k)] = v; });
 
-    /* ── build number grid ── */
+    /* ── build grid ── */
     const grid = document.getElementById('numGrid');
     QUESTIONS.forEach((q, i) => {
       const c = document.createElement('div');
@@ -559,7 +622,7 @@
       grid.appendChild(c);
     });
 
-    /* ── render question ── */
+    /* ── render ── */
     function render(i) {
       const q = QUESTIONS[i];
       if (!q) return;
@@ -568,7 +631,6 @@
       document.getElementById('qNum').textContent = `Question ${i + 1} of ${TOTAL}`;
       document.getElementById('qText').textContent = q.question_text;
 
-      /* badges */
       const ce = document.getElementById('qCourse');
       ce.textContent = q.course_code || '';
       ce.style.display = q.course_code ? '' : 'none';
@@ -577,7 +639,6 @@
       de.textContent = q.difficulty || '';
       de.className = `badge b-${q.difficulty || 'medium'}`;
 
-      /* options */
       const box = document.getElementById('opts');
       box.innerHTML = '';
       ['a','b','c','d'].forEach(l => {
@@ -593,18 +654,17 @@
         box.appendChild(d);
       });
 
-      /* explanation */
       document.getElementById('explCard').classList.remove('show');
 
-      /* prev / next */
-      document.getElementById('prevBtn').disabled = i === 0;
-      const nb = document.getElementById('nextBtn');
+      const prev = document.getElementById('prevBtn');
+      const next = document.getElementById('nextBtn');
+      prev.disabled = i === 0;
       if (i === TOTAL - 1) {
-        nb.disabled = true;
-        nb.innerHTML = 'Last Question';
+        next.disabled = true;
+        next.innerHTML = '<span class="material-icons">check</span> Last Question';
       } else {
-        nb.disabled = false;
-        nb.innerHTML = 'Next <span class="material-icons">arrow_forward</span>';
+        next.disabled = false;
+        next.innerHTML = 'Next <span class="material-icons">arrow_forward</span>';
       }
 
       syncGrid();
@@ -614,34 +674,31 @@
     function syncGrid() {
       QUESTIONS.forEach((q, i) => {
         const c = document.getElementById(`g${i}`);
-        c.className = i === cur        ? 'gq current'
+        c.className = i === cur          ? 'gq current'
                     : ans[q.question_id] ? 'gq answered'
                     : 'gq';
       });
     }
 
     function syncProgress() {
-      const pct = (Object.keys(ans).length / TOTAL) * 100;
-      document.getElementById('progFill').style.width = pct + '%';
-      document.getElementById('answeredCount').textContent = Object.keys(ans).length;
+      const done = Object.keys(ans).length;
+      document.getElementById('progFill').style.width = (done / TOTAL * 100) + '%';
+      document.getElementById('answeredCount').textContent = done;
     }
 
-    /* ── pick an option ── */
+    /* ── pick ── */
     function pick(i, l) {
       const q = QUESTIONS[i];
       ans[q.question_id] = l;
-
       document.querySelectorAll('#opts .opt').forEach(o => {
         o.classList.toggle('selected', o.dataset.l === l);
         o.classList.remove('correct-ans', 'wrong-ans');
       });
-
-      syncGrid();
-      syncProgress();
+      syncGrid(); syncProgress();
       save(q.question_id, l, i);
     }
 
-    /* ── save answer ── */
+    /* ── save ── */
     let saveT = null;
     function save(qid, l, i) {
       setSaving(true);
@@ -652,9 +709,7 @@
           credentials: 'same-origin',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            session_id: SESSION_ID,
-            question_id: qid,
-            selected_option: l
+            session_id: SESSION_ID, question_id: qid, selected_option: l
           })
         })
         .then(r => r.json())
@@ -684,7 +739,7 @@
       document.getElementById('savingInd').classList.toggle('show', v);
     }
 
-    /* ── navigation ── */
+    /* ── navigate ── */
     function go(dir) { goTo(cur + dir); }
     function goTo(i) {
       if (i < 0 || i >= TOTAL) return;
@@ -704,8 +759,8 @@
 
       function tick() {
         const rem = Math.max(0, endMs - Date.now());
-        const m   = Math.floor(rem / 60000);
-        const s   = Math.floor((rem % 60000) / 1000);
+        const m = Math.floor(rem / 60000);
+        const s = Math.floor((rem % 60000) / 1000);
         dis.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
         if (rem <= 0) {
@@ -716,18 +771,18 @@
         }
         if (!w5 && rem <= 300000) {
           w5 = true; tel.className = 'timer crit';
-          popup('⏰  5 minutes remaining — start wrapping up.');
+          showPopup('⏰  5 minutes remaining — start wrapping up.');
         } else if (!w1 && rem <= 60000) {
           w1 = true;
-          popup('🚨  1 minute left — submit now!');
+          showPopup('🚨  1 minute left — submit now!');
         } else if (rem > 300000 && rem <= 900000) {
           tel.className = 'timer warn';
         }
       }
 
-      function popup(msg) {
+      function showPopup(msg) {
         const w = document.createElement('div');
-        w.className = 'timer-warn-popup';
+        w.className = 'warn-popup';
         w.textContent = msg;
         document.body.appendChild(w);
         setTimeout(() => {
@@ -746,7 +801,7 @@
       const done = Object.keys(ans).length;
       const left = TOTAL - done;
       let msg = `Submit your quiz?\n\n✓  Answered: ${done} / ${TOTAL}`;
-      if (left > 0) msg += `\n✗  Unanswered: ${left} — these will be marked wrong.`;
+      if (left > 0) msg += `\n✗  Unanswered: ${left} — will be marked wrong.`;
       if (confirm(msg)) document.getElementById('submitForm').submit();
     }
 
