@@ -813,7 +813,7 @@
       <h1>UNIFIED<br>EXCELLENCE</h1>
       <div class="hero-buttons">
         <a href="/user/notes" class="btn btn-primary">View Notes</a>
-        <a onclick="showUnderDevModal()"class="btn btn-outline">Signup</a>
+        <a href="{{ url_for('user_signup_page') }}" class="btn btn-outline">Sign Up</a>
       </div>
     </div>
   </section>
@@ -874,7 +874,7 @@
           <span class="tool-panel-tag">Quiz</span>
           <h3 class="tool-panel-title">Test What<br>You Know.</h3>
           <p class="tool-panel-sub">Quick quizzes that reveal gaps and sharpen your understanding fast.</p>
-          <a onclick="showUnderDevModal()" class="visit-btn">
+          <a href="{{ url_for('user_signup_page') }}" class="visit-btn">
             Take a Quiz <span class="material-icons">arrow_forward</span>
           </a>
         </div>
