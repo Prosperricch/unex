@@ -5,354 +5,509 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U-NEX • Quiz Setup</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
+    /* ═══════════════════════════════════════
+       TOKENS — home page design language
+    ═══════════════════════════════════════ */
     :root {
-      --orange:     #f97316;
-      --orange-dk:  #ea580c;
-      --orange-dim: rgba(249,115,22,0.10);
-      --orange-bd:  rgba(249,115,22,0.22);
-      --gold:       #d4a017;
-      --gold-dim:   rgba(212,160,23,0.10);
-      --green:      #22c55e;
-      --green-dim:  rgba(34,197,94,0.10);
-      --green-bd:   rgba(34,197,94,0.22);
-      --bg:         #0c0e14;
-      --s1:         #13161f;
-      --s2:         #191d28;
-      --bd:         rgba(255,255,255,0.06);
-      --bd2:        rgba(255,255,255,0.10);
-      --txt:        #eef0f6;
-      --txt2:       rgba(238,240,246,0.55);
-      --txt3:       rgba(238,240,246,0.28);
+      --orange:    #f97316;
+      --orange-dk: #ea580c;
+      --bg:        #f9fafb;
+      --white:     #ffffff;
+      --dark:      #111827;
+      --gray-1:    #374151;
+      --gray-2:    #4b5563;
+      --gray-3:    #6b7280;
+      --gray-4:    #9ca3af;
+      --gray-5:    #d1d5db;
+      --gray-6:    #e5e7eb;
+      --gray-7:    #f3f4f6;
+      --green:     #22c55e;
+      --green-bg:  #f0fdf4;
+      --green-bd:  #bbf7d0;
+      --red:       #ef4444;
+      --red-bg:    #fef2f2;
+      --red-bd:    #fecaca;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
-      color: var(--txt);
+      color: var(--dark);
       min-height: 100vh;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
     }
+
     a { text-decoration: none; color: inherit; }
 
-    .ambient {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.07) 0%, transparent 65%),
-        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(212,160,23,0.05) 0%, transparent 60%);
-    }
-
-    /* NAV */
-    .nav {
-      position: sticky; top: 0; z-index: 200;
-      height: 62px;
-      background: rgba(12,14,20,0.88);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--bd);
+    /* ═══════════════════════════════════════
+       TOP NAV — white, fixed, home page style
+    ═══════════════════════════════════════ */
+    .topbar {
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: 72px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-6);
+      box-shadow: var(--shadow-sm);
       display: flex; align-items: center;
-      padding: 0 28px; gap: 12px;
+      padding: 0 5vw; gap: 16px;
     }
-    .nav-logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem; font-weight: 900;
-      letter-spacing: -1.2px; margin-right: auto;
+
+    .tb-logo {
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: -1.4px; color: var(--dark);
+      margin-right: auto;
     }
-    .nav-logo em { color: var(--orange); font-style: normal; }
-    .nav-btn {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.82rem; font-weight: 500; color: var(--txt2);
-      padding: 7px 13px; border-radius: 9px;
-      border: 1px solid var(--bd2); background: var(--s1);
-      transition: color .2s;
+    .tb-logo span { color: var(--orange); }
+
+    .tb-back {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      color: var(--gray-2);
+      border: 1.5px solid var(--gray-6);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      transition: background .18s, color .18s,
+                  border-color .18s, transform .12s;
     }
-    .nav-btn:hover { color: var(--txt); }
-    .nav-btn .material-icons { font-size: 0.95rem; }
-    .nav-avatar {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+    .tb-back:hover {
+      background: var(--gray-7); color: var(--dark);
+      border-color: var(--gray-5); transform: translateY(-1px);
+    }
+    .tb-back .material-icons { font-size: 1rem; }
+
+    /* avatar circle — orange gradient */
+    .tb-avatar {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, #d97706 100%);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem; font-weight: 900; color: #fff;
+      font-size: 0.95rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 12px rgba(249,115,22,0.28);
+      flex-shrink: 0;
     }
 
-    /* PAGE */
+    /* ═══════════════════════════════════════
+       PAGE
+    ═══════════════════════════════════════ */
     .page {
-      position: relative; z-index: 1;
-      max-width: 680px; margin: 0 auto;
-      padding: 40px 24px 80px;
+      padding-top: 72px;
+      max-width: 720px;
+      margin: 0 auto;
+      padding-left: 5vw;
+      padding-right: 5vw;
+      padding-bottom: 100px;
     }
 
-    .ph { margin-bottom: 32px; }
-    .ph-label {
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: .13em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 6px;
+    /* ═══════════════════════════════════════
+       PAGE HEADER — generous, editorial
+    ═══════════════════════════════════════ */
+    .ph {
+      padding-top: 56px;
+      margin-bottom: 40px;
     }
-    .ph-title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.7rem, 3vw, 2.3rem);
-      font-weight: 900; letter-spacing: -0.8px; line-height: 1.08;
-    }
-    .ph-sub { font-size: 0.85rem; color: var(--txt2); margin-top: 5px; }
 
-    /* INFO STRIP */
-    .info-strip {
+    /* eyebrow — home page .eyebrow style */
+    .ph-eyebrow {
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 14px;
       display: flex; align-items: center; gap: 10px;
-      background: var(--orange-dim);
-      border: 1px solid var(--orange-bd);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 24px;
-      font-size: 0.83rem; color: var(--txt2);
     }
-    .info-strip .material-icons { color: var(--orange); font-size: 1.1rem; flex-shrink: 0; }
-    .info-strip strong { color: var(--txt); }
+    .ph-eyebrow::before {
+      content: '';
+      width: 28px; height: 3px;
+      background: var(--orange); border-radius: 2px;
+    }
 
-    /* CARD */
+    /* headline — home page h2 style */
+    .ph-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -1px;
+      color: var(--dark);
+      margin-bottom: 14px;
+    }
+    .ph-title span { color: var(--orange); }
+
+    /* sub — home page p.lead style */
+    .ph-sub {
+      font-size: 1.05rem;
+      color: var(--gray-2);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════
+       INFO BANNER — orange tinted, like home
+       page tool-panel-tag but wider
+    ═══════════════════════════════════════ */
+    .info-banner {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      font-size: 0.9rem; color: var(--gray-2);
+      line-height: 1.6;
+      box-shadow: var(--shadow-sm);
+    }
+    .info-banner .material-icons {
+      color: var(--orange); font-size: 1.2rem;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .info-banner strong { color: var(--dark); font-weight: 700; }
+
+    /* ═══════════════════════════════════════
+       CARDS — white, shadowed, like home
+       page tool panels but flat
+    ═══════════════════════════════════════ */
     .card {
-      background: var(--s1);
-      border: 1px solid var(--bd);
-      border-radius: 18px;
-      padding: 28px;
-      margin-bottom: 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-6);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-md);
       position: relative; overflow: hidden;
     }
-    .card::before {
+
+    /* subtle diagonal hatch — matches home page hero overlay style */
+    .card::after {
       content: '';
-      position: absolute; inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 22px 22px;
+      position: absolute; top: 0; right: 0;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(249,115,22,0.04) 0%, transparent 70%);
       pointer-events: none;
     }
 
+    .card-label {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 8px;
+    }
     .card-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem; font-weight: 800;
-      margin-bottom: 4px; position: relative; z-index: 1;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--dark); margin-bottom: 4px;
     }
     .card-sub {
-      font-size: 0.78rem; color: var(--txt2);
-      margin-bottom: 20px; position: relative; z-index: 1;
+      font-size: 0.88rem; color: var(--gray-3);
+      margin-bottom: 24px; line-height: 1.55;
     }
 
-    /* FORM */
+    /* ═══════════════════════════════════════
+       FORM FIELDS
+    ═══════════════════════════════════════ */
     .fgrid {
       display: grid; grid-template-columns: 1fr 1fr;
-      gap: 13px; position: relative; z-index: 1;
+      gap: 16px;
     }
-    .fgrid.single { grid-template-columns: 1fr; }
-    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg { display: flex; flex-direction: column; gap: 6px; }
     .fg.full { grid-column: 1 / -1; }
 
     .fg label {
-      font-size: 0.7rem; font-weight: 600;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: var(--txt3);
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--gray-3);
+    }
+    .fg label .req { color: var(--orange); }
+    .fg label .opt {
+      font-weight: 400; text-transform: none;
+      letter-spacing: 0; color: var(--gray-4); font-size: 0.72rem;
     }
 
+    /* input wrapper with icon */
     .iw { position: relative; display: flex; align-items: center; }
-    .iw .li {
-      position: absolute; left: 12px; top:0; bottom:0;
+    .iw .icon {
+      position: absolute; left: 13px; top:0; bottom:0;
       display: flex; align-items: center;
       pointer-events: none; z-index: 2;
-      color: var(--txt3); transition: color .2s;
+      color: var(--gray-4); transition: color .2s;
     }
-    .iw .li .material-icons { font-size: 0.95rem; line-height:1; display:block; }
+    .iw .icon .material-icons { font-size: 1rem; line-height:1; }
 
     input, select {
       width: 100%;
-      padding: 11px 12px 11px 36px;
-      background: rgba(255,255,255,0.05);
-      border: 1.5px solid var(--bd2);
+      padding: 12px 14px 12px 40px;
+      background: var(--white);
+      border: 1.5px solid var(--gray-6);
       border-radius: 10px;
       font-family: system-ui, sans-serif;
-      font-size: 0.88rem; color: var(--txt);
-      outline: none; -webkit-appearance: none; appearance: none;
-      transition: border-color .2s, background .2s, box-shadow .2s;
+      font-size: 0.92rem; color: var(--dark);
+      outline: none;
+      -webkit-appearance: none; appearance: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .2s, box-shadow .2s;
     }
     select {
-      cursor: pointer; padding-right: 34px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' fill='none'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='rgba(238,240,246,.3)' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 12px center;
+      cursor: pointer; padding-right: 36px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' fill='none'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236b7280' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
     }
-    select option { background: #191d28; }
     input:focus, select:focus {
       border-color: var(--orange);
-      background: rgba(249,115,22,0.05);
-      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12), var(--shadow-sm);
     }
-    .iw:focus-within .li { color: var(--orange); }
-    input::placeholder { color: var(--txt3); font-weight: 300; }
-    input.no-icon { padding-left: 13px; }
+    .iw:focus-within .icon { color: var(--orange); }
+    input::placeholder { color: var(--gray-4); }
+    input.no-icon { padding-left: 14px; }
 
-    /* MODE TOGGLE */
-    .mode-row {
-      display: flex; gap: 10px;
-      position: relative; z-index: 1;
-    }
+    /* ═══════════════════════════════════════
+       MODE TOGGLE — card-style options
+    ═══════════════════════════════════════ */
+    .mode-row { display: flex; gap: 12px; }
+
     .mode-opt {
       flex: 1;
-      display: flex; align-items: center; gap: 10px;
-      padding: 13px 15px; border-radius: 11px;
-      border: 1.5px solid var(--bd2);
-      background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px; border-radius: 14px;
+      border: 1.5px solid var(--gray-6);
+      background: var(--white);
       cursor: pointer;
-      transition: border-color .2s, background .2s;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .18s, background .18s,
+                  transform .12s, box-shadow .18s;
+    }
+    .mode-opt:hover {
+      border-color: var(--gray-5);
+      background: var(--gray-7);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
     .mode-opt input[type="radio"] { display: none; }
     .mode-opt.selected {
-      border-color: var(--orange-bd);
-      background: var(--orange-dim);
+      border-color: var(--orange);
+      background: #fff7ed;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.10), var(--shadow-sm);
+      transform: translateY(-2px);
     }
+
     .mode-ico {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: var(--s2); border: 1px solid var(--bd);
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--gray-7); border: 1px solid var(--gray-6);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      transition: background .18s, border-color .18s;
     }
-    .mode-ico .material-icons { font-size: 1.05rem; color: var(--txt2); }
+    .mode-ico .material-icons { font-size: 1.1rem; color: var(--gray-3); }
     .mode-opt.selected .mode-ico {
-      background: var(--orange-dim);
-      border-color: var(--orange-bd);
+      background: #fff7ed; border-color: #fed7aa;
     }
     .mode-opt.selected .mode-ico .material-icons { color: var(--orange); }
-    .mode-label { font-size: 0.85rem; font-weight: 600; }
-    .mode-desc  { font-size: 0.72rem; color: var(--txt2); margin-top: 1px; }
 
-    /* QUESTION COUNT BADGE */
+    .mode-label { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .mode-desc  { font-size: 0.76rem; color: var(--gray-3); margin-top: 2px; line-height: 1.4; }
+
+    /* ═══════════════════════════════════════
+       QUESTION COUNT BADGE
+    ═══════════════════════════════════════ */
     .count-badge {
-      display: flex; align-items: center; gap: 10px;
-      padding: 13px 16px; border-radius: 12px;
-      background: var(--s2); border: 1px solid var(--bd);
-      margin-top: 16px; position: relative; z-index: 1;
-      transition: border-color .3s;
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; border-radius: 14px;
+      background: var(--gray-7);
+      border: 1.5px solid var(--gray-6);
+      margin-top: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: background .3s, border-color .3s;
     }
-    .count-badge.has-questions { border-color: var(--green-bd); background: var(--green-dim); }
-    .count-badge.no-questions  { border-color: rgba(239,68,68,0.22); background: rgba(239,68,68,0.07); }
-
-    .cb-ico { font-size: 1.3rem; flex-shrink: 0; }
-    .count-badge.has-questions .cb-ico { color: var(--green); }
-    .count-badge.no-questions  .cb-ico { color: #ef4444; }
-
-    .cb-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.4rem; font-weight: 900; line-height: 1;
+    .count-badge.has-q {
+      background: var(--green-bg); border-color: var(--green-bd);
     }
-    .count-badge.has-questions .cb-val { color: var(--green); }
-    .count-badge.no-questions  .cb-val { color: #ef4444; }
-    .cb-lbl { font-size: 0.78rem; color: var(--txt2); }
+    .count-badge.no-q {
+      background: var(--red-bg); border-color: var(--red-bd);
+    }
 
-    .cb-loading .cb-ico { color: var(--txt3); animation: spin .8s linear infinite; }
+    .cb-ico { font-size: 1.5rem; flex-shrink: 0; color: var(--gray-4); }
+    .count-badge.has-q .cb-ico { color: var(--green); }
+    .count-badge.no-q  .cb-ico { color: var(--red); }
+    .cb-loading .cb-ico { animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* SUBMIT */
-    .submit-btn {
+    .cb-val {
+      font-size: 1.6rem; font-weight: 800; line-height: 1;
+      color: var(--gray-3);
+    }
+    .count-badge.has-q .cb-val { color: #166534; }
+    .count-badge.no-q  .cb-val { color: #991b1b; }
+
+    .cb-lbl { font-size: 0.82rem; color: var(--gray-3); margin-top: 2px; }
+    .count-badge.has-q .cb-lbl { color: #166534; }
+    .count-badge.no-q  .cb-lbl { color: #991b1b; }
+
+    /* ═══════════════════════════════════════
+       START BUTTON — home page .visit-btn style
+    ═══════════════════════════════════════ */
+    .start-btn {
       width: 100%; margin-top: 8px;
-      padding: 15px 20px;
+      padding: 16px 28px;
       background: var(--orange); color: #fff;
+      border: none; border-radius: 14px; cursor: pointer;
       font-family: system-ui, sans-serif;
-      font-size: 1rem; font-weight: 700;
-      border: none; border-radius: 12px; cursor: pointer;
+      font-size: 1.05rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      position: relative; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.30);
       transition: background .2s, transform .15s, box-shadow .2s;
     }
-    .submit-btn::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
-      pointer-events: none;
-    }
-    .submit-btn:hover {
+    .start-btn:hover {
       background: var(--orange-dk);
       transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(249,115,22,0.35);
+      box-shadow: 0 10px 30px rgba(249,115,22,0.38);
     }
-    .submit-btn:active { transform: none; box-shadow: none; }
-    .submit-btn:disabled {
-      background: var(--s2); color: var(--txt3);
-      cursor: not-allowed; transform: none; box-shadow: none;
+    .start-btn:active { transform: none; }
+    .start-btn:disabled {
+      background: var(--gray-5); color: var(--white);
+      cursor: not-allowed; transform: none;
+      box-shadow: none;
     }
-    .submit-btn .material-icons { font-size: 1.1rem; line-height:1; }
+    .start-btn .material-icons { font-size: 1.15rem; }
 
-    /* ANIMS */
-    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
-    .a1{animation-delay:.04s} .a2{animation-delay:.10s}
-    .a3{animation-delay:.16s} .a4{animation-delay:.22s}
+    /* ═══════════════════════════════════════
+       TOASTS — same as home page modals
+    ═══════════════════════════════════════ */
+    .toast-wrap {
+      position: fixed; top: 84px; right: 5vw; z-index: 999;
+      display: flex; flex-direction: column; gap: 10px;
+      pointer-events: none; max-width: 340px;
+    }
+    .toast {
+      background: var(--white);
+      border: 1px solid var(--gray-6);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.88rem; color: var(--gray-2);
+      display: flex; align-items: flex-start; gap: 10px;
+      pointer-events: all;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn .32s cubic-bezier(.22,1,.36,1);
+      border-left: 4px solid var(--gray-5);
+    }
+    .toast.success { border-left-color: var(--green); }
+    .toast.error   { border-left-color: var(--red); }
+    .toast.info    { border-left-color: var(--orange); }
+    .toast .material-icons { font-size: 1.05rem; flex-shrink: 0; margin-top: 1px; }
+    .toast.success .material-icons { color: var(--green); }
+    .toast.error   .material-icons { color: var(--red); }
+    .toast.info    .material-icons { color: var(--orange); }
+    @keyframes toastIn {
+      from { opacity:0; transform: translateX(16px) scale(.96); }
+      to   { opacity:1; transform: none; }
+    }
+
+    /* ═══════════════════════════════════════
+       ANIMATIONS — staggered like home page
+    ═══════════════════════════════════════ */
+    .a {
+      opacity:0; transform: translateY(18px);
+      animation: up .48s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    .a1{animation-delay:.04s}
+    .a2{animation-delay:.12s}
+    .a3{animation-delay:.20s}
+    .a4{animation-delay:.28s}
     @keyframes up { to { opacity:1; transform:none; } }
 
-    @media (max-width: 560px) {
-      .page { padding: 24px 16px 64px; }
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 640px) {
+      .topbar { padding: 0 4vw; height: 64px; }
+      .tb-logo { font-size: 1.45rem; }
+      .page { padding-left: 4vw; padding-right: 4vw; padding-bottom: 80px; }
+      .ph { padding-top: 36px; margin-bottom: 28px; }
+      .ph-title { font-size: clamp(1.7rem, 6vw, 2.2rem); }
+      .card { padding: 24px 20px; border-radius: 16px; }
       .fgrid { grid-template-columns: 1fr; }
       .fg.full { grid-column: 1; }
-      .mode-row { flex-direction: column; }
+      .mode-row { flex-direction: column; gap: 10px; }
+    }
+
+    @media (max-width: 400px) {
+      .tb-back span:not(.material-icons) { display: none; }
+      .tb-back { padding: 9px 12px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="ambient"></div>
-
   <div id="fd"
        data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
        style="display:none"></div>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
-    <a href="{{ url_for('user_dashboard') }}" class="nav-btn">
-      <span class="material-icons">arrow_back</span> Dashboard
+  <!-- ══ TOP NAV ══ -->
+  <header class="topbar">
+    <div class="tb-logo">U-<span>NEX</span></div>
+    <a href="{{ url_for('user_dashboard') }}" class="tb-back">
+      <span class="material-icons">arrow_back</span>
+      <span>Dashboard</span>
     </a>
-    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar">
+    <a href="{{ url_for('user_settings_page') }}" class="tb-avatar">
       {{ student_name[0] | upper }}
     </a>
-  </nav>
+  </header>
 
-  <!-- PAGE -->
+  <!-- ══ PAGE ══ -->
   <div class="page">
 
+    <!-- header -->
     <div class="ph a a1">
-      <p class="ph-label">Quiz</p>
-      <h1 class="ph-title">Set up your quiz.</h1>
+      <div class="ph-eyebrow">Quiz Setup</div>
+      <h1 class="ph-title">
+        Set up your<br><span>quiz.</span>
+      </h1>
       <p class="ph-sub">
         {{ student_dept | title }} · Level {{ student_level }} ·
-        Questions are pulled from approved notes for your selection.
+        Questions are pulled from your approved course bank.
       </p>
     </div>
 
-    <div class="info-strip a a1">
+    <!-- info banner -->
+    <div class="info-banner a a1">
       <span class="material-icons">info</span>
-      <span>You will get <strong>up to 70 questions</strong> shuffled uniquely for you.
-      Options are also randomised so every attempt is different.</span>
+      <div>
+        You will get <strong>up to 70 questions</strong> shuffled uniquely for you.
+        Options within each question are also randomised — every attempt is different.
+      </div>
     </div>
 
     <form method="POST" action="{{ url_for('quiz_start') }}" id="setupForm">
 
-      <!-- FILTERS -->
+      <!-- CONTENT FILTERS -->
       <div class="card a a2">
+        <div class="card-label">Step 1</div>
         <div class="card-title">Select Your Content</div>
-        <div class="card-sub">Choose what you want to be tested on.</div>
+        <div class="card-sub">Filter questions by level, semester and course.</div>
+
         <div class="fgrid">
 
+          <!-- level -->
           <div class="fg full">
-            <label>Level <span style="color:var(--orange)">*</span></label>
+            <label>Level <span class="req">*</span></label>
             <div class="iw">
-              <span class="li"><span class="material-icons">layers</span></span>
+              <span class="icon"><span class="material-icons">layers</span></span>
               <select name="level" id="sel-level" required>
-                <option value="100" {% if student_level == '100' %}selected{% endif %}>100 Level</option>
-                <option value="200" {% if student_level == '200' %}selected{% endif %}>200 Level</option>
-                <option value="300" {% if student_level == '300' %}selected{% endif %}>300 Level</option>
-                <option value="400" {% if student_level == '400' %}selected{% endif %}>400 Level</option>
+                <option value="100" {% if student_level=='100' %}selected{% endif %}>100 Level</option>
+                <option value="200" {% if student_level=='200' %}selected{% endif %}>200 Level</option>
+                <option value="300" {% if student_level=='300' %}selected{% endif %}>300 Level</option>
+                <option value="400" {% if student_level=='400' %}selected{% endif %}>400 Level</option>
               </select>
             </div>
           </div>
 
+          <!-- semester -->
           <div class="fg">
-            <label>Semester <span style="color:var(--orange)">*</span></label>
+            <label>Semester <span class="req">*</span></label>
             <div class="iw">
-              <span class="li"><span class="material-icons">calendar_today</span></span>
+              <span class="icon"><span class="material-icons">calendar_today</span></span>
               <select name="semester" id="sel-semester" required>
                 <option value="" disabled {% if not semesters %}selected{% endif %}>Select semester</option>
                 {% for s in semesters %}
@@ -362,10 +517,11 @@
             </div>
           </div>
 
+          <!-- academic year -->
           <div class="fg">
-            <label>Academic Year <span style="color:var(--orange)">*</span></label>
+            <label>Academic Year <span class="req">*</span></label>
             <div class="iw">
-              <span class="li"><span class="material-icons">event</span></span>
+              <span class="icon"><span class="material-icons">event</span></span>
               <select name="academic_year" id="sel-year" required>
                 <option value="" disabled {% if not academic_years %}selected{% endif %}>Select year</option>
                 {% for y in academic_years %}
@@ -375,10 +531,14 @@
             </div>
           </div>
 
+          <!-- course code -->
           <div class="fg full">
-            <label>Course Code <span style="color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0">(optional — leave blank for all courses)</span></label>
+            <label>
+              Course Code
+              <span class="opt">— optional, leave blank for all courses</span>
+            </label>
             <div class="iw">
-              <span class="li"><span class="material-icons">book</span></span>
+              <span class="icon"><span class="material-icons">book</span></span>
               <select name="course_code" id="sel-course">
                 <option value="">All courses</option>
                 {% for cc in course_codes %}
@@ -390,30 +550,33 @@
 
         </div>
 
-        <!-- live question count -->
+        <!-- live count badge -->
         <div class="count-badge cb-loading" id="countBadge">
           <span class="material-icons cb-ico">sync</span>
           <div>
             <div class="cb-val" id="countVal">—</div>
-            <div class="cb-lbl">approved questions available</div>
+            <div class="cb-lbl">approved questions available for this selection</div>
           </div>
         </div>
       </div>
 
       <!-- TIME & MODE -->
       <div class="card a a3">
+        <div class="card-label">Step 2</div>
         <div class="card-title">Time &amp; Mode</div>
-        <div class="card-sub">Set your own time limit, or go untimed.</div>
+        <div class="card-sub">Set your time limit and choose how you want to be tested.</div>
 
-        <div class="fgrid" style="margin-bottom:20px">
-          <div class="fg full">
-            <label>Time Limit (minutes) — leave blank for no time limit</label>
+        <div style="margin-bottom:20px;">
+          <div class="fg">
+            <label>
+              Time Limit
+              <span class="opt">— in minutes, leave blank for no limit</span>
+            </label>
             <div class="iw">
-              <span class="li"><span class="material-icons">timer</span></span>
-              <input type="number" name="time_limit" id="timeInput"
+              <span class="icon"><span class="material-icons">timer</span></span>
+              <input type="number" name="time_limit"
                      placeholder="e.g. 45"
-                     min="5" max="300" class="no-icon"
-                     style="padding-left:36px">
+                     min="5" max="300">
             </div>
           </div>
         </div>
@@ -424,7 +587,7 @@
             <div class="mode-ico"><span class="material-icons">assignment</span></div>
             <div>
               <div class="mode-label">Exam Mode</div>
-              <div class="mode-desc">See all results at the end</div>
+              <div class="mode-desc">Results revealed at the end</div>
             </div>
           </label>
           <label class="mode-opt" id="modePractice">
@@ -440,7 +603,7 @@
 
       <!-- START -->
       <div class="a a4">
-        <button type="submit" class="submit-btn" id="startBtn" disabled>
+        <button type="submit" class="start-btn" id="startBtn" disabled>
           <span class="material-icons">play_arrow</span>
           Start Quiz
         </button>
@@ -449,23 +612,25 @@
     </form>
   </div>
 
+  <!-- toast container -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
   <script>
-    /* mode toggle */
-    document.querySelectorAll('input[name="mode"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        document.getElementById('modeExam').classList.toggle('selected', radio.value === 'exam' && radio.checked);
-        document.getElementById('modePractice').classList.toggle('selected', radio.value === 'practice' && radio.checked);
-        document.querySelectorAll('input[name="mode"]').forEach(r => {
-          r.closest('.mode-opt').classList.toggle('selected', r.checked);
-        });
+    /* ── mode toggle ── */
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        document.querySelectorAll('.mode-opt').forEach(o =>
+          o.classList.toggle('selected', o.querySelector('input').checked)
+        );
       });
     });
 
-    /* live count */
+    /* ── live count ── */
     let countTimer = null;
     const badge    = document.getElementById('countBadge');
     const countVal = document.getElementById('countVal');
     const startBtn = document.getElementById('startBtn');
+    const TI = { success:'check_circle', error:'error_outline', info:'info' };
 
     function fetchCount() {
       const sem   = document.getElementById('sel-semester').value;
@@ -480,40 +645,34 @@
         return;
       }
 
-      badge.className     = 'count-badge cb-loading';
+      badge.className      = 'count-badge cb-loading';
       countVal.textContent = '…';
 
-      const url = `/user/quiz/count?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}&level=${encodeURIComponent(level)}`;
-
-      fetch(url, { credentials: 'same-origin' })
-        .then(r => {
-          if (r.status === 302 || r.redirected) {
-            /* redirected to login — session expired */
-            window.location.href = '/user/login';
-            return null;
-          }
-          return r.json();
-        })
-        .then(data => {
-          if (!data) return;
-          const n = data.count !== undefined ? data.count : 0;
-          countVal.textContent = n;
-          if (n >= 1) {
-            badge.className   = 'count-badge has-questions';
-            startBtn.disabled = false;
-          } else {
-            badge.className   = 'count-badge no-questions';
-            startBtn.disabled = true;
-            if (data.error) console.error('Count error:', data.error);
-          }
-        })
-        .catch(err => {
-          /* network error — still let user try if fields are filled */
-          console.error('fetchCount failed:', err);
-          badge.className     = 'count-badge has-questions';
-          countVal.textContent = '?';
-          startBtn.disabled   = false;
-        });
+      fetch(
+        `/user/quiz/count?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}&level=${encodeURIComponent(level)}`,
+        { credentials: 'same-origin' }
+      )
+      .then(r => {
+        if (r.redirected) { window.location.href = '/user/login'; return null; }
+        return r.json();
+      })
+      .then(data => {
+        if (!data) return;
+        const n = data.count ?? 0;
+        countVal.textContent = n;
+        if (n >= 1) {
+          badge.className   = 'count-badge has-q';
+          startBtn.disabled = false;
+        } else {
+          badge.className   = 'count-badge no-q';
+          startBtn.disabled = true;
+        }
+      })
+      .catch(() => {
+        badge.className      = 'count-badge has-q';
+        countVal.textContent = '?';
+        startBtn.disabled    = false;
+      });
     }
 
     ['sel-level','sel-semester','sel-year','sel-course'].forEach(id => {
@@ -523,37 +682,28 @@
       });
     });
 
-    /* run on page load so badge shows immediately if dropdowns are pre-filled */
     fetchCount();
 
-    /* flash toasts */
-    const TI = { success:'check_circle', error:'error_outline', info:'notifications_active' };
-    const TC = { success:'ts', error:'te', info:'ti' };
-
+    /* ── toasts ── */
     function showToast(cat, msg) {
-      /* reuse same toast style as dashboard */
-      const el = document.createElement('div');
-      el.style.cssText = `
-        position:fixed;top:80px;right:20px;z-index:9999;
-        background:#191d28;border:1px solid rgba(255,255,255,0.10);
-        border-radius:12px;padding:13px 16px;
-        font-size:.85rem;color:#eef0f6;
-        box-shadow:0 8px 28px rgba(0,0,0,0.5);
-        animation:slideIn .3s ease;
-        display:flex;align-items:center;gap:10px;max-width:320px;
-      `;
-      const colors = { success:'#22c55e', error:'#ef4444', info:'#f97316' };
-      el.style.borderLeftColor = colors[cat] || '#f97316';
-      el.style.borderLeftWidth = '3px';
-      el.innerHTML = `<span style="color:${colors[cat]||'#f97316'};font-size:1rem" class="material-icons">${TI[cat]||TI.info}</span><span>${msg}</span>`;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 4000);
+      const wrap = document.getElementById('toastWrap');
+      const el   = document.createElement('div');
+      el.className = `toast ${cat}`;
+      el.innerHTML = `<span class="material-icons">${TI[cat]||TI.info}</span><span>${msg}</span>`;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.style.transition = 'opacity .3s';
+        el.style.opacity    = '0';
+        setTimeout(() => el.remove(), 320);
+      }, 4200);
     }
 
     (function(){
       try {
         JSON.parse(document.getElementById('fd').dataset.messages)
-          .forEach(([cat,msg],i) => setTimeout(() => showToast(cat,msg), i*280));
+          .forEach(([cat, msg], i) =>
+            setTimeout(() => showToast(cat, msg), i * 280)
+          );
       } catch(e){}
     })();
   </script>
