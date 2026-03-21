@@ -7,348 +7,439 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
+    /* ════════════════════════════════════════════════
+       DESIGN TOKENS — mirrors home page language
+    ════════════════════════════════════════════════ */
     :root {
-      --orange:     #f97316;
-      --orange-dk:  #ea580c;
-      --orange-dim: rgba(249,115,22,0.12);
-      --orange-bd:  rgba(249,115,22,0.30);
-      --green:      #22c55e;
-      --green-dim:  rgba(34,197,94,0.12);
-      --green-bd:   rgba(34,197,94,0.30);
-      --red:        #ef4444;
-      --red-dim:    rgba(239,68,68,0.10);
-      --red-bd:     rgba(239,68,68,0.28);
-      --bg:         #0c0e14;
-      --s1:         #13161f;
-      --s2:         #191d28;
-      --bd:         rgba(255,255,255,0.07);
-      --bd2:        rgba(255,255,255,0.12);
-      --txt:        #eef0f6;
-      --txt2:       rgba(238,240,246,0.58);
-      --txt3:       rgba(238,240,246,0.30);
+      --orange:      #f97316;
+      --orange-dk:   #ea580c;
+      --orange-dim:  rgba(249,115,22,0.10);
+      --orange-bd:   rgba(249,115,22,0.28);
+
+      --green:       #22c55e;
+      --green-dim:   rgba(34,197,94,0.10);
+      --green-bd:    rgba(34,197,94,0.28);
+
+      --red:         #ef4444;
+      --red-dim:     rgba(239,68,68,0.08);
+      --red-bd:      rgba(239,68,68,0.26);
+
+      /* dark backgrounds — same as home page hero #1e2026 family */
+      --bg:          #0c0e14;
+      --surface:     #13161f;
+      --surface-2:   #191d28;
+      --surface-3:   #1e2230;
+
+      /* borders */
+      --bd:          rgba(255,255,255,0.06);
+      --bd-2:        rgba(255,255,255,0.11);
+
+      /* text — same hierarchy as home page */
+      --txt:         #eef0f6;
+      --txt-2:       rgba(238,240,246,0.58);
+      --txt-3:       rgba(238,240,246,0.32);
+
+      /* spacing rhythm — generous like home page */
+      --rad-sm:      8px;
+      --rad-md:      12px;
+      --rad-lg:      16px;
+      --rad-xl:      20px;
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     html, body {
       height: 100%;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--txt);
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* ════════════════════════════════
-       TOP BAR — fixed, never wraps
-    ════════════════════════════════ */
+    a { text-decoration: none; color: inherit; }
+
+    /* ════════════════════════════════════════════════
+       TOP BAR
+       — white bg on home = dark bg here; same height
+         feel, same confident weight
+    ════════════════════════════════════════════════ */
     .topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-      height: 54px;
-      background: rgba(12,14,20,0.97);
+      position: fixed; top:0; left:0; right:0; z-index:400;
+      height: 64px;
+      background: rgba(12,14,20,0.96);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--bd);
       display: flex; align-items: center;
-      padding: 0 16px; gap: 10px;
+      padding: 0 5vw; gap: 16px;
     }
 
-    /* quiz title — shrinks so timer + submit never wrap */
-    .tb-title {
+    /* logo treatment — same weight as home .logo */
+    .tb-brand {
       font-family: 'Syne', sans-serif;
-      font-size: 0.88rem; font-weight: 800;
+      font-size: 1.5rem; font-weight: 900;
+      letter-spacing: -1.2px;
       color: var(--txt);
+      flex-shrink: 0;
+    }
+    .tb-brand em { color: var(--orange); font-style: normal; }
+
+    /* divider dot */
+    .tb-dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--bd-2); flex-shrink: 0;
+    }
+
+    /* course label — eyebrow style from home */
+    .tb-course {
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--txt-3);
       flex: 1; min-width: 0;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .tb-title em { color: var(--orange); font-style: normal; }
 
-    /* timer — compact, never overflows */
+    /* timer */
     .timer {
-      display: flex; align-items: center; gap: 5px;
+      display: flex; align-items: center; gap: 6px;
       font-family: 'Syne', sans-serif;
-      font-size: 0.95rem; font-weight: 900;
-      letter-spacing: 0.04em;
+      font-size: 1rem; font-weight: 900;
+      letter-spacing: 0.05em;
       color: var(--txt);
-      background: var(--s1); border: 1px solid var(--bd2);
-      padding: 5px 10px; border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--bd-2);
+      padding: 6px 14px; border-radius: var(--rad-md);
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .timer .material-icons { font-size: 0.9rem; color: var(--txt-3); }
+    .timer.warn {
+      color: var(--orange); border-color: var(--orange-bd);
+      background: var(--orange-dim);
+    }
+    .timer.crit {
+      color: var(--red); border-color: var(--red-bd);
+      background: var(--red-dim);
+      animation: blink .55s ease-in-out infinite alternate;
+    }
+    @keyframes blink { from{opacity:1} to{opacity:.5} }
+
+    /* progress count */
+    .tb-count {
+      font-size: 0.8rem; color: var(--txt-3);
       white-space: nowrap; flex-shrink: 0;
     }
-    .timer .material-icons { font-size: 0.9rem; color: var(--txt3); flex-shrink: 0; }
-    .timer.warn { color: var(--orange); border-color: var(--orange-bd); background: var(--orange-dim); }
-    .timer.crit { color: var(--red);   border-color: var(--red-bd);   background: var(--red-dim);
-                  animation: pulse .5s ease-in-out infinite alternate; }
-    @keyframes pulse { from{opacity:1} to{opacity:.55} }
+    .tb-count strong { color: var(--txt); font-weight: 700; }
 
-    /* progress text — hidden on very small screens */
-    .tb-prog {
-      font-size: 0.75rem; color: var(--txt2);
-      white-space: nowrap; flex-shrink: 0;
-    }
-    .tb-prog strong { color: var(--txt); }
-
-    /* submit button */
+    /* submit button — same style as home .visit-btn */
     .tb-submit {
-      display: flex; align-items: center; gap: 5px;
-      padding: 7px 14px; border-radius: 8px;
-      font-size: 0.8rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
       background: var(--orange); color: #fff;
-      border: none; cursor: pointer; flex-shrink: 0;
-      transition: background .2s;
+      border: none; border-radius: var(--rad-md);
+      font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; flex-shrink: 0;
+      transition: background .2s, transform .15s;
     }
-    .tb-submit:hover { background: var(--orange-dk); }
-    .tb-submit .material-icons { font-size: 0.88rem; }
+    .tb-submit:hover { background: var(--orange-dk); transform: translateY(-1px); }
+    .tb-submit .material-icons { font-size: 0.95rem; }
 
-    /* ════════════════════════════════
-       PAGE — below fixed topbar
-    ════════════════════════════════ */
+    /* ════════════════════════════════════════════════
+       PROGRESS STRIP — thin like home accent-line
+    ════════════════════════════════════════════════ */
+    .prog-strip {
+      position: fixed; top: 64px; left:0; right:0; z-index:399;
+      height: 3px; background: var(--bd);
+    }
+    .prog-fill {
+      height: 100%; background: var(--orange);
+      border-radius: 0 3px 3px 0;
+      transition: width .35s ease;
+    }
+
+    /* ════════════════════════════════════════════════
+       PAGE WRAPPER
+    ════════════════════════════════════════════════ */
     .page {
-      padding-top: 54px;          /* clear fixed topbar */
+      padding-top: 67px; /* topbar 64px + strip 3px */
       min-height: 100vh;
       display: flex; flex-direction: column;
     }
 
-    /* ════════════════════════════════
-       PROGRESS BAR — thin strip
-    ════════════════════════════════ */
-    .prog-bar-wrap {
-      height: 3px; background: var(--bd);
-      position: sticky; top: 54px; z-index: 200;
-    }
-    .prog-bar-fill {
-      height: 100%; background: var(--orange);
-      transition: width .3s ease;
-    }
-
-    /* ════════════════════════════════
-       MAIN CONTENT — question + grid
-    ════════════════════════════════ */
-    .content {
+    /* ════════════════════════════════════════════════
+       DESKTOP LAYOUT — side-by-side
+    ════════════════════════════════════════════════ */
+    .layout {
       display: grid;
-      grid-template-columns: 1fr 220px;
+      grid-template-columns: 1fr 260px;
       flex: 1;
+      min-height: calc(100vh - 67px);
     }
 
     /* ── QUESTION PANEL ── */
     .q-panel {
-      padding: 28px 24px 80px;
+      padding: 48px 5vw 80px;
       overflow-y: auto;
       border-right: 1px solid var(--bd);
     }
 
-    /* question header */
-    .q-header {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 18px;
-    }
-    .q-num {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.68rem; font-weight: 900;
-      letter-spacing: .12em; text-transform: uppercase;
+    /* question number — eyebrow label style */
+    .q-eyebrow {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
       color: var(--orange);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .q-badge {
+
+    /* badge pills */
+    .badge {
       font-size: 0.6rem; font-weight: 700;
-      letter-spacing: .07em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 100px; border: 1px solid;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 100px; border: 1px solid;
     }
-    .qb-easy   { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
-    .qb-medium { background: rgba(234,179,8,.10); border-color: rgba(234,179,8,.28); color: #eab308; }
-    .qb-hard   { background: var(--red-dim); border-color: var(--red-bd); color: var(--red); }
-    .qb-course { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
+    .b-easy   { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
+    .b-medium { background: rgba(234,179,8,.09); border-color: rgba(234,179,8,.26); color: #eab308; }
+    .b-hard   { background: var(--red-dim);   border-color: var(--red-bd);   color: var(--red); }
+    .b-course { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
 
-    /* question text */
+    /* question text — same weight/size feel as home h2 but scaled down */
     .q-text {
-      font-size: 1rem; font-weight: 500; line-height: 1.7;
-      color: var(--txt); margin-bottom: 22px;
+      font-size: 1.15rem; font-weight: 500;
+      line-height: 1.7; color: var(--txt);
+      margin-bottom: 32px;
+      max-width: 640px;
     }
 
-    /* options */
-    .options { display: flex; flex-direction: column; gap: 9px; margin-bottom: 24px; }
+    /* ── OPTIONS ── */
+    .options {
+      display: flex; flex-direction: column; gap: 11px;
+      margin-bottom: 32px; max-width: 640px;
+    }
 
     .opt {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 13px 14px; border-radius: 11px;
-      border: 1.5px solid var(--bd2);
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px; border-radius: var(--rad-lg);
+      border: 1.5px solid var(--bd-2);
       background: rgba(255,255,255,0.025);
       cursor: pointer; user-select: none;
-      transition: border-color .15s, background .15s;
+      transition: border-color .18s, background .18s, transform .12s;
     }
-    .opt:hover         { border-color: var(--orange-bd); background: var(--orange-dim); }
-    .opt.selected      { border-color: var(--orange-bd); background: var(--orange-dim); }
-    .opt.correct-ans   { border-color: var(--green-bd);  background: var(--green-dim); }
-    .opt.wrong-ans     { border-color: var(--red-bd);    background: var(--red-dim); }
+    .opt:hover {
+      border-color: var(--orange-bd);
+      background: var(--orange-dim);
+      transform: translateX(3px);
+    }
+    .opt.selected {
+      border-color: var(--orange-bd);
+      background: var(--orange-dim);
+    }
+    .opt.correct-ans {
+      border-color: var(--green-bd);
+      background: var(--green-dim);
+      transform: none;
+    }
+    .opt.wrong-ans {
+      border-color: var(--red-bd);
+      background: var(--red-dim);
+      transform: none;
+    }
 
+    /* letter badge — same circle style as home tool-panel-tag */
     .opt-ltr {
-      width: 26px; height: 26px; border-radius: 6px;
-      background: var(--s2); border: 1px solid var(--bd2);
+      width: 30px; height: 30px; border-radius: var(--rad-sm);
+      background: var(--surface-2); border: 1px solid var(--bd-2);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
-      font-size: 0.68rem; font-weight: 900; color: var(--txt2);
+      font-size: 0.7rem; font-weight: 900; color: var(--txt-2);
       flex-shrink: 0;
-      transition: background .15s, border-color .15s, color .15s;
+      transition: background .18s, border-color .18s, color .18s;
     }
     .opt.selected    .opt-ltr { background: var(--orange); border-color: var(--orange); color: #fff; }
     .opt.correct-ans .opt-ltr { background: var(--green);  border-color: var(--green);  color: #fff; }
     .opt.wrong-ans   .opt-ltr { background: var(--red);    border-color: var(--red);    color: #fff; }
 
-    .opt-text { font-size: 0.88rem; line-height: 1.5; color: var(--txt2); padding-top: 1px; }
-    .opt.selected    .opt-text,
-    .opt.correct-ans .opt-text,
-    .opt.wrong-ans   .opt-text { color: var(--txt); }
+    /* option text */
+    .opt-txt {
+      font-size: 0.92rem; line-height: 1.6; color: var(--txt-2);
+      padding-top: 4px;
+    }
+    .opt.selected    .opt-txt,
+    .opt.correct-ans .opt-txt,
+    .opt.wrong-ans   .opt-txt { color: var(--txt); }
 
-    /* practice explanation */
-    .practice-expl {
+    /* practice explanation — card style */
+    .expl-card {
       display: none;
-      padding: 11px 14px; border-radius: 9px;
+      padding: 14px 18px; border-radius: var(--rad-md);
       background: var(--green-dim); border: 1px solid var(--green-bd);
-      font-size: 0.8rem; line-height: 1.55; color: var(--txt2);
-      margin-bottom: 16px;
+      font-size: 0.85rem; line-height: 1.6; color: var(--txt-2);
+      margin-bottom: 20px; max-width: 640px;
     }
-    .practice-expl.show { display: block; }
-    .practice-expl strong { color: var(--green); }
+    .expl-card.show { display: block; }
+    .expl-card strong { color: var(--green); font-weight: 700; }
 
-    /* prev / next */
+    /* ── NAV BUTTONS ── */
     .q-nav {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 12px;
+      max-width: 640px;
     }
-    .nav-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 10px 18px; border-radius: 9px;
-      font-size: 0.83rem; font-weight: 600;
-      border: 1px solid var(--bd2); background: var(--s1);
-      color: var(--txt2); cursor: pointer;
-      transition: all .18s;
-    }
-    .nav-btn:hover { background: var(--s2); color: var(--txt); }
-    .nav-btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .nav-btn.primary:hover { background: var(--orange-dk); }
-    .nav-btn:disabled { opacity: .3; cursor: not-allowed; }
-    .nav-btn .material-icons { font-size: 0.95rem; }
 
-    /* ── GRID PANEL ── */
+    /* secondary — same as home .btn-outline adapted to dark */
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 12px 22px; border-radius: var(--rad-md);
+      font-size: 0.88rem; font-weight: 600;
+      border: 1.5px solid var(--bd-2);
+      background: var(--surface); color: var(--txt-2);
+      cursor: pointer;
+      transition: background .18s, color .18s, border-color .18s, transform .12s;
+    }
+    .btn-nav:hover {
+      background: var(--surface-2); color: var(--txt);
+      border-color: var(--bd-2); transform: translateY(-1px);
+    }
+    .btn-nav.primary {
+      background: var(--orange); border-color: var(--orange); color: #fff;
+    }
+    .btn-nav.primary:hover { background: var(--orange-dk); border-color: var(--orange-dk); }
+    .btn-nav:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+    .btn-nav .material-icons { font-size: 1rem; }
+
+    /* ── NUMBER GRID PANEL ── */
     .grid-panel {
-      padding: 20px 14px;
-      background: var(--s1);
+      background: var(--surface);
+      border-left: 1px solid var(--bd);
+      padding: 28px 18px;
+      position: sticky; top: 67px;
+      height: calc(100vh - 67px);
       overflow-y: auto;
-      position: sticky; top: 57px;    /* stick below topbar + progress bar */
-      height: calc(100vh - 57px);
     }
 
+    /* label */
     .gp-label {
       font-size: 0.65rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--txt3); margin-bottom: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--txt-3); margin-bottom: 14px;
     }
 
-    .q-grid {
+    /* grid */
+    .num-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-      margin-bottom: 16px;
+      gap: 5px; margin-bottom: 22px;
     }
 
     .gq {
       aspect-ratio: 1;
-      border-radius: 5px;
       display: flex; align-items: center; justify-content: center;
+      border-radius: var(--rad-sm);
       font-size: 0.62rem; font-weight: 700;
       cursor: pointer;
       border: 1px solid var(--bd);
-      background: var(--s2); color: var(--txt3);
+      background: var(--surface-2); color: var(--txt-3);
       transition: all .12s;
     }
-    .gq:hover    { border-color: var(--bd2); color: var(--txt); }
+    .gq:hover    { border-color: var(--bd-2); color: var(--txt); }
     .gq.answered { background: var(--orange-dim); border-color: var(--orange-bd); color: var(--orange); }
     .gq.current  { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-    .gp-legend {
-      display: flex; flex-direction: column; gap: 6px;
-      margin-top: 14px;
+    /* legend */
+    .legend {
+      display: flex; flex-direction: column; gap: 8px;
+      padding-top: 4px;
     }
-    .leg {
-      display: flex; align-items: center; gap: 7px;
-      font-size: 0.68rem; color: var(--txt2);
+    .leg-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; color: var(--txt-2); line-height: 1.4;
     }
     .leg-dot {
-      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+      width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0;
     }
-    .ld-now  { background: var(--orange); }
-    .ld-done { background: var(--orange-dim); border: 1px solid var(--orange-bd); }
-    .ld-skip { background: var(--s2); border: 1px solid var(--bd); }
+    .ld-curr  { background: var(--orange); }
+    .ld-done  { background: var(--orange-dim); border: 1px solid var(--orange-bd); }
+    .ld-open  { background: var(--surface-2); border: 1px solid var(--bd); }
 
-    /* saving indicator */
+    /* saving toast */
     .saving {
-      position: fixed; bottom: 20px; left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%);
-      background: var(--s2); border: 1px solid var(--bd2);
-      border-radius: 100px; padding: 6px 16px;
-      font-size: 0.75rem; color: var(--txt2);
-      display: flex; align-items: center; gap: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--bd-2);
+      border-radius: 100px; padding: 8px 20px;
+      font-size: 0.78rem; color: var(--txt-2);
+      display: flex; align-items: center; gap: 7px;
       opacity: 0; transition: opacity .25s;
-      pointer-events: none; z-index: 400;
+      pointer-events: none; z-index:500;
       white-space: nowrap;
     }
     .saving.show { opacity: 1; }
-    .saving .material-icons { font-size: 0.85rem; animation: spin .7s linear infinite; }
+    .saving .material-icons { font-size: 0.88rem; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ════════════════════════════════
-       MOBILE — stack vertically
-    ════════════════════════════════ */
-    @media (max-width: 680px) {
-      /* topbar — hide progress text on tiny screens */
-      .tb-prog { display: none; }
-
-      /* stack: grid on top, question below */
-      .content {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-      }
-
-      /* grid panel — horizontal scroll strip at top */
-      .grid-panel {
-        position: static;
-        height: auto;
-        border-bottom: 1px solid var(--bd);
-        padding: 12px 14px;
-      }
-
-      /* wider grid on mobile so numbers are readable */
-      .q-grid {
-        grid-template-columns: repeat(10, 1fr);
-        gap: 3px;
-      }
-
-      /* hide legend on mobile — saves space */
-      .gp-legend { display: none; }
-
-      /* question panel — full width, comfortable padding */
-      .q-panel {
-        padding: 20px 16px 80px;
-        border-right: none;
-      }
-
-      .q-text { font-size: 0.95rem; }
-
-      .opt { padding: 12px 13px; }
-
-      /* nav buttons — fill width */
-      .q-nav { justify-content: space-between; }
-      .nav-btn { flex: 1; justify-content: center; }
+    /* timer warning popup */
+    .timer-warn-popup {
+      position: fixed; top: 78px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface-3);
+      border: 1px solid var(--orange-bd);
+      color: var(--txt); padding: 12px 28px;
+      border-radius: var(--rad-lg);
+      font-size: 0.9rem; font-weight: 600;
+      z-index: 600; white-space: nowrap;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      pointer-events: none;
     }
 
-    /* very small phones */
-    @media (max-width: 380px) {
-      .topbar { padding: 0 12px; gap: 8px; }
-      .tb-submit span:last-child { display: none; } /* icon only */
-      .tb-submit { padding: 7px 10px; }
-      .timer { padding: 5px 8px; font-size: 0.88rem; }
+    /* ════════════════════════════════════════════════
+       MOBILE — stack vertically ≤ 700px
+    ════════════════════════════════════════════════ */
+    @media (max-width: 700px) {
+
+      /* topbar — tighter padding, hide course label */
+      .topbar {
+        padding: 0 4vw; gap: 10px; height: 56px;
+      }
+      .tb-brand { font-size: 1.2rem; }
+      .tb-dot, .tb-course { display: none; }
+      .tb-submit { padding: 8px 14px; font-size: 0.82rem; gap: 5px; }
+      .tb-submit span:not(.material-icons) { display: none; }
+
+      .prog-strip { top: 56px; }
+      .page { padding-top: 59px; }
+
+      /* single column */
+      .layout { grid-template-columns: 1fr; }
+
+      /* number grid — compact strip */
+      .grid-panel {
+        position: static; height: auto;
+        border-left: none; border-bottom: 1px solid var(--bd);
+        padding: 16px 4vw;
+      }
+      .num-grid { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+      .legend { display: none; }
+
+      /* question panel */
+      .q-panel { padding: 28px 4vw 80px; }
+      .q-text { font-size: 1rem; margin-bottom: 24px; }
+      .options { gap: 9px; margin-bottom: 24px; }
+      .opt { padding: 13px 14px; }
+
+      /* nav buttons full width */
+      .q-nav { gap: 10px; }
+      .btn-nav { flex: 1; justify-content: center; }
+    }
+
+    /* very small — icon-only submit, tighter timer */
+    @media (max-width: 360px) {
+      .timer { padding: 5px 10px; font-size: 0.88rem; }
+      .tb-count { display: none; }
     }
   </style>
 </head>
 <body>
 
-  {# data for JS #}
   <div id="qd"
        data-session-id="{{ quiz_sess.id }}"
        data-total="{{ total }}"
@@ -363,10 +454,10 @@
   </script>
 
   <!-- ══ TOP BAR ══ -->
-  <div class="topbar">
-    <div class="tb-title">
-      <em>U-NEX</em> &nbsp;·&nbsp; {{ quiz_sess.course_code or 'Quiz' }}
-    </div>
+  <header class="topbar">
+    <div class="tb-brand"><em>U</em>-NEX</div>
+    <div class="tb-dot"></div>
+    <div class="tb-course">{{ quiz_sess.course_code or quiz_sess.department | title }}</div>
 
     {% if quiz_sess.time_limit_minutes %}
     <div class="timer" id="timer">
@@ -375,7 +466,7 @@
     </div>
     {% endif %}
 
-    <div class="tb-prog">
+    <div class="tb-count">
       <strong id="answeredCount">{{ answered_count }}</strong>/{{ total }}
     </div>
 
@@ -383,52 +474,54 @@
       <span class="material-icons">send</span>
       <span>Submit</span>
     </button>
-  </div>
+  </header>
 
-  <!-- progress bar -->
-  <div class="prog-bar-wrap">
-    <div class="prog-bar-fill" id="progFill" style="width:0%"></div>
+  <!-- progress strip -->
+  <div class="prog-strip">
+    <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
 
   <div class="page">
-    <div class="content">
+    <div class="layout">
 
       <!-- ── QUESTION PANEL ── -->
-      <div class="q-panel" id="qPanel">
-        <div class="q-header">
-          <span class="q-num" id="qNum">Question 1 of {{ total }}</span>
-          <span class="q-badge qb-course" id="qCourse"></span>
-          <span class="q-badge" id="qDiff"></span>
+      <main class="q-panel" id="qPanel">
+
+        <div class="q-eyebrow">
+          <span id="qNum">Question 1 of {{ total }}</span>
+          <span class="badge b-course" id="qCourse"></span>
+          <span class="badge" id="qDiff"></span>
         </div>
 
-        <div class="q-text" id="qText"></div>
+        <p class="q-text" id="qText"></p>
 
-        <div class="options" id="optionsContainer"></div>
+        <div class="options" id="opts"></div>
 
-        <div class="practice-expl" id="practiceExpl">
-          <strong>Explanation:</strong> <span id="explText"></span>
+        <div class="expl-card" id="explCard">
+          <strong>Explanation —</strong> <span id="explText"></span>
         </div>
 
         <div class="q-nav">
-          <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>
+          <button class="btn-nav" id="prevBtn" onclick="go(-1)" disabled>
             <span class="material-icons">arrow_back</span> Prev
           </button>
-          <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">
+          <button class="btn-nav primary" id="nextBtn" onclick="go(1)">
             Next <span class="material-icons">arrow_forward</span>
           </button>
         </div>
-      </div>
+
+      </main>
 
       <!-- ── GRID PANEL ── -->
-      <div class="grid-panel">
+      <aside class="grid-panel">
         <div class="gp-label">Questions</div>
-        <div class="q-grid" id="qGrid"></div>
-        <div class="gp-legend">
-          <div class="leg"><div class="leg-dot ld-now"></div> Current</div>
-          <div class="leg"><div class="leg-dot ld-done"></div> Answered</div>
-          <div class="leg"><div class="leg-dot ld-skip"></div> Unanswered</div>
+        <div class="num-grid" id="numGrid"></div>
+        <div class="legend">
+          <div class="leg-row"><div class="leg-dot ld-curr"></div> Current</div>
+          <div class="leg-row"><div class="leg-dot ld-done"></div> Answered</div>
+          <div class="leg-row"><div class="leg-dot ld-open"></div> Unanswered</div>
         </div>
-      </div>
+      </aside>
 
     </div>
   </div>
@@ -444,6 +537,7 @@
         id="submitForm"></form>
 
   <script>
+    /* ── state ── */
     const qd         = document.getElementById('qd');
     const SESSION_ID = parseInt(qd.dataset.sessionId);
     const TOTAL      = parseInt(qd.dataset.total);
@@ -451,223 +545,214 @@
     const TIME_LIMIT = qd.dataset.timeLimit ? parseInt(qd.dataset.timeLimit) : null;
     const STARTED_AT = qd.dataset.started;
 
-    let currentIdx = 0;
-    const localAnswers = {};
-    Object.entries(ANSWERS).forEach(([qid, sel]) => {
-      if (sel) localAnswers[parseInt(qid)] = sel;
-    });
+    let cur = 0;
+    const ans = {};
+    Object.entries(ANSWERS).forEach(([k,v]) => { if (v) ans[parseInt(k)] = v; });
 
-    /* ── BUILD GRID ── */
-    const grid = document.getElementById('qGrid');
+    /* ── build number grid ── */
+    const grid = document.getElementById('numGrid');
     QUESTIONS.forEach((q, i) => {
       const c = document.createElement('div');
-      c.className = 'gq';
-      c.id = `gq-${i}`;
+      c.className = 'gq'; c.id = `g${i}`;
       c.textContent = i + 1;
-      c.addEventListener('click', () => goTo(i));
+      c.onclick = () => goTo(i);
       grid.appendChild(c);
     });
 
-    /* ── RENDER ── */
-    function render(idx) {
-      const q = QUESTIONS[idx];
+    /* ── render question ── */
+    function render(i) {
+      const q = QUESTIONS[i];
       if (!q) return;
-      currentIdx = idx;
+      cur = i;
 
-      document.getElementById('qNum').textContent = `Question ${idx + 1} of ${TOTAL}`;
+      document.getElementById('qNum').textContent = `Question ${i + 1} of ${TOTAL}`;
       document.getElementById('qText').textContent = q.question_text;
 
+      /* badges */
       const ce = document.getElementById('qCourse');
-      ce.textContent = q.course_code;
+      ce.textContent = q.course_code || '';
+      ce.style.display = q.course_code ? '' : 'none';
 
       const de = document.getElementById('qDiff');
-      de.textContent = q.difficulty;
-      de.className = `q-badge qb-${q.difficulty}`;
+      de.textContent = q.difficulty || '';
+      de.className = `badge b-${q.difficulty || 'medium'}`;
 
-      // build options
-      const box = document.getElementById('optionsContainer');
+      /* options */
+      const box = document.getElementById('opts');
       box.innerHTML = '';
-      ['a','b','c','d'].forEach(ltr => {
-        const txt = q.options[ltr];
+      ['a','b','c','d'].forEach(l => {
+        const txt = q.options[l];
         if (!txt) return;
-        const div = document.createElement('div');
-        div.className = 'opt' + (localAnswers[q.question_id] === ltr ? ' selected' : '');
-        div.dataset.ltr = ltr;
-        div.innerHTML = `<div class="opt-ltr">${ltr.toUpperCase()}</div><div class="opt-text">${txt}</div>`;
-        div.addEventListener('click', () => pick(idx, ltr));
-        box.appendChild(div);
+        const d = document.createElement('div');
+        d.className = 'opt' + (ans[q.question_id] === l ? ' selected' : '');
+        d.dataset.l = l;
+        d.innerHTML =
+          `<div class="opt-ltr">${l.toUpperCase()}</div>` +
+          `<div class="opt-txt">${txt}</div>`;
+        d.onclick = () => pick(i, l);
+        box.appendChild(d);
       });
 
-      document.getElementById('practiceExpl').classList.remove('show');
+      /* explanation */
+      document.getElementById('explCard').classList.remove('show');
 
-      // nav
-      const prev = document.getElementById('prevBtn');
-      const next = document.getElementById('nextBtn');
-      prev.disabled = idx === 0;
-      if (idx === TOTAL - 1) {
-        next.disabled = true;
-        next.innerHTML = 'Last Question';
+      /* prev / next */
+      document.getElementById('prevBtn').disabled = i === 0;
+      const nb = document.getElementById('nextBtn');
+      if (i === TOTAL - 1) {
+        nb.disabled = true;
+        nb.innerHTML = 'Last Question';
       } else {
-        next.disabled = false;
-        next.innerHTML = 'Next <span class="material-icons">arrow_forward</span>';
+        nb.disabled = false;
+        nb.innerHTML = 'Next <span class="material-icons">arrow_forward</span>';
       }
 
-      updateGrid();
-      updateProgress();
+      syncGrid();
+      syncProgress();
     }
 
-    function updateGrid() {
+    function syncGrid() {
       QUESTIONS.forEach((q, i) => {
-        const c = document.getElementById(`gq-${i}`);
-        c.className = i === currentIdx ? 'gq current'
-                    : localAnswers[q.question_id] ? 'gq answered'
+        const c = document.getElementById(`g${i}`);
+        c.className = i === cur        ? 'gq current'
+                    : ans[q.question_id] ? 'gq answered'
                     : 'gq';
       });
     }
 
-    function updateProgress() {
-      const pct = (Object.keys(localAnswers).length / TOTAL) * 100;
+    function syncProgress() {
+      const pct = (Object.keys(ans).length / TOTAL) * 100;
       document.getElementById('progFill').style.width = pct + '%';
+      document.getElementById('answeredCount').textContent = Object.keys(ans).length;
     }
 
-    /* ── PICK OPTION ── */
-    function pick(idx, ltr) {
-      const q = QUESTIONS[idx];
-      localAnswers[q.question_id] = ltr;
+    /* ── pick an option ── */
+    function pick(i, l) {
+      const q = QUESTIONS[i];
+      ans[q.question_id] = l;
 
-      document.querySelectorAll('#optionsContainer .opt').forEach(o => {
-        o.classList.toggle('selected', o.dataset.ltr === ltr);
+      document.querySelectorAll('#opts .opt').forEach(o => {
+        o.classList.toggle('selected', o.dataset.l === l);
         o.classList.remove('correct-ans', 'wrong-ans');
       });
 
-      document.getElementById('answeredCount').textContent = Object.keys(localAnswers).length;
-      updateGrid();
-      updateProgress();
-      saveAnswer(q.question_id, ltr, idx);
+      syncGrid();
+      syncProgress();
+      save(q.question_id, l, i);
     }
 
-    /* ── SAVE ── */
-    let saveTimer = null;
-    function saveAnswer(qid, ltr, idx) {
-      showSaving(true);
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
+    /* ── save answer ── */
+    let saveT = null;
+    function save(qid, l, i) {
+      setSaving(true);
+      clearTimeout(saveT);
+      saveT = setTimeout(() => {
         fetch('/user/quiz/answer', {
           method: 'POST',
           credentials: 'same-origin',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            session_id:      SESSION_ID,
-            question_id:     qid,
-            selected_option: ltr
+            session_id: SESSION_ID,
+            question_id: qid,
+            selected_option: l
           })
         })
         .then(r => r.json())
-        .then(data => {
-          showSaving(false);
-          if (MODE === 'practice' && data.success) {
-            showFeedback(idx, ltr, data.is_correct);
-          }
+        .then(d => {
+          setSaving(false);
+          if (MODE === 'practice' && d.success) feedback(i, l, d.is_correct);
         })
-        .catch(() => showSaving(false));
-      }, 200);
+        .catch(() => setSaving(false));
+      }, 220);
     }
 
-    function showFeedback(idx, ltr, correct) {
+    function feedback(i, l, correct) {
       if (MODE !== 'practice') return;
-      document.querySelectorAll('#optionsContainer .opt').forEach(o => {
-        if (o.dataset.ltr === ltr) {
+      document.querySelectorAll('#opts .opt').forEach(o => {
+        if (o.dataset.l === l) {
           o.classList.add(correct ? 'correct-ans' : 'wrong-ans');
           o.classList.remove('selected');
         }
       });
-      const expl = document.getElementById('practiceExpl');
+      const card = document.getElementById('explCard');
       document.getElementById('explText').textContent =
         correct ? 'Correct! Well done.' : 'Incorrect. Review your notes on this topic.';
-      expl.classList.add('show');
+      card.classList.add('show');
     }
 
-    function showSaving(show) {
-      document.getElementById('savingInd').classList.toggle('show', show);
+    function setSaving(v) {
+      document.getElementById('savingInd').classList.toggle('show', v);
     }
 
-    /* ── NAV ── */
-    function navigate(dir) {
-      const n = currentIdx + dir;
-      if (n >= 0 && n < TOTAL) goTo(n);
-    }
-    function goTo(idx) {
-      render(idx);
+    /* ── navigation ── */
+    function go(dir) { goTo(cur + dir); }
+    function goTo(i) {
+      if (i < 0 || i >= TOTAL) return;
+      render(i);
       document.getElementById('qPanel').scrollTop = 0;
-      /* on mobile, scroll grid panel into view */
-      if (window.innerWidth <= 680) {
-        document.querySelector('.grid-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
     }
 
-    /* ── TIMER ── */
+    /* ── timer ── */
     if (TIME_LIMIT) {
-      const timerEl = document.getElementById('timer');
-      const display = document.getElementById('timerDisplay');
-      const startMs = new Date(STARTED_AT.replace(' ','T') + (STARTED_AT.includes('+') ? '' : 'Z')).getTime();
-      const endMs   = startMs + TIME_LIMIT * 60000;
+      const tel = document.getElementById('timer');
+      const dis = document.getElementById('timerDisplay');
+      const startMs = new Date(
+        STARTED_AT.replace(' ','T') + (STARTED_AT.includes('+') ? '' : 'Z')
+      ).getTime();
+      const endMs = startMs + TIME_LIMIT * 60000;
       let w5 = false, w1 = false;
 
       function tick() {
-        const rem  = Math.max(0, endMs - Date.now());
-        const m    = Math.floor(rem / 60000);
-        const s    = Math.floor((rem % 60000) / 1000);
-        display.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        const rem = Math.max(0, endMs - Date.now());
+        const m   = Math.floor(rem / 60000);
+        const s   = Math.floor((rem % 60000) / 1000);
+        dis.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
         if (rem <= 0) {
-          timerEl.className = 'timer crit';
+          tel.className = 'timer crit';
           clearInterval(iv);
           document.getElementById('submitForm').submit();
           return;
         }
         if (!w5 && rem <= 300000) {
-          w5 = true; timerEl.className = 'timer crit';
-          warn('⏰ 5 minutes left — start wrapping up.');
+          w5 = true; tel.className = 'timer crit';
+          popup('⏰  5 minutes remaining — start wrapping up.');
         } else if (!w1 && rem <= 60000) {
           w1 = true;
-          warn('🚨 1 minute left — submit now!');
+          popup('🚨  1 minute left — submit now!');
         } else if (rem > 300000 && rem <= 900000) {
-          timerEl.className = 'timer warn';
+          tel.className = 'timer warn';
         }
       }
 
-      function warn(msg) {
+      function popup(msg) {
         const w = document.createElement('div');
+        w.className = 'timer-warn-popup';
         w.textContent = msg;
-        w.style.cssText = [
-          'position:fixed','top:66px','left:50%','transform:translateX(-50%)',
-          'background:#1e2333','border:1px solid rgba(249,115,22,0.4)',
-          'color:#eef0f6','padding:11px 22px','border-radius:11px',
-          'font-size:.88rem','font-weight:600','z-index:9999',
-          'box-shadow:0 8px 28px rgba(0,0,0,0.6)',
-          'pointer-events:none','white-space:nowrap'
-        ].join(';');
         document.body.appendChild(w);
-        setTimeout(() => { w.style.transition='opacity .4s'; w.style.opacity='0';
-          setTimeout(() => w.remove(), 400); }, 4000);
+        setTimeout(() => {
+          w.style.transition = 'opacity .4s';
+          w.style.opacity = '0';
+          setTimeout(() => w.remove(), 420);
+        }, 4500);
       }
 
       tick();
       const iv = setInterval(tick, 1000);
     }
 
-    /* ── SUBMIT ── */
+    /* ── submit ── */
     function confirmSubmit() {
-      const done = Object.keys(localAnswers).length;
+      const done = Object.keys(ans).length;
       const left = TOTAL - done;
-      let msg = `Submit your quiz?\n\nAnswered: ${done} / ${TOTAL}`;
-      if (left > 0) msg += `\nUnanswered: ${left} (marked wrong)`;
+      let msg = `Submit your quiz?\n\n✓  Answered: ${done} / ${TOTAL}`;
+      if (left > 0) msg += `\n✗  Unanswered: ${left} — these will be marked wrong.`;
       if (confirm(msg)) document.getElementById('submitForm').submit();
     }
 
-    /* ── INIT ── */
+    /* ── init ── */
     render(0);
-    updateProgress();
+    syncProgress();
   </script>
 
 </body>
