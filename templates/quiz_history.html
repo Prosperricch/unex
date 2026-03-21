@@ -5,320 +5,473 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U-NEX • Quiz History</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
+    /* ═══════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════ */
     :root {
-      --orange:     #f97316;
-      --orange-dk:  #ea580c;
-      --orange-dim: rgba(249,115,22,0.10);
-      --orange-bd:  rgba(249,115,22,0.22);
-      --gold:       #d4a017;
-      --green:      #22c55e;
-      --green-dim:  rgba(34,197,94,0.10);
-      --green-bd:   rgba(34,197,94,0.22);
-      --red:        #ef4444;
-      --red-dim:    rgba(239,68,68,0.08);
-      --red-bd:     rgba(239,68,68,0.20);
-      --bg:         #0c0e14;
-      --s1:         #13161f;
-      --s2:         #191d28;
-      --bd:         rgba(255,255,255,0.06);
-      --bd2:        rgba(255,255,255,0.10);
-      --txt:        #eef0f6;
-      --txt2:       rgba(238,240,246,0.55);
-      --txt3:       rgba(238,240,246,0.28);
+      --orange:    #f97316;
+      --orange-dk: #ea580c;
+      --bg:        #f9fafb;
+      --white:     #ffffff;
+      --dark:      #111827;
+      --gray-1:    #374151;
+      --gray-2:    #4b5563;
+      --gray-3:    #6b7280;
+      --gray-4:    #9ca3af;
+      --gray-5:    #d1d5db;
+      --gray-6:    #e5e7eb;
+      --gray-7:    #f3f4f6;
+      --green:     #22c55e;
+      --green-bg:  #f0fdf4;
+      --green-bd:  #bbf7d0;
+      --green-dk:  #166534;
+      --red:       #ef4444;
+      --red-bg:    #fef2f2;
+      --red-bd:    #fecaca;
+      --red-dk:    #991b1b;
+      --blue:      #60a5fa;
+      --blue-bg:   #eff6ff;
+      --blue-bd:   #bfdbfe;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
-      color: var(--txt);
+      color: var(--dark);
       min-height: 100vh;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
     }
+
     a { text-decoration: none; color: inherit; }
 
-    .ambient {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 55% 45% at 8% 15%,  rgba(249,115,22,0.06) 0%, transparent 65%),
-        radial-gradient(ellipse 45% 50% at 92% 85%, rgba(34,197,94,0.04) 0%, transparent 60%);
-    }
-
-    /* NAV */
-    .nav {
-      position: sticky; top: 0; z-index: 200;
-      height: 60px;
-      background: rgba(12,14,20,0.92);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--bd);
+    /* ═══════════════════════════════════════
+       TOP NAV
+    ═══════════════════════════════════════ */
+    .topbar {
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: 72px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-6);
+      box-shadow: var(--shadow-sm);
       display: flex; align-items: center;
-      padding: 0 28px; gap: 12px;
+      padding: 0 5vw; gap: 12px;
     }
-    .nav-logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.45rem; font-weight: 900;
-      letter-spacing: -1.1px; margin-right: auto;
+
+    .tb-logo {
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: -1.4px; color: var(--dark);
+      margin-right: auto;
     }
-    .nav-logo em { color: var(--orange); font-style: normal; }
-    .nav-btn {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.82rem; font-weight: 500; color: var(--txt2);
-      padding: 7px 13px; border-radius: 9px;
-      border: 1px solid var(--bd2); background: var(--s1);
-      transition: color .2s;
+    .tb-logo span { color: var(--orange); }
+
+    .tb-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      border: 1.5px solid var(--gray-6);
+      background: var(--white); color: var(--gray-2);
+      box-shadow: var(--shadow-sm);
+      transition: background .18s, color .18s,
+                  border-color .18s, transform .12s;
+      flex-shrink: 0;
     }
-    .nav-btn:hover { color: var(--txt); }
-    .nav-btn .material-icons { font-size: 0.95rem; }
-    .nav-btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .nav-btn.primary:hover { background: var(--orange-dk); }
-    .nav-avatar {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+    .tb-btn:hover {
+      background: var(--gray-7); color: var(--dark);
+      border-color: var(--gray-5); transform: translateY(-1px);
+    }
+    .tb-btn .material-icons { font-size: 1rem; }
+
+    /* primary orange button */
+    .tb-btn.primary {
+      background: var(--orange); border-color: var(--orange); color: #fff;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.28);
+    }
+    .tb-btn.primary:hover {
+      background: var(--orange-dk); border-color: var(--orange-dk);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.36);
+    }
+
+    .tb-avatar {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, #d97706 100%);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem; font-weight: 900; color: #fff;
+      font-size: 0.95rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 12px rgba(249,115,22,0.28);
+      flex-shrink: 0;
     }
 
-    /* PAGE */
+    /* ═══════════════════════════════════════
+       PAGE
+    ═══════════════════════════════════════ */
     .page {
-      position: relative; z-index: 1;
-      max-width: 860px; margin: 0 auto;
-      padding: 36px 24px 80px;
+      padding-top: 72px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding-left: 5vw;
+      padding-right: 5vw;
+      padding-bottom: 100px;
     }
 
-    .ph { margin-bottom: 28px; }
-    .ph-label {
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: .13em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 6px;
+    /* ═══════════════════════════════════════
+       PAGE HEADER
+    ═══════════════════════════════════════ */
+    .ph {
+      padding-top: 52px;
+      margin-bottom: 40px;
+    }
+    .ph-eyebrow {
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ph-eyebrow::before {
+      content: '';
+      width: 28px; height: 3px;
+      background: var(--orange); border-radius: 2px;
     }
     .ph-title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      font-weight: 900; letter-spacing: -0.7px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800; line-height: 1.08;
+      letter-spacing: -1px; color: var(--dark);
+      margin-bottom: 12px;
     }
-    .ph-sub { font-size: 0.84rem; color: var(--txt2); margin-top: 5px; }
+    .ph-sub {
+      font-size: 1.05rem; color: var(--gray-2); line-height: 1.7;
+    }
 
-    /* SUMMARY STRIP */
-    .summary-strip {
+    /* ═══════════════════════════════════════
+       SUMMARY STATS — 4-col grid of white cards
+    ═══════════════════════════════════════ */
+    .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
+      gap: 16px;
+      margin-bottom: 40px;
     }
-    .ss-card {
-      background: var(--s1);
-      border: 1px solid var(--bd);
-      border-radius: 14px;
-      padding: 18px 16px;
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-6);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-sm);
       position: relative; overflow: hidden;
+      transition: transform .18s, box-shadow .18s;
     }
-    .ss-card::after {
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+    /* corner glow — transparent accent */
+    .stat-card::after {
       content: '';
-      position: absolute; bottom: -20px; right: -20px;
-      width: 70px; height: 70px; border-radius: 50%;
-      pointer-events: none; opacity: 0.07;
+      position: absolute; bottom: -24px; right: -24px;
+      width: 80px; height: 80px; border-radius: 50%;
+      pointer-events: none; opacity: 0.12;
     }
-    .ss-o::after { background: var(--orange); }
-    .ss-g::after { background: var(--green); }
-    .ss-r::after { background: var(--red); }
-    .ss-b::after { background: #60a5fa; }
+    .sc-o::after { background: var(--orange); }
+    .sc-g::after { background: var(--green); }
+    .sc-b::after { background: var(--blue); }
+    .sc-r::after { background: var(--red); }
 
-    .ss-ico {
-      width: 30px; height: 30px; border-radius: 8px;
+    .stat-ico {
+      width: 36px; height: 36px; border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
-    .ss-o .ss-ico { background: var(--orange-dim); }
-    .ss-g .ss-ico { background: var(--green-dim); }
-    .ss-r .ss-ico { background: var(--red-dim); }
-    .ss-b .ss-ico { background: rgba(96,165,250,0.10); }
-    .ss-o .ss-ico .material-icons { color: var(--orange); font-size: 0.95rem; }
-    .ss-g .ss-ico .material-icons { color: var(--green);  font-size: 0.95rem; }
-    .ss-r .ss-ico .material-icons { color: var(--red);    font-size: 0.95rem; }
-    .ss-b .ss-ico .material-icons { color: #60a5fa;       font-size: 0.95rem; }
+    .sc-o .stat-ico { background: #fff7ed; }
+    .sc-g .stat-ico { background: var(--green-bg); }
+    .sc-b .stat-ico { background: var(--blue-bg); }
+    .sc-r .stat-ico { background: var(--red-bg); }
 
-    .ss-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem; font-weight: 900; line-height: 1;
-      margin-bottom: 3px;
+    .sc-o .stat-ico .material-icons { color: var(--orange); font-size: 1rem; }
+    .sc-g .stat-ico .material-icons { color: var(--green);  font-size: 1rem; }
+    .sc-b .stat-ico .material-icons { color: var(--blue);   font-size: 1rem; }
+    .sc-r .stat-ico .material-icons { color: var(--red);    font-size: 1rem; }
+
+    .stat-val {
+      font-size: 2rem; font-weight: 800; line-height: 1;
+      margin-bottom: 4px; letter-spacing: -0.5px;
     }
-    .ss-o .ss-val { color: var(--orange); }
-    .ss-g .ss-val { color: var(--green); }
-    .ss-r .ss-val { color: var(--red); }
-    .ss-b .ss-val { color: #60a5fa; }
-    .ss-lbl { font-size: 0.72rem; color: var(--txt2); }
+    .sc-o .stat-val { color: var(--orange); }
+    .sc-g .stat-val { color: var(--green-dk); }
+    .sc-b .stat-val { color: #1d4ed8; }
+    .sc-r .stat-val { color: var(--red-dk); }
 
-    /* HISTORY CARDS */
+    .stat-lbl { font-size: 0.8rem; color: var(--gray-3); font-weight: 500; }
+
+    /* ═══════════════════════════════════════
+       SECTION HEADING — home page .accent-line
+    ═══════════════════════════════════════ */
+    .section-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-head h2 {
+      font-size: 1.1rem; font-weight: 700; color: var(--dark);
+    }
+    .section-head::before {
+      content: '';
+      width: 4px; height: 20px;
+      background: var(--orange); border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       HISTORY CARDS — white, clean rows
+    ═══════════════════════════════════════ */
     .hcard {
-      background: var(--s1);
-      border: 1px solid var(--bd);
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-bottom: 10px;
       display: flex; align-items: center; gap: 18px;
-      transition: border-color .2s, transform .15s;
+      background: var(--white);
+      border: 1px solid var(--gray-6);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .18s, transform .15s, box-shadow .18s;
     }
-    .hcard:hover { border-color: var(--bd2); transform: translateX(3px); }
+    .hcard:hover {
+      border-color: var(--orange);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
+    }
 
     /* score bubble */
     .hc-score {
       flex-shrink: 0;
-      width: 58px; height: 58px;
-      border-radius: 13px;
+      width: 64px; height: 64px;
+      border-radius: 14px;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       border: 2px solid;
     }
-    .hc-score.passed { border-color: var(--green-bd); background: var(--green-dim); }
-    .hc-score.failed { border-color: var(--red-bd);   background: var(--red-dim); }
+    .hc-score.passed { border-color: var(--green-bd); background: var(--green-bg); }
+    .hc-score.failed { border-color: var(--red-bd);   background: var(--red-bg); }
 
     .hcs-pct {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem; font-weight: 900; line-height: 1;
+      font-size: 1.1rem; font-weight: 800; line-height: 1;
     }
-    .hc-score.passed .hcs-pct { color: var(--green); }
-    .hc-score.failed .hcs-pct { color: var(--red); }
-    .hcs-lbl { font-size: 0.55rem; color: var(--txt3); margin-top: 1px; }
+    .hc-score.passed .hcs-pct { color: var(--green-dk); }
+    .hc-score.failed .hcs-pct { color: var(--red-dk); }
+    .hcs-lbl {
+      font-size: 0.58rem; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--gray-4); margin-top: 2px;
+    }
 
+    /* info */
     .hc-info { flex: 1; min-width: 0; }
+
     .hc-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem; font-weight: 800;
-      margin-bottom: 4px;
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--dark); margin-bottom: 6px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .hc-meta {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      font-size: 0.75rem; color: var(--txt2);
-    }
-    .hc-meta span { display: flex; align-items: center; gap: 4px; }
-    .hc-meta .material-icons { font-size: 0.82rem; color: var(--txt3); }
 
+    .hc-meta {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      font-size: 0.78rem; color: var(--gray-3);
+    }
+    .hc-meta span {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .hc-meta .material-icons { font-size: 0.82rem; color: var(--gray-4); }
+
+    /* right side */
     .hc-right {
       display: flex; flex-direction: column;
-      align-items: flex-end; gap: 8px; flex-shrink: 0;
+      align-items: flex-end; gap: 10px; flex-shrink: 0;
     }
-    .hc-badge {
-      font-size: 0.62rem; font-weight: 700;
-      letter-spacing: .07em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 100px; border: 1px solid;
+
+    .hc-pill {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px; border: 1px solid;
     }
-    .hcb-pass { background: var(--green-dim); border-color: var(--green-bd); color: var(--green); }
-    .hcb-fail { background: var(--red-dim);   border-color: var(--red-bd);   color: var(--red); }
+    .pill-pass { background: var(--green-bg); border-color: var(--green-bd); color: var(--green-dk); }
+    .pill-fail { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--red-dk); }
 
     .hc-view {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.75rem; font-weight: 600; color: var(--txt3);
-      transition: color .2s;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.78rem; font-weight: 600; color: var(--gray-4);
+      transition: color .18s;
     }
     .hcard:hover .hc-view { color: var(--orange); }
-    .hc-view .material-icons { font-size: 0.85rem; }
+    .hc-view .material-icons { font-size: 0.9rem; }
 
-    /* empty */
+    /* ═══════════════════════════════════════
+       EMPTY STATE — dark panel as secondary accent
+    ═══════════════════════════════════════ */
     .empty {
-      text-align: center; padding: 60px 24px;
-      background: var(--s1); border: 1px solid var(--bd);
-      border-radius: 16px;
+      text-align: center;
+      padding: 72px 32px;
+      background: #1e2026;     /* home page hero bg — dark as secondary */
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow-lg);
+      position: relative; overflow: hidden;
     }
-    .empty .material-icons { font-size: 2.5rem; color: var(--txt3); display: block; margin-bottom: 12px; }
-    .empty h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
-    .empty p  { font-size: 0.85rem; color: var(--txt2); margin-bottom: 20px; line-height: 1.6; }
-    .empty-btn {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 10px 22px; border-radius: 10px;
-      font-size: 0.85rem; font-weight: 700;
-      background: var(--orange); color: #fff;
-      transition: background .2s;
+    /* subtle orange glow */
+    .empty::before {
+      content: '';
+      position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(249,115,22,0.12) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .empty-btn:hover { background: var(--orange-dk); }
-    .empty-btn .material-icons { font-size: 1rem; }
 
-    /* ANIMS */
-    .a { opacity:0; transform:translateY(14px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
-    .a1{animation-delay:.04s} .a2{animation-delay:.10s}
-    .a3{animation-delay:.16s} .a4{animation-delay:.20s}
+    .empty-ico {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.25);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .empty-ico .material-icons { font-size: 1.8rem; color: var(--orange); }
+
+    .empty h3 {
+      font-size: 1.4rem; font-weight: 800;
+      color: #eef0f6; margin-bottom: 10px;
+    }
+    .empty p {
+      font-size: 0.95rem; color: rgba(238,240,246,0.55);
+      margin-bottom: 28px; line-height: 1.7; max-width: 340px; margin-left: auto; margin-right: auto;
+    }
+    .empty-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700;
+      background: var(--orange); color: #fff;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+      transition: background .2s, transform .15s, box-shadow .2s;
+      position: relative;
+    }
+    .empty-btn:hover {
+      background: var(--orange-dk);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(249,115,22,0.42);
+    }
+    .empty-btn .material-icons { font-size: 1.05rem; }
+
+    /* ═══════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════ */
+    .a { opacity:0; transform:translateY(18px);
+         animation:up .48s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.12s}
+    .a3{animation-delay:.20s} .a4{animation-delay:.28s}
     @keyframes up { to { opacity:1; transform:none; } }
 
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
     @media (max-width: 640px) {
-      .summary-strip { grid-template-columns: 1fr 1fr; }
-      .page { padding: 24px 14px 64px; }
-      .nav  { padding: 0 16px; }
-      .hcard { flex-wrap: wrap; }
+      .topbar { padding: 0 4vw; height: 64px; }
+      .tb-logo { font-size: 1.45rem; }
+      /* hide dashboard btn text on mobile */
+      .tb-btn:not(.primary) span:not(.material-icons) { display: none; }
+      .tb-btn:not(.primary) { padding: 9px 12px; }
+
+      .page { padding-left: 4vw; padding-right: 4vw; }
+      .ph { padding-top: 32px; margin-bottom: 28px; }
+      .ph-title { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .stat-val { font-size: 1.6rem; }
+
+      .hcard { padding: 16px; gap: 14px; }
+      .hc-score { width: 54px; height: 54px; border-radius: 11px; }
+      .hcs-pct { font-size: 0.95rem; }
+      .hc-title { font-size: 0.88rem; }
+      .hc-right { display: none; }  /* hide on very small — info is enough */
     }
   </style>
 </head>
 <body>
 
-  <div class="ambient"></div>
-
-  <!-- NAV -->
-  <nav class="nav">
-    <a href="{{ url_for('user_home') }}" class="nav-logo"><em>U</em>-NEX</a>
-    <a href="{{ url_for('quiz_setup') }}" class="nav-btn primary">
-      <span class="material-icons">play_arrow</span> New Quiz
+  <!-- ══ TOP NAV ══ -->
+  <header class="topbar">
+    <div class="tb-logo">U-<span>NEX</span></div>
+    <a href="{{ url_for('quiz_setup') }}" class="tb-btn primary">
+      <span class="material-icons">play_arrow</span>
+      <span>New Quiz</span>
     </a>
-    <a href="{{ url_for('user_dashboard') }}" class="nav-btn">
-      <span class="material-icons">dashboard</span> Dashboard
+    <a href="{{ url_for('user_dashboard') }}" class="tb-btn">
+      <span class="material-icons">dashboard</span>
+      <span>Dashboard</span>
     </a>
-    <a href="{{ url_for('user_settings_page') }}" class="nav-avatar">
+    <a href="{{ url_for('user_settings_page') }}" class="tb-avatar">
       {{ student_name[0] | upper }}
     </a>
-  </nav>
+  </header>
 
-  <!-- PAGE -->
   <div class="page">
 
+    <!-- header -->
     <div class="ph a a1">
-      <p class="ph-label">Quiz</p>
-      <h1 class="ph-title">Your History</h1>
-      <p class="ph-sub">All your past quiz attempts and scores.</p>
+      <div class="ph-eyebrow">Progress</div>
+      <h1 class="ph-title">Your Quiz History</h1>
+      <p class="ph-sub">All your past attempts, scores, and performance trends.</p>
     </div>
 
     {% if history %}
 
-    <!-- SUMMARY STATS -->
-    {% set total_quizzes = history | length %}
+    {% set total_quizzes  = history | length %}
     {% set passed_quizzes = history | selectattr('passed') | list | length %}
-    {% set avg_pct = (history | map(attribute='percentage') | map('float') | sum / total_quizzes) | round(1) if total_quizzes > 0 else 0 %}
-    {% set best_pct = history | map(attribute='percentage') | map('float') | max | round(1) if total_quizzes > 0 else 0 %}
+    {% set avg_pct        = (history | map(attribute='percentage') | map('float') | sum / total_quizzes) | round(1) if total_quizzes > 0 else 0 %}
+    {% set best_pct       = history | map(attribute='percentage') | map('float') | max | round(1) if total_quizzes > 0 else 0 %}
 
-    <div class="summary-strip a a2">
-      <div class="ss-card ss-o">
-        <div class="ss-ico"><span class="material-icons">quiz</span></div>
-        <div class="ss-val">{{ total_quizzes }}</div>
-        <div class="ss-lbl">Total Quizzes</div>
+    <!-- stats -->
+    <div class="stats-grid a a2">
+      <div class="stat-card sc-o">
+        <div class="stat-ico"><span class="material-icons">quiz</span></div>
+        <div class="stat-val">{{ total_quizzes }}</div>
+        <div class="stat-lbl">Total Quizzes</div>
       </div>
-      <div class="ss-card ss-g">
-        <div class="ss-ico"><span class="material-icons">emoji_events</span></div>
-        <div class="ss-val">{{ best_pct }}%</div>
-        <div class="ss-lbl">Best Score</div>
+      <div class="stat-card sc-g">
+        <div class="stat-ico"><span class="material-icons">emoji_events</span></div>
+        <div class="stat-val">{{ best_pct }}%</div>
+        <div class="stat-lbl">Best Score</div>
       </div>
-      <div class="ss-card ss-b">
-        <div class="ss-ico"><span class="material-icons">insights</span></div>
-        <div class="ss-val">{{ avg_pct }}%</div>
-        <div class="ss-lbl">Average Score</div>
+      <div class="stat-card sc-b">
+        <div class="stat-ico"><span class="material-icons">insights</span></div>
+        <div class="stat-val">{{ avg_pct }}%</div>
+        <div class="stat-lbl">Average Score</div>
       </div>
-      <div class="ss-card ss-r">
-        <div class="ss-ico"><span class="material-icons">check_circle</span></div>
-        <div class="ss-val">{{ passed_quizzes }}</div>
-        <div class="ss-lbl">Passed</div>
+      <div class="stat-card sc-r">
+        <div class="stat-ico"><span class="material-icons">check_circle</span></div>
+        <div class="stat-val">{{ passed_quizzes }}</div>
+        <div class="stat-lbl">Passed</div>
       </div>
     </div>
 
-    <!-- HISTORY LIST -->
+    <!-- list heading -->
+    <div class="section-head a a3">
+      <h2>Attempt History</h2>
+    </div>
+
+    <!-- history rows -->
     <div class="a a3">
       {% for h in history %}
       {% set qs = h.get('quiz_sessions', {}) %}
-      <a class="hcard" href="{{ url_for('quiz_results', session_id=h.session_id) }}">
+      <a class="hcard"
+         href="{{ url_for('quiz_results', session_id=h.session_id) }}">
 
+        <!-- score bubble -->
         <div class="hc-score {% if h.passed %}passed{% else %}failed{% endif %}">
           <div class="hcs-pct">{{ h.percentage | float | int }}%</div>
           <div class="hcs-lbl">score</div>
         </div>
 
+        <!-- info -->
         <div class="hc-info">
           <div class="hc-title">
             {{ qs.course_code if qs.course_code else 'Mixed Courses' }}
@@ -348,12 +501,13 @@
           </div>
         </div>
 
+        <!-- right -->
         <div class="hc-right">
-          <span class="hc-badge {% if h.passed %}hcb-pass{% else %}hcb-fail{% endif %}">
+          <span class="hc-pill {% if h.passed %}pill-pass{% else %}pill-fail{% endif %}">
             {% if h.passed %}Passed{% else %}Failed{% endif %}
           </span>
           <span class="hc-view">
-            View <span class="material-icons">chevron_right</span>
+            View results <span class="material-icons">chevron_right</span>
           </span>
         </div>
 
@@ -363,12 +517,16 @@
 
     {% else %}
 
+    <!-- empty state — dark panel as secondary -->
     <div class="empty a a2">
-      <span class="material-icons">quiz</span>
+      <div class="empty-ico">
+        <span class="material-icons">quiz</span>
+      </div>
       <h3>No quizzes yet</h3>
-      <p>You haven't taken any quizzes yet.<br>Start one now and your results will appear here.</p>
+      <p>You haven't taken any quizzes yet. Start one and your results will show up here.</p>
       <a href="{{ url_for('quiz_setup') }}" class="empty-btn">
-        <span class="material-icons">play_arrow</span> Take Your First Quiz
+        <span class="material-icons">play_arrow</span>
+        Take Your First Quiz
       </a>
     </div>
 
