@@ -208,7 +208,7 @@
       position: relative;
       z-index: 1;
     }
-    .logo em { color: var(--orange); font-style: normal; }
+    .logo span { color: var(--orange); }
 
     .nav-login {
       display: flex;
@@ -347,10 +347,10 @@
     .card {
       width: 100%;
       max-width: 460px;
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border: none;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 20px;
       padding: 44px 40px 40px;
       box-shadow: none;
@@ -481,7 +481,7 @@
       width: 100%;
       margin-top: 24px;
       padding: 14px 20px;
-      background: var(--dark);
+      background: var(--orange);
       color: #fff;
       font-family: 'Outfit', sans-serif;
       font-size: .95rem;
@@ -505,9 +505,9 @@
       pointer-events:none;
     }
     .sub-btn:hover {
-      background: #1f2937;
+      background: var(--orange-dk);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(17,24,39,0.22);
+      box-shadow: 0 10px 32px rgba(249,115,22,0.40);
     }
     .sub-btn:active { transform:translateY(0); box-shadow:none; }
     .sub-btn .material-icons { font-size:1.05rem; line-height:1; }
@@ -652,7 +652,7 @@
 
   <!-- ══ TOPBAR ══ -->
   <nav class="topbar">
-    <a href="{{ url_for('user_home') }}" class="logo"><em>U</em>-NEX</a>
+    <a href="{{ url_for('user_home') }}" class="logo">U-<span>NEX</span></a>
     <a href="{{ url_for('user_login_page') }}" class="nav-login">
       <span class="material-icons">login</span>
       Log in
