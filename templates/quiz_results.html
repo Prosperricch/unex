@@ -3,19 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-NEX • Quiz Setup</title>
+  <title>U-NEX • Quiz Results</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
-    /* ═══════════════════════════════════════
-       TOKENS — home page design language
-    ═══════════════════════════════════════ */
     :root {
       --orange:    #f97316;
       --orange-dk: #ea580c;
       --bg:        #f9fafb;
       --white:     #ffffff;
       --dark:      #111827;
-      --gray-1:    #374151;
       --gray-2:    #4b5563;
       --gray-3:    #6b7280;
       --gray-4:    #9ca3af;
@@ -23,14 +19,19 @@
       --gray-6:    #e5e7eb;
       --gray-7:    #f3f4f6;
       --green:     #22c55e;
+      --green-dk:  #16a34a;
       --green-bg:  #f0fdf4;
       --green-bd:  #bbf7d0;
       --red:       #ef4444;
+      --red-dk:    #dc2626;
       --red-bg:    #fef2f2;
       --red-bd:    #fecaca;
+      --blue:      #3b82f6;
+      --blue-bg:   #eff6ff;
+      --blue-bd:   #bfdbfe;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
       --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.13);
     }
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -47,19 +48,16 @@
 
     a { text-decoration: none; color: inherit; }
 
-    /* ═══════════════════════════════════════
-       TOP NAV — white, fixed, home page style
-    ═══════════════════════════════════════ */
+    /* ── NAV ── */
     .topbar {
-      position: fixed; top:0; left:0; right:0; z-index:500;
+      position: sticky; top:0; z-index:400;
       height: 72px;
       background: var(--white);
       border-bottom: 1px solid var(--gray-6);
       box-shadow: var(--shadow-sm);
       display: flex; align-items: center;
-      padding: 0 5vw; gap: 16px;
+      padding: 0 5vw; gap: 10px;
     }
-
     .tb-logo {
       font-size: 1.8rem; font-weight: 800;
       letter-spacing: -1.4px; color: var(--dark);
@@ -67,24 +65,23 @@
     }
     .tb-logo span { color: var(--orange); }
 
-    .tb-back {
+    .tb-btn {
       display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 18px; border-radius: 10px;
-      font-size: 0.88rem; font-weight: 600;
+      padding: 9px 16px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600;
       color: var(--gray-2);
       border: 1.5px solid var(--gray-6);
       background: var(--white);
       box-shadow: var(--shadow-sm);
-      transition: background .18s, color .18s,
-                  border-color .18s, transform .12s;
+      white-space: nowrap;
+      transition: background .18s, color .18s, border-color .18s, transform .12s;
     }
-    .tb-back:hover {
+    .tb-btn:hover {
       background: var(--gray-7); color: var(--dark);
       border-color: var(--gray-5); transform: translateY(-1px);
     }
-    .tb-back .material-icons { font-size: 1rem; }
+    .tb-btn .material-icons { font-size: 0.95rem; }
 
-    /* avatar circle — orange gradient */
     .tb-avatar {
       width: 38px; height: 38px; border-radius: 10px;
       background: linear-gradient(135deg, var(--orange) 0%, #d97706 100%);
@@ -94,618 +91,511 @@
       flex-shrink: 0;
     }
 
-    /* ═══════════════════════════════════════
-       PAGE
-    ═══════════════════════════════════════ */
+    /* ── PAGE ── */
     .page {
-      padding-top: 72px;
-      max-width: 720px;
-      margin: 0 auto;
-      padding-left: 5vw;
-      padding-right: 5vw;
-      padding-bottom: 100px;
+      max-width: 860px; margin: 0 auto;
+      padding: 48px 5vw 100px;
     }
 
-    /* ═══════════════════════════════════════
-       PAGE HEADER — generous, editorial
-    ═══════════════════════════════════════ */
-    .ph {
-      padding-top: 56px;
-      margin-bottom: 40px;
+    /* ── HERO CARD ── */
+    .hero {
+      border-radius: 24px; overflow: hidden;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-lg);
     }
 
-    /* eyebrow — home page .eyebrow style */
-    .ph-eyebrow {
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 14px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .ph-eyebrow::before {
-      content: '';
-      width: 28px; height: 3px;
-      background: var(--orange); border-radius: 2px;
-    }
-
-    /* headline — home page h2 style */
-    .ph-title {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -1px;
-      color: var(--dark);
-      margin-bottom: 14px;
-    }
-    .ph-title span { color: var(--orange); }
-
-    /* sub — home page p.lead style */
-    .ph-sub {
-      font-size: 1.05rem;
-      color: var(--gray-2);
-      line-height: 1.7;
-    }
-
-    /* ═══════════════════════════════════════
-       INFO BANNER — orange tinted, like home
-       page tool-panel-tag but wider
-    ═══════════════════════════════════════ */
-    .info-banner {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      border-radius: 14px;
-      padding: 16px 20px;
-      margin-bottom: 32px;
-      font-size: 0.9rem; color: var(--gray-2);
-      line-height: 1.6;
-      box-shadow: var(--shadow-sm);
-    }
-    .info-banner .material-icons {
-      color: var(--orange); font-size: 1.2rem;
-      flex-shrink: 0; margin-top: 1px;
-    }
-    .info-banner strong { color: var(--dark); font-weight: 700; }
-
-    /* ═══════════════════════════════════════
-       CARDS — white, shadowed, like home
-       page tool panels but flat
-    ═══════════════════════════════════════ */
-    .card {
-      background: var(--white);
-      border: 1px solid var(--gray-6);
-      border-radius: 20px;
-      padding: 32px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-md);
+    /* dark top — home page hero bg as secondary accent */
+    .hero-top {
+      background: #1e2026;
+      padding: 40px 44px 44px;
       position: relative; overflow: hidden;
     }
-
-    /* subtle diagonal hatch — matches home page hero overlay style */
-    .card::after {
+    /* radial glow top-right */
+    .hero-top::before {
       content: '';
-      position: absolute; top: 0; right: 0;
-      width: 200px; height: 200px; border-radius: 50%;
-      background: radial-gradient(circle,
-        rgba(249,115,22,0.04) 0%, transparent 70%);
+      position: absolute; top: -70px; right: -70px;
+      width: 300px; height: 300px; border-radius: 50%;
+      pointer-events: none;
+    }
+    .passed .hero-top::before {
+      background: radial-gradient(circle, rgba(34,197,94,0.22) 0%, transparent 70%);
+    }
+    .failed .hero-top::before {
+      background: radial-gradient(circle, rgba(239,68,68,0.20) 0%, transparent 70%);
+    }
+    /* hatch pattern — home page hero overlay feel */
+    .hero-top::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        48deg, transparent 0, transparent 28px,
+        rgba(255,255,255,0.012) 28px, rgba(255,255,255,0.012) 29px
+      );
       pointer-events: none;
     }
 
-    .card-label {
-      font-size: 0.72rem; font-weight: 700;
+    .hero-row {
+      display: flex; align-items: center; gap: 32px;
+      position: relative; z-index: 1;
+    }
+
+    /* score ring */
+    .score-ring {
+      flex-shrink: 0;
+      width: 118px; height: 118px; border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 4px solid;
+    }
+    .passed .score-ring { border-color: var(--green); background: rgba(34,197,94,0.14); }
+    .failed .score-ring { border-color: var(--red);   background: rgba(239,68,68,0.12); }
+
+    .score-pct {
+      font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -1px;
+    }
+    .passed .score-pct { color: var(--green); }
+    .failed .score-pct { color: var(--red); }
+
+    .score-sub-lbl {
+      font-size: 0.62rem; font-weight: 700;
       letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 8px;
-    }
-    .card-title {
-      font-size: 1.2rem; font-weight: 700;
-      color: var(--dark); margin-bottom: 4px;
-    }
-    .card-sub {
-      font-size: 0.88rem; color: var(--gray-3);
-      margin-bottom: 24px; line-height: 1.55;
+      color: rgba(255,255,255,0.38); margin-top: 4px;
     }
 
-    /* ═══════════════════════════════════════
-       FORM FIELDS
-    ═══════════════════════════════════════ */
-    .fgrid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .fg { display: flex; flex-direction: column; gap: 6px; }
-    .fg.full { grid-column: 1 / -1; }
+    /* text block */
+    .hero-text { flex: 1; min-width: 0; }
 
-    .fg label {
-      font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 0.07em; text-transform: uppercase;
-      color: var(--gray-3);
+    .verdict {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800; letter-spacing: -0.8px;
+      line-height: 1.08; margin-bottom: 8px; color: #fff;
     }
-    .fg label .req { color: var(--orange); }
-    .fg label .opt {
-      font-weight: 400; text-transform: none;
-      letter-spacing: 0; color: var(--gray-4); font-size: 0.72rem;
-    }
+    .verdict em { font-style: normal; }
+    .passed .verdict em { color: var(--green); }
+    .failed .verdict em { color: var(--red); }
 
-    /* input wrapper with icon */
-    .iw { position: relative; display: flex; align-items: center; }
-    .iw .icon {
-      position: absolute; left: 13px; top:0; bottom:0;
-      display: flex; align-items: center;
-      pointer-events: none; z-index: 2;
-      color: var(--gray-4); transition: color .2s;
+    .hero-desc {
+      font-size: 0.95rem; color: rgba(255,255,255,0.58);
+      line-height: 1.65; margin-bottom: 22px;
     }
-    .iw .icon .material-icons { font-size: 1rem; line-height:1; }
+    .hero-desc strong { color: rgba(255,255,255,0.90); }
 
-    input, select {
-      width: 100%;
-      padding: 12px 14px 12px 40px;
+    /* stat chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px; border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.11);
+      background: rgba(255,255,255,0.07);
+      font-size: 0.8rem; font-weight: 600;
+      color: rgba(255,255,255,0.70);
+    }
+    .chip .material-icons { font-size: 0.88rem; }
+    .chip strong { color: #fff; }
+
+    /* white bottom — actions */
+    .hero-btm {
       background: var(--white);
-      border: 1.5px solid var(--gray-6);
-      border-radius: 10px;
-      font-family: system-ui, sans-serif;
-      font-size: 0.92rem; color: var(--dark);
-      outline: none;
-      -webkit-appearance: none; appearance: none;
-      box-shadow: var(--shadow-sm);
-      transition: border-color .2s, box-shadow .2s;
+      border-top: 1px solid var(--gray-6);
+      padding: 20px 44px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
-    select {
-      cursor: pointer; padding-right: 36px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' fill='none'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236b7280' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 13px center;
-    }
-    input:focus, select:focus {
-      border-color: var(--orange);
-      box-shadow: 0 0 0 3px rgba(249,115,22,0.12), var(--shadow-sm);
-    }
-    .iw:focus-within .icon { color: var(--orange); }
-    input::placeholder { color: var(--gray-4); }
-    input.no-icon { padding-left: 14px; }
 
-    /* ═══════════════════════════════════════
-       MODE TOGGLE — card-style options
-    ═══════════════════════════════════════ */
-    .mode-row { display: flex; gap: 12px; }
-
-    .mode-opt {
-      flex: 1;
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 18px; border-radius: 14px;
+    /* action buttons */
+    .act {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
       border: 1.5px solid var(--gray-6);
-      background: var(--white);
-      cursor: pointer;
+      background: var(--white); color: var(--gray-2);
       box-shadow: var(--shadow-sm);
-      transition: border-color .18s, background .18s,
+      transition: background .18s, color .18s, border-color .18s,
                   transform .12s, box-shadow .18s;
     }
-    .mode-opt:hover {
+    .act:hover {
+      background: var(--gray-7); color: var(--dark);
       border-color: var(--gray-5);
-      background: var(--gray-7);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-2px); box-shadow: var(--shadow-md);
     }
-    .mode-opt input[type="radio"] { display: none; }
-    .mode-opt.selected {
-      border-color: var(--orange);
-      background: #fff7ed;
-      box-shadow: 0 0 0 3px rgba(249,115,22,0.10), var(--shadow-sm);
-      transform: translateY(-2px);
+    .act.primary {
+      background: var(--orange); border-color: var(--orange); color: #fff;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.28);
+    }
+    .act.primary:hover {
+      background: var(--orange-dk); border-color: var(--orange-dk);
+      box-shadow: 0 8px 24px rgba(249,115,22,0.36);
+    }
+    .act .material-icons { font-size: 0.95rem; }
+
+    /* ── REVIEW SECTION ── */
+    .sec-label {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 6px;
+    }
+    .sec-title {
+      font-size: 1.35rem; font-weight: 700;
+      color: var(--dark); margin-bottom: 20px;
     }
 
-    .mode-ico {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: var(--gray-7); border: 1px solid var(--gray-6);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background .18s, border-color .18s;
+    /* filter tabs — pill style */
+    .tabs {
+      display: flex; gap: 6px;
+      overflow-x: auto; scrollbar-width: none;
+      padding-bottom: 2px; margin-bottom: 22px;
     }
-    .mode-ico .material-icons { font-size: 1.1rem; color: var(--gray-3); }
-    .mode-opt.selected .mode-ico {
-      background: #fff7ed; border-color: #fed7aa;
-    }
-    .mode-opt.selected .mode-ico .material-icons { color: var(--orange); }
+    .tabs::-webkit-scrollbar { display: none; }
 
-    .mode-label { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
-    .mode-desc  { font-size: 0.76rem; color: var(--gray-3); margin-top: 2px; line-height: 1.4; }
-
-    /* ═══════════════════════════════════════
-       QUESTION COUNT BADGE
-    ═══════════════════════════════════════ */
-    .count-badge {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 20px; border-radius: 14px;
-      background: var(--gray-7);
+    .ftab {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 16px; border-radius: 100px;
+      font-size: 0.82rem; font-weight: 600;
       border: 1.5px solid var(--gray-6);
-      margin-top: 20px;
+      background: var(--white); color: var(--gray-3);
+      cursor: pointer; white-space: nowrap;
       box-shadow: var(--shadow-sm);
-      transition: background .3s, border-color .3s;
+      transition: all .18s;
     }
-    .count-badge.has-q {
-      background: var(--green-bg); border-color: var(--green-bd);
-    }
-    .count-badge.no-q {
-      background: var(--red-bg); border-color: var(--red-bd);
-    }
+    .ftab:hover { background: var(--gray-7); color: var(--dark); }
+    .ftab.active.ft-all     { background: var(--dark); border-color: var(--dark); color: #fff; }
+    .ftab.active.ft-correct { background: var(--green-bg); border-color: var(--green-bd); color: var(--green-dk); }
+    .ftab.active.ft-wrong   { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--red-dk); }
+    .ftab.active.ft-skip    { background: var(--blue-bg);  border-color: var(--blue-bd);  color: var(--blue); }
 
-    .cb-ico { font-size: 1.5rem; flex-shrink: 0; color: var(--gray-4); }
-    .count-badge.has-q .cb-ico { color: var(--green); }
-    .count-badge.no-q  .cb-ico { color: var(--red); }
-    .cb-loading .cb-ico { animation: spin .8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .fn {
+      font-size: 0.7rem; font-weight: 700;
+      padding: 1px 7px; border-radius: 100px;
+      background: var(--gray-7); color: var(--gray-3);
+    }
+    .ftab.active.ft-all     .fn { background: rgba(255,255,255,0.15); color: #fff; }
+    .ftab.active.ft-correct .fn { background: var(--green-bd); color: var(--green-dk); }
+    .ftab.active.ft-wrong   .fn { background: var(--red-bd);   color: var(--red-dk); }
+    .ftab.active.ft-skip    .fn { background: var(--blue-bd);  color: var(--blue); }
 
-    .cb-val {
-      font-size: 1.6rem; font-weight: 800; line-height: 1;
-      color: var(--gray-3);
-    }
-    .count-badge.has-q .cb-val { color: #166534; }
-    .count-badge.no-q  .cb-val { color: #991b1b; }
-
-    .cb-lbl { font-size: 0.82rem; color: var(--gray-3); margin-top: 2px; }
-    .count-badge.has-q .cb-lbl { color: #166534; }
-    .count-badge.no-q  .cb-lbl { color: #991b1b; }
-
-    /* ═══════════════════════════════════════
-       START BUTTON — home page .visit-btn style
-    ═══════════════════════════════════════ */
-    .start-btn {
-      width: 100%; margin-top: 8px;
-      padding: 16px 28px;
-      background: var(--orange); color: #fff;
-      border: none; border-radius: 14px; cursor: pointer;
-      font-family: system-ui, sans-serif;
-      font-size: 1.05rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      box-shadow: 0 4px 16px rgba(249,115,22,0.30);
-      transition: background .2s, transform .15s, box-shadow .2s;
-    }
-    .start-btn:hover {
-      background: var(--orange-dk);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(249,115,22,0.38);
-    }
-    .start-btn:active { transform: none; }
-    .start-btn:disabled {
-      background: var(--gray-5); color: var(--white);
-      cursor: not-allowed; transform: none;
-      box-shadow: none;
-    }
-    .start-btn .material-icons { font-size: 1.15rem; }
-
-    /* ═══════════════════════════════════════
-       TOASTS — same as home page modals
-    ═══════════════════════════════════════ */
-    .toast-wrap {
-      position: fixed; top: 84px; right: 5vw; z-index: 999;
-      display: flex; flex-direction: column; gap: 10px;
-      pointer-events: none; max-width: 340px;
-    }
-    .toast {
+    /* ── QUESTION CARDS ── */
+    .rcard {
       background: var(--white);
-      border: 1px solid var(--gray-6);
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 0.88rem; color: var(--gray-2);
-      display: flex; align-items: flex-start; gap: 10px;
-      pointer-events: all;
-      box-shadow: var(--shadow-lg);
-      animation: toastIn .32s cubic-bezier(.22,1,.36,1);
-      border-left: 4px solid var(--gray-5);
+      border: 1.5px solid var(--gray-6);
+      border-radius: 20px;
+      padding: 24px 28px 24px 32px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      position: relative; overflow: hidden;
+      transition: box-shadow .2s;
     }
-    .toast.success { border-left-color: var(--green); }
-    .toast.error   { border-left-color: var(--red); }
-    .toast.info    { border-left-color: var(--orange); }
-    .toast .material-icons { font-size: 1.05rem; flex-shrink: 0; margin-top: 1px; }
-    .toast.success .material-icons { color: var(--green); }
-    .toast.error   .material-icons { color: var(--red); }
-    .toast.info    .material-icons { color: var(--orange); }
-    @keyframes toastIn {
-      from { opacity:0; transform: translateX(16px) scale(.96); }
-      to   { opacity:1; transform: none; }
+    .rcard:hover { box-shadow: var(--shadow-md); }
+
+    /* left accent strip */
+    .rcard::before {
+      content: '';
+      position: absolute; left:0; top:0; bottom:0;
+      width: 4px; border-radius: 20px 0 0 20px;
+    }
+    .rcard.rc-correct::before { background: var(--green); }
+    .rcard.rc-wrong::before   { background: var(--red); }
+    .rcard.rc-skip::before    { background: var(--gray-5); }
+
+    /* top-right glow */
+    .rcard::after {
+      content: '';
+      position: absolute; top:-40px; right:-40px;
+      width: 120px; height: 120px; border-radius: 50%;
+      pointer-events: none;
+    }
+    .rcard.rc-correct::after { background: radial-gradient(circle, rgba(34,197,94,0.07), transparent 70%); }
+    .rcard.rc-wrong::after   { background: radial-gradient(circle, rgba(239,68,68,0.06), transparent 70%); }
+
+    .rc-head {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 14px; flex-wrap: wrap;
     }
 
-    /* ═══════════════════════════════════════
-       ANIMATIONS — staggered like home page
-    ═══════════════════════════════════════ */
-    .a {
-      opacity:0; transform: translateY(18px);
-      animation: up .48s cubic-bezier(.22,1,.36,1) forwards;
+    .rc-pills { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+
+    .pill {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 100px; border: 1px solid;
     }
-    .a1{animation-delay:.04s}
-    .a2{animation-delay:.12s}
-    .a3{animation-delay:.20s}
-    .a4{animation-delay:.28s}
+    .p-course { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+    .p-easy   { background: var(--green-bg); border-color: var(--green-bd); color: var(--green-dk); }
+    .p-medium { background: #fefce8; border-color: #fef08a; color: #854d0e; }
+    .p-hard   { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--red-dk); }
+
+    .rc-qnum { font-size: 0.68rem; color: var(--gray-4); font-weight: 600; }
+
+    .rc-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.75rem; font-weight: 700; border: 1px solid; flex-shrink: 0;
+    }
+    .rc-status .material-icons { font-size: 0.85rem; }
+    .rc-status.correct { background: var(--green-bg); border-color: var(--green-bd); color: var(--green-dk); }
+    .rc-status.wrong   { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--red-dk); }
+    .rc-status.skip    { background: var(--blue-bg);  border-color: var(--blue-bd);  color: var(--blue); }
+
+    .rc-q {
+      font-size: 1rem; font-weight: 500;
+      line-height: 1.65; color: var(--dark);
+      margin-bottom: 18px;
+    }
+
+    .rc-opts {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-bottom: 16px;
+    }
+
+    .ropt {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 14px; border-radius: 10px;
+      border: 1.5px solid var(--gray-6);
+      background: var(--gray-7);
+      font-size: 0.88rem; color: var(--gray-2); line-height: 1.5;
+    }
+    .ropt.is-correct   { background: var(--green-bg); border-color: var(--green-bd); color: var(--dark); }
+    .ropt.is-wrong-sel { background: var(--red-bg);   border-color: var(--red-bd);   color: var(--dark); }
+
+    .ropt-ltr {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: var(--white); border: 1px solid var(--gray-6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 800; color: var(--gray-3);
+      flex-shrink: 0;
+    }
+    .ropt.is-correct   .ropt-ltr { background: var(--green); border-color: var(--green); color: #fff; }
+    .ropt.is-wrong-sel .ropt-ltr { background: var(--red);   border-color: var(--red);   color: #fff; }
+
+    .otag {
+      font-size: 0.68rem; font-weight: 700; margin-left: 4px;
+    }
+    .otag.c { color: var(--green-dk); }
+    .otag.w { color: var(--red-dk); }
+
+    .rc-expl {
+      padding: 13px 16px; border-radius: 10px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      font-size: 0.85rem; line-height: 1.6; color: var(--gray-2);
+    }
+    .rc-expl strong { color: var(--orange-dk); }
+
+    .empty-state {
+      text-align: center; padding: 64px 20px;
+      background: var(--white);
+      border: 1.5px solid var(--gray-6);
+      border-radius: 20px; box-shadow: var(--shadow-sm);
+    }
+    .empty-state .material-icons { font-size: 2.5rem; color: var(--gray-5); display: block; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; color: var(--gray-3); }
+
+    /* animations */
+    .a { opacity:0; transform:translateY(18px);
+         animation: up .48s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.12s}
+    .a3{animation-delay:.20s} .a4{animation-delay:.28s}
     @keyframes up { to { opacity:1; transform:none; } }
 
-    /* ═══════════════════════════════════════
-       RESPONSIVE
-    ═══════════════════════════════════════ */
+    /* responsive */
     @media (max-width: 640px) {
-      .topbar { padding: 0 4vw; height: 64px; }
+      .topbar { padding: 0 4vw; height: 64px; gap: 8px; }
       .tb-logo { font-size: 1.45rem; }
-      .page { padding-left: 4vw; padding-right: 4vw; padding-bottom: 80px; }
-      .ph { padding-top: 36px; margin-bottom: 28px; }
-      .ph-title { font-size: clamp(1.7rem, 6vw, 2.2rem); }
-      .card { padding: 24px 20px; border-radius: 16px; }
-      .fgrid { grid-template-columns: 1fr; }
-      .fg.full { grid-column: 1; }
-      .mode-row { flex-direction: column; gap: 10px; }
+      .tb-btn.sm-hide { display: none; }
+      .page { padding: 24px 4vw 80px; }
+      .hero-top { padding: 24px 20px 28px; }
+      .hero-row { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .score-ring { width: 92px; height: 92px; }
+      .score-pct  { font-size: 1.6rem; }
+      .verdict    { font-size: 1.5rem; }
+      .hero-btm   { padding: 16px 20px; gap: 8px; }
+      .act        { padding: 10px 14px; font-size: 0.82rem; }
+      .rc-opts    { grid-template-columns: 1fr; }
+      .rcard      { padding: 18px 18px 18px 22px; }
     }
-
     @media (max-width: 400px) {
-      .tb-back span:not(.material-icons) { display: none; }
-      .tb-back { padding: 9px 12px; }
+      .tb-avatar { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div id="fd"
-       data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}'
-       style="display:none"></div>
-
-  <!-- ══ TOP NAV ══ -->
+  <!-- NAV -->
   <header class="topbar">
     <div class="tb-logo">U-<span>NEX</span></div>
-    <a href="{{ url_for('user_dashboard') }}" class="tb-back">
-      <span class="material-icons">arrow_back</span>
-      <span>Dashboard</span>
+    <a href="{{ url_for('quiz_setup') }}"   class="tb-btn sm-hide">
+      <span class="material-icons">replay</span> New Quiz
+    </a>
+    <a href="{{ url_for('quiz_history') }}"  class="tb-btn sm-hide">
+      <span class="material-icons">history</span> History
+    </a>
+    <a href="{{ url_for('user_dashboard') }}" class="tb-btn">
+      <span class="material-icons">dashboard</span> Dashboard
     </a>
     <a href="{{ url_for('user_settings_page') }}" class="tb-avatar">
       {{ student_name[0] | upper }}
     </a>
   </header>
 
-  <!-- ══ PAGE ══ -->
   <div class="page">
 
-    <!-- header -->
-    <div class="ph a a1">
-      <div class="ph-eyebrow">Quiz Setup</div>
-      <h1 class="ph-title">
-        Set up your<br><span>quiz.</span>
-      </h1>
-      <p class="ph-sub">
-        {{ student_dept | title }} · Level {{ student_level }} ·
-        Questions are pulled from your approved course bank.
-      </p>
+    <!-- SCORE HERO -->
+    {% set pct = result.percentage | float %}
+    <div class="hero {% if result.passed %}passed{% else %}failed{% endif %} a a1">
+
+      <div class="hero-top">
+        <div class="hero-row">
+
+          <div class="score-ring">
+            <div class="score-pct">{{ pct | int }}%</div>
+            <div class="score-sub-lbl">Score</div>
+          </div>
+
+          <div class="hero-text">
+            <div class="verdict">
+              {% if result.passed %}Well done<em>.</em>
+              {% else %}Keep going<em>.</em>{% endif %}
+            </div>
+            <div class="hero-desc">
+              You scored <strong>{{ result.score }} out of {{ result.total }}</strong>
+              {% if quiz_sess.course_code %} on {{ quiz_sess.course_code }}{% endif %}
+              · {{ quiz_sess.semester }} {{ quiz_sess.academic_year }}
+            </div>
+            <div class="chips">
+              <div class="chip">
+                <span class="material-icons">check_circle</span>
+                <strong>{{ result.score }}</strong> correct
+              </div>
+              <div class="chip">
+                <span class="material-icons">cancel</span>
+                <strong>{{ result.total - result.score }}</strong> wrong/skipped
+              </div>
+              {% if result.time_taken_seconds %}
+              <div class="chip">
+                <span class="material-icons">timer</span>
+                <strong>{{ result.time_taken_seconds // 60 }}m {{ result.time_taken_seconds % 60 }}s</strong>
+              </div>
+              {% endif %}
+              <div class="chip">
+                <span class="material-icons">school</span>
+                <strong>{{ quiz_sess.mode | title }}</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="hero-btm">
+        <a href="{{ url_for('quiz_setup') }}"  class="act primary">
+          <span class="material-icons">replay</span> Retake Quiz
+        </a>
+        <a href="{{ url_for('user_notes') }}"   class="act">
+          <span class="material-icons">menu_book</span> Review Notes
+        </a>
+        <a href="{{ url_for('quiz_history') }}"  class="act">
+          <span class="material-icons">history</span> History
+        </a>
+        <a href="{{ url_for('user_dashboard') }}" class="act">
+          <span class="material-icons">dashboard</span> Dashboard
+        </a>
+      </div>
+
     </div>
 
-    <!-- info banner -->
-    <div class="info-banner a a1">
-      <span class="material-icons">info</span>
-      <div>
-        You will get <strong>up to 70 questions</strong> shuffled uniquely for you.
-        Options within each question are also randomised — every attempt is different.
-      </div>
-    </div>
+    <!-- REVIEW -->
+    {% set correct_count = review | selectattr('is_correct') | list | length %}
+    {% set wrong_count   = review | rejectattr('is_correct') | selectattr('selected') | list | length %}
+    {% set skip_count    = review | rejectattr('selected') | list | length %}
 
-    <form method="POST" action="{{ url_for('quiz_start') }}" id="setupForm">
+    <div class="a a2">
+      <div class="sec-label">Question Review</div>
+      <div class="sec-title">See how you did on each question.</div>
 
-      <!-- CONTENT FILTERS -->
-      <div class="card a a2">
-        <div class="card-label">Step 1</div>
-        <div class="card-title">Select Your Content</div>
-        <div class="card-sub">Filter questions by level, semester and course.</div>
-
-        <div class="fgrid">
-
-          <!-- level -->
-          <div class="fg full">
-            <label>Level <span class="req">*</span></label>
-            <div class="iw">
-              <span class="icon"><span class="material-icons">layers</span></span>
-              <select name="level" id="sel-level" required>
-                <option value="100" {% if student_level=='100' %}selected{% endif %}>100 Level</option>
-                <option value="200" {% if student_level=='200' %}selected{% endif %}>200 Level</option>
-                <option value="300" {% if student_level=='300' %}selected{% endif %}>300 Level</option>
-                <option value="400" {% if student_level=='400' %}selected{% endif %}>400 Level</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- semester -->
-          <div class="fg">
-            <label>Semester <span class="req">*</span></label>
-            <div class="iw">
-              <span class="icon"><span class="material-icons">calendar_today</span></span>
-              <select name="semester" id="sel-semester" required>
-                <option value="" disabled {% if not semesters %}selected{% endif %}>Select semester</option>
-                {% for s in semesters %}
-                <option value="{{ s }}" {% if loop.first %}selected{% endif %}>{{ s }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-
-          <!-- academic year -->
-          <div class="fg">
-            <label>Academic Year <span class="req">*</span></label>
-            <div class="iw">
-              <span class="icon"><span class="material-icons">event</span></span>
-              <select name="academic_year" id="sel-year" required>
-                <option value="" disabled {% if not academic_years %}selected{% endif %}>Select year</option>
-                {% for y in academic_years %}
-                <option value="{{ y }}" {% if loop.first %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-
-          <!-- course code -->
-          <div class="fg full">
-            <label>
-              Course Code
-              <span class="opt">— optional, leave blank for all courses</span>
-            </label>
-            <div class="iw">
-              <span class="icon"><span class="material-icons">book</span></span>
-              <select name="course_code" id="sel-course">
-                <option value="">All courses</option>
-                {% for cc in course_codes %}
-                <option value="{{ cc }}">{{ cc }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- live count badge -->
-        <div class="count-badge cb-loading" id="countBadge">
-          <span class="material-icons cb-ico">sync</span>
-          <div>
-            <div class="cb-val" id="countVal">—</div>
-            <div class="cb-lbl">approved questions available for this selection</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TIME & MODE -->
-      <div class="card a a3">
-        <div class="card-label">Step 2</div>
-        <div class="card-title">Time &amp; Mode</div>
-        <div class="card-sub">Set your time limit and choose how you want to be tested.</div>
-
-        <div style="margin-bottom:20px;">
-          <div class="fg">
-            <label>
-              Time Limit
-              <span class="opt">— in minutes, leave blank for no limit</span>
-            </label>
-            <div class="iw">
-              <span class="icon"><span class="material-icons">timer</span></span>
-              <input type="number" name="time_limit"
-                     placeholder="e.g. 45"
-                     min="5" max="300">
-            </div>
-          </div>
-        </div>
-
-        <div class="mode-row">
-          <label class="mode-opt selected" id="modeExam">
-            <input type="radio" name="mode" value="exam" checked>
-            <div class="mode-ico"><span class="material-icons">assignment</span></div>
-            <div>
-              <div class="mode-label">Exam Mode</div>
-              <div class="mode-desc">Results revealed at the end</div>
-            </div>
-          </label>
-          <label class="mode-opt" id="modePractice">
-            <input type="radio" name="mode" value="practice">
-            <div class="mode-ico"><span class="material-icons">school</span></div>
-            <div>
-              <div class="mode-label">Practice Mode</div>
-              <div class="mode-desc">See correct answer after each question</div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- START -->
-      <div class="a a4">
-        <button type="submit" class="start-btn" id="startBtn" disabled>
-          <span class="material-icons">play_arrow</span>
-          Start Quiz
+      <div class="tabs">
+        <button class="ftab ft-all active" data-filter="all">
+          All <span class="fn">{{ review | length }}</span>
+        </button>
+        <button class="ftab ft-correct" data-filter="correct">
+          Correct <span class="fn">{{ correct_count }}</span>
+        </button>
+        <button class="ftab ft-wrong" data-filter="wrong">
+          Wrong <span class="fn">{{ wrong_count }}</span>
+        </button>
+        <button class="ftab ft-skip" data-filter="skip">
+          Skipped <span class="fn">{{ skip_count }}</span>
         </button>
       </div>
+    </div>
 
-    </form>
+    <div id="reviewList" class="a a3">
+      {% for q in review %}
+      {% set status = 'correct' if q.is_correct else ('skip' if not q.selected else 'wrong') %}
+      <div class="rcard rc-{{ status }}" data-status="{{ status }}">
+
+        <div class="rc-head">
+          <div class="rc-pills">
+            <span class="pill p-course">{{ q.course_code }}</span>
+            <span class="pill p-{{ q.difficulty }}">{{ q.difficulty }}</span>
+            <span class="rc-qnum">Q{{ q.position }}</span>
+          </div>
+          <div class="rc-status {{ status }}">
+            {% if status == 'correct' %}
+              <span class="material-icons">check_circle</span> Correct
+            {% elif status == 'wrong' %}
+              <span class="material-icons">cancel</span> Wrong
+            {% else %}
+              <span class="material-icons">remove_circle_outline</span> Skipped
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="rc-q">{{ q.question_text }}</div>
+
+        <div class="rc-opts">
+          {% for ltr in ['a','b','c','d'] %}
+          {% set opt_text = q.options.get(ltr, '') %}
+          {% if opt_text %}
+          <div class="ropt
+            {%- if ltr == q.correct %} is-correct{% endif %}
+            {%- if q.selected and ltr == q.selected and ltr != q.correct %} is-wrong-sel{% endif %}">
+            <span class="ropt-ltr">{{ ltr | upper }}</span>
+            <span>
+              {{ opt_text }}
+              {% if ltr == q.correct %}<span class="otag c">✓ correct</span>{% endif %}
+              {% if q.selected and ltr == q.selected and ltr != q.correct %}<span class="otag w">✗ your answer</span>{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if q.explanation %}
+        <div class="rc-expl">
+          <strong>Why:</strong> {{ q.explanation }}
+        </div>
+        {% endif %}
+
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <span class="material-icons">quiz</span>
+        <p>No review data available for this session.</p>
+      </div>
+      {% endfor %}
+    </div>
+
   </div>
 
-  <!-- toast container -->
-  <div class="toast-wrap" id="toastWrap"></div>
-
   <script>
-    /* ── mode toggle ── */
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', () => {
-        document.querySelectorAll('.mode-opt').forEach(o =>
-          o.classList.toggle('selected', o.querySelector('input').checked)
-        );
+    document.querySelectorAll('.ftab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.rcard').forEach(c => {
+          c.style.display = (f === 'all' || c.dataset.status === f) ? '' : 'none';
+        });
       });
     });
-
-    /* ── live count ── */
-    let countTimer = null;
-    const badge    = document.getElementById('countBadge');
-    const countVal = document.getElementById('countVal');
-    const startBtn = document.getElementById('startBtn');
-    const TI = { success:'check_circle', error:'error_outline', info:'info' };
-
-    function fetchCount() {
-      const sem   = document.getElementById('sel-semester').value;
-      const yr    = document.getElementById('sel-year').value;
-      const cc    = document.getElementById('sel-course').value;
-      const level = document.getElementById('sel-level').value;
-
-      if (!sem || !yr) {
-        badge.className     = 'count-badge';
-        countVal.textContent = '—';
-        startBtn.disabled   = true;
-        return;
-      }
-
-      badge.className      = 'count-badge cb-loading';
-      countVal.textContent = '…';
-
-      fetch(
-        `/user/quiz/count?semester=${encodeURIComponent(sem)}&academic_year=${encodeURIComponent(yr)}&course_code=${encodeURIComponent(cc)}&level=${encodeURIComponent(level)}`,
-        { credentials: 'same-origin' }
-      )
-      .then(r => {
-        if (r.redirected) { window.location.href = '/user/login'; return null; }
-        return r.json();
-      })
-      .then(data => {
-        if (!data) return;
-        const n = data.count ?? 0;
-        countVal.textContent = n;
-        if (n >= 1) {
-          badge.className   = 'count-badge has-q';
-          startBtn.disabled = false;
-        } else {
-          badge.className   = 'count-badge no-q';
-          startBtn.disabled = true;
-        }
-      })
-      .catch(() => {
-        badge.className      = 'count-badge has-q';
-        countVal.textContent = '?';
-        startBtn.disabled    = false;
-      });
-    }
-
-    ['sel-level','sel-semester','sel-year','sel-course'].forEach(id => {
-      document.getElementById(id).addEventListener('change', () => {
-        clearTimeout(countTimer);
-        countTimer = setTimeout(fetchCount, 300);
-      });
-    });
-
-    fetchCount();
-
-    /* ── toasts ── */
-    function showToast(cat, msg) {
-      const wrap = document.getElementById('toastWrap');
-      const el   = document.createElement('div');
-      el.className = `toast ${cat}`;
-      el.innerHTML = `<span class="material-icons">${TI[cat]||TI.info}</span><span>${msg}</span>`;
-      wrap.appendChild(el);
-      setTimeout(() => {
-        el.style.transition = 'opacity .3s';
-        el.style.opacity    = '0';
-        setTimeout(() => el.remove(), 320);
-      }, 4200);
-    }
-
-    (function(){
-      try {
-        JSON.parse(document.getElementById('fd').dataset.messages)
-          .forEach(([cat, msg], i) =>
-            setTimeout(() => showToast(cat, msg), i * 280)
-          );
-      } catch(e){}
-    })();
   </script>
 
 </body>
