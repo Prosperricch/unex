@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX Admin • TMS</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --orange:    #f97316;
+      --orange-dk: #ea580c;
+      --bg:        #f9fafb;
+      --white:     #ffffff;
+      --dark:      #111827;
+      --gray-2:    #4b5563;
+      --gray-3:    #6b7280;
+      --gray-4:    #9ca3af;
+      --gray-5:    #d1d5db;
+      --gray-6:    #e5e7eb;
+      --gray-7:    #f3f4f6;
+      --green:     #22c55e;
+      --green-bg:  #f0fdf4;
+      --red:       #ef4444;
+      --red-bg:    #fef2f2;
+      --red-bd:    #fecaca;
+      --blue:      #3b82f6;
+      --tms:       #8b5cf6;
+      --tms-dk:    #7c3aed;
+      --tms-bg:    #f5f3ff;
+      --tms-bd:    #ddd6fe;
+      --tms-text:  #6d28d9;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--dark);
+      min-height: 100vh; line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── TOP NAV ── */
+    .topbar {
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: 64px; background: var(--white);
+      border-bottom: 1px solid var(--gray-6);
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center;
+      padding: 0 5vw; gap: 14px;
+    }
+    .tb-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1.2px; color: var(--dark); margin-right: auto; }
+    .tb-logo span { color: var(--orange); }
+    .tb-badge {
+      background: var(--tms-bg); border: 1px solid var(--tms-bd);
+      color: var(--tms-text); font-size: 0.72rem; font-weight: 700;
+      padding: 4px 10px; border-radius: 100px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .tb-back {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 10px;
+      border: 1.5px solid var(--gray-6); background: var(--white);
+      font-size: 0.84rem; font-weight: 500; color: var(--gray-2);
+      cursor: pointer; transition: background .18s, color .18s;
+    }
+    .tb-back:hover { background: var(--gray-7); color: var(--dark); }
+    .tb-back .material-icons { font-size: 1rem; }
+
+    /* ── PAGE ── */
+    .page {
+      padding-top: 80px; max-width: 1100px;
+      margin: 0 auto; padding-left: 5vw; padding-right: 5vw; padding-bottom: 120px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header { padding-top: 36px; margin-bottom: 32px; }
+    .ph-eyebrow {
+      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--tms); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ph-eyebrow::before { content:''; width:20px; height:3px; background:var(--tms); border-radius:2px; }
+    .ph-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 4px; }
+    .ph-sub { font-size: 0.88rem; color: var(--gray-3); }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px; background: var(--gray-7);
+      border: 1px solid var(--gray-6); border-radius: 14px;
+      padding: 4px; margin-bottom: 28px; width: fit-content;
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      border: none; background: transparent; color: var(--gray-3);
+      transition: background .18s, color .18s;
+    }
+    .tab-btn:hover { color: var(--dark); }
+    .tab-btn.active { background: var(--white); color: var(--tms); box-shadow: var(--shadow-sm); }
+    .tab-btn .material-icons { font-size: 1rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white); border: 1px solid var(--gray-6);
+      border-radius: 20px; padding: 28px 28px;
+      box-shadow: var(--shadow-sm); margin-bottom: 20px;
+    }
+    .card-head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 22px;
+    }
+    .card-head::before { content:''; width:4px; height:20px; background:var(--tms); border-radius:2px; }
+    .card-head h2 { font-size: 1rem; font-weight: 700; }
+    .card-head p { font-size: 0.82rem; color: var(--gray-3); margin-left: auto; }
+
+    /* ── FORMS ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid.cols1 { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 0.78rem; font-weight: 700; color: var(--gray-2);
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--gray-5); border-radius: 10px;
+      font-size: 0.9rem; color: var(--dark); background: var(--white);
+      transition: border-color .18s, box-shadow .18s;
+      font-family: inherit;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--tms);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field-hint { font-size: 0.75rem; color: var(--gray-4); }
+
+    /* File drop zone */
+    .drop-zone {
+      border: 2px dashed var(--tms-bd); border-radius: 14px;
+      padding: 40px 24px; text-align: center; cursor: pointer;
+      background: var(--tms-bg); transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--tms); background: #ede9fe;
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dz-icon { font-size: 2.4rem; color: var(--tms); margin-bottom: 10px; }
+    .dz-title { font-size: 0.95rem; font-weight: 700; color: var(--tms-text); margin-bottom: 4px; }
+    .dz-sub { font-size: 0.8rem; color: var(--gray-3); }
+    .dz-file-name {
+      margin-top: 10px; font-size: 0.82rem; font-weight: 600; color: var(--tms);
+      display: none;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 11px;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer;
+      border: none; transition: background .18s, transform .12s, box-shadow .2s;
+      font-family: inherit;
+    }
+    .btn .material-icons { font-size: 1rem; }
+    .btn-tms {
+      background: var(--tms); color: #fff;
+      box-shadow: 0 4px 14px rgba(139,92,246,0.30);
+    }
+    .btn-tms:hover { background: var(--tms-dk); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(139,92,246,0.38); }
+    .btn-orange {
+      background: var(--orange); color: #fff;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.28);
+    }
+    .btn-orange:hover { background: var(--orange-dk); transform: translateY(-1px); }
+    .btn-ghost {
+      background: var(--gray-7); color: var(--gray-2);
+      border: 1px solid var(--gray-6);
+    }
+    .btn-ghost:hover { background: var(--gray-6); color: var(--dark); }
+    .btn-red {
+      background: var(--red-bg); color: var(--red);
+      border: 1px solid var(--red-bd);
+    }
+    .btn-red:hover { background: #fee2e2; }
+    .btn-sm { padding: 7px 14px; font-size: 0.8rem; }
+    .btn-sm .material-icons { font-size: 0.85rem; }
+
+    /* ── ACTIVE TIMETABLE BANNER ── */
+    .active-banner {
+      position: relative; overflow: hidden;
+      background: #1e2026; border-radius: 20px;
+      padding: 24px 28px; margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+    .active-banner::before {
+      content:''; position:absolute; top:-50px; right:-50px;
+      width:200px; height:200px; border-radius:50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.20) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .ab-left { position: relative; z-index: 1; }
+    .ab-eyebrow {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #a78bfa; margin-bottom: 6px;
+    }
+    .ab-label { font-size: 1.15rem; font-weight: 800; color: #eef0f6; margin-bottom: 8px; }
+    .ab-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ab-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 100px; font-size: 0.72rem; font-weight: 600;
+      background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.30); color: #a78bfa;
+    }
+    .ab-pill .material-icons { font-size: 0.7rem; }
+    .ab-right { position: relative; z-index: 1; display: flex; gap: 10px; flex-shrink: 0; }
+
+    /* ── STATUS BADGE ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 0.72rem; font-weight: 700;
+    }
+    .badge-green { background: var(--green-bg); color: #166534; border: 1px solid #bbf7d0; }
+    .badge-tms   { background: var(--tms-bg); color: var(--tms-text); border: 1px solid var(--tms-bd); }
+    .badge-gray  { background: var(--gray-7); color: var(--gray-3); border: 1px solid var(--gray-6); }
+    .badge-red   { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bd); }
+
+    /* ── ENTRIES PREVIEW TABLE ── */
+    .preview-bar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .preview-bar h3 { font-size: 0.95rem; font-weight: 700; flex: 1; }
+    .search-input {
+      padding: 8px 14px; border-radius: 10px;
+      border: 1.5px solid var(--gray-5); font-size: 0.84rem;
+      width: 220px; font-family: inherit;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .search-input:focus { outline: none; border-color: var(--tms); box-shadow: 0 0 0 3px rgba(139,92,246,0.10); }
+    .filter-select {
+      padding: 8px 12px; border-radius: 10px;
+      border: 1.5px solid var(--gray-5); font-size: 0.84rem;
+      font-family: inherit; background: var(--white); cursor: pointer;
+      transition: border-color .18s;
+    }
+    .filter-select:focus { outline: none; border-color: var(--tms); }
+
+    .table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--gray-6); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    thead th {
+      background: var(--gray-7); padding: 12px 16px;
+      text-align: left; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-3);
+      border-bottom: 1px solid var(--gray-6); white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--gray-6); transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--gray-7); }
+    tbody td { padding: 11px 16px; color: var(--gray-2); vertical-align: middle; }
+    .td-course { font-weight: 700; color: var(--dark); font-family: monospace; font-size: 0.88rem; }
+    .td-venue { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .day-chip {
+      padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    }
+    .day-MON { background:#fff7ed; color:var(--orange); border:1px solid #fed7aa; }
+    .day-TUE { background:var(--tms-bg); color:var(--tms-text); border:1px solid var(--tms-bd); }
+    .day-WED { background:var(--green-bg); color:#166534; border:1px solid #bbf7d0; }
+    .day-THU { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .day-FRI { background:#fdf4ff; color:#7e22ce; border:1px solid #e9d5ff; }
+    .time-chip {
+      padding: 2px 9px; border-radius: 8px;
+      background: var(--gray-7); font-size: 0.72rem; font-weight: 600;
+      color: var(--gray-2); white-space: nowrap; font-family: monospace;
+    }
+
+    /* ── VENUE MANAGER ── */
+    .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .venue-card {
+      border: 1.5px solid var(--gray-6); border-radius: 16px;
+      overflow: hidden; background: var(--white);
+      transition: box-shadow .18s, border-color .18s;
+    }
+    .venue-card:hover { box-shadow: var(--shadow-md); border-color: var(--tms-bd); }
+    .venue-img {
+      width: 100%; height: 140px; object-fit: cover;
+      background: linear-gradient(135deg, #1e2026 0%, #2d3748 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .venue-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .venue-img-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .venue-img-placeholder .material-icons { font-size: 2rem; color: rgba(255,255,255,0.25); }
+    .venue-img-placeholder span { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-weight: 500; }
+    .venue-info { padding: 14px 16px; }
+    .venue-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; color: var(--dark); }
+    .venue-cap { font-size: 0.75rem; color: var(--gray-4); margin-bottom: 12px; }
+    .venue-actions { display: flex; gap: 8px; }
+    .venue-upload-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border-radius: 9px;
+      background: var(--tms-bg); border: 1px solid var(--tms-bd);
+      color: var(--tms-text); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: background .18s;
+    }
+    .venue-upload-label:hover { background: #ede9fe; }
+    .venue-upload-label .material-icons { font-size: 0.85rem; }
+    .venue-upload-label input[type=file] { display: none; }
+    .venue-del-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border-radius: 9px;
+      background: var(--red-bg); border: 1px solid var(--red-bd);
+      color: var(--red); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: background .18s; border: none;
+    }
+    .venue-del-btn:hover { background: #fee2e2; }
+    .venue-del-btn .material-icons { font-size: 0.85rem; }
+
+    /* ── LABEL EDITOR ── */
+    .label-preview {
+      background: #1e2026; border-radius: 14px; padding: 18px 22px;
+      display: flex; align-items: center; gap: 14px; margin-top: 16px;
+    }
+    .lp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tms); flex-shrink: 0; box-shadow: 0 0 8px var(--tms); }
+    .lp-text { font-size: 0.95rem; font-weight: 700; color: #eef0f6; }
+    .lp-ver {
+      margin-left: auto; flex-shrink: 0;
+      background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.3);
+      color: #a78bfa; font-size: 0.7rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 100px; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-mini {
+      background: var(--white); border: 1px solid var(--gray-6);
+      border-radius: 14px; padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .sm-val { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; color: var(--tms); margin-bottom: 2px; }
+    .sm-lbl { font-size: 0.76rem; color: var(--gray-3); font-weight: 500; }
+
+    /* ── UPLOAD HISTORY ── */
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; border-radius: 12px;
+      border: 1px solid var(--gray-6); background: var(--white);
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .history-item:hover { border-color: var(--tms-bd); box-shadow: var(--shadow-sm); }
+    .hi-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--tms-bg); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hi-icon .material-icons { font-size: 1rem; color: var(--tms); }
+    .hi-info { flex: 1; min-width: 0; }
+    .hi-label { font-size: 0.88rem; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+    .hi-meta { font-size: 0.74rem; color: var(--gray-4); }
+    .hi-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── TOAST ── */
+    .toast-wrap { position:fixed; top:78px; right:5vw; z-index:999; display:flex; flex-direction:column; gap:10px; pointer-events:none; max-width:340px; }
+    .toast {
+      background:var(--white); border:1px solid var(--gray-6); border-radius:14px;
+      padding:14px 16px; font-size:0.88rem; color:var(--gray-2);
+      display:flex; align-items:flex-start; gap:10px; pointer-events:all;
+      box-shadow:var(--shadow-lg); border-left:4px solid var(--gray-5);
+      animation:toastIn .32s cubic-bezier(.22,1,.36,1);
+    }
+    .toast.success { border-left-color:var(--green); }
+    .toast.error   { border-left-color:var(--red); }
+    .toast.info    { border-left-color:var(--tms); }
+    .toast .material-icons { font-size:1.05rem; flex-shrink:0; margin-top:1px; }
+    .toast.success .material-icons { color:var(--green); }
+    .toast.error   .material-icons { color:var(--red); }
+    .toast.info    .material-icons { color:var(--tms); }
+    @keyframes toastIn { from{opacity:0;transform:translateX(16px) scale(.96)} to{opacity:1;transform:none} }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 60px 24px; color: var(--gray-4);
+    }
+    .empty-state .material-icons { font-size: 3rem; margin-bottom: 12px; display: block; }
+    .empty-state p { font-size: 0.88rem; }
+
+    /* ── ANIMATIONS ── */
+    .a { opacity:0; transform:translateY(16px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.10s} .a3{animation-delay:.16s} .a4{animation-delay:.22s}
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px; padding: 28px;
+      max-width: 480px; width: 100%; box-shadow: var(--shadow-lg);
+      animation: modalIn .28s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:none} }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-head h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { width:30px; height:30px; border-radius:8px; background:var(--gray-7); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-3); }
+    .modal-close:hover { background: var(--gray-6); }
+    .modal-close .material-icons { font-size: 0.95rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* ── PROGRESS ── */
+    .progress-bar {
+      height: 6px; background: var(--gray-6); border-radius: 100px;
+      overflow: hidden; margin-top: 12px; display: none;
+    }
+    .progress-fill {
+      height: 100%; background: var(--tms); border-radius: 100px;
+      transition: width .3s ease; width: 0%;
+    }
+    .upload-status { font-size: 0.82rem; color: var(--gray-3); margin-top: 8px; display: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .topbar { padding: 0 4vw; }
+      .page { padding-left: 4vw; padding-right: 4vw; }
+      .form-grid, .form-grid.cols3 { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .venue-grid { grid-template-columns: 1fr; }
+      .active-banner { flex-direction: column; align-items: flex-start; }
+      .tabs { width: 100%; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fd" data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}' style="display:none"></div>
+
+  <!-- TOP NAV -->
+  <header class="topbar">
+    <div class="tb-logo">U-<span>NEX</span></div>
+    <span class="tb-badge"><span class="material-icons" style="font-size:.7rem;vertical-align:middle;">calendar_month</span> TMS Admin</span>
+    <a href="{{ url_for('admin_dashboard_page') }}" class="tb-back">
+      <span class="material-icons">arrow_back</span> Dashboard
+    </a>
+  </header>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <div class="page-header a a1">
+      <div class="ph-eyebrow">Timetable Management System</div>
+      <h1 class="ph-title">TMS Control Panel</h1>
+      <p class="ph-sub">Upload, parse, and manage semester timetables. Control what students see.</p>
+    </div>
+
+    <!-- ACTIVE TIMETABLE BANNER -->
+    {% if active_upload %}
+    <div class="active-banner a a2">
+      <div class="ab-left">
+        <div class="ab-eyebrow">Currently Active Timetable</div>
+        <div class="ab-label">{{ active_upload.label }} <span style="color:#a78bfa">{{ active_upload.version }}</span></div>
+        <div class="ab-pills">
+          <span class="ab-pill"><span class="material-icons">event</span>{{ active_upload.semester }}</span>
+          <span class="ab-pill"><span class="material-icons">school</span>{{ active_upload.academic_year }}</span>
+          <span class="ab-pill"><span class="material-icons">table_rows</span>{{ active_upload.entry_count }} entries</span>
+          <span class="ab-pill"><span class="material-icons">schedule</span>Uploaded {{ active_upload.uploaded_at }}</span>
+        </div>
+      </div>
+      <div class="ab-right">
+        <a href="{{ url_for('user_tms') }}" target="_blank" class="btn btn-ghost btn-sm">
+          <span class="material-icons">open_in_new</span> Preview
+        </a>
+        <button class="btn btn-red btn-sm" onclick="confirmDeactivate()">
+          <span class="material-icons">unpublished</span> Deactivate
+        </button>
+      </div>
+    </div>
+    {% else %}
+    <div class="active-banner a a2" style="border: 2px dashed rgba(139,92,246,0.25);">
+      <div class="ab-left">
+        <div class="ab-eyebrow">No Active Timetable</div>
+        <div class="ab-label" style="color: rgba(238,240,246,0.5);">No timetable is currently published</div>
+        <div style="font-size:0.82rem; color: rgba(238,240,246,0.35); margin-top:4px;">Upload one below to make it visible to students.</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- STATS ROW -->
+    <div class="stats-row a a2">
+      <div class="stat-mini">
+        <div class="sm-val">{{ total_entries }}</div>
+        <div class="sm-lbl">Total Entries</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sm-val">{{ total_venues }}</div>
+        <div class="sm-lbl">Venues</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sm-val">{{ venues_with_images }}</div>
+        <div class="sm-lbl">Venues with Images</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sm-val">{{ total_uploads }}</div>
+        <div class="sm-lbl">Total Uploads</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs a a3">
+      <button class="tab-btn active" onclick="switchTab('upload', this)">
+        <span class="material-icons">upload_file</span> Upload Timetable
+      </button>
+      <button class="tab-btn" onclick="switchTab('label', this)">
+        <span class="material-icons">edit</span> Edit Label
+      </button>
+      <button class="tab-btn" onclick="switchTab('venues', this)">
+        <span class="material-icons">location_on</span> Venue Images
+      </button>
+      <button class="tab-btn" onclick="switchTab('entries', this)">
+        <span class="material-icons">table_view</span> View Entries
+      </button>
+      <button class="tab-btn" onclick="switchTab('history', this)">
+        <span class="material-icons">history</span> Upload History
+      </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB 1: UPLOAD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-upload">
+      <div class="card a a4">
+        <div class="card-head"><h2>Upload New Timetable</h2></div>
+        <form method="POST" action="{{ url_for('admin_tms_upload') }}" enctype="multipart/form-data" id="uploadForm">
+
+          <!-- DROP ZONE -->
+          <div class="drop-zone" id="dropZone">
+            <input type="file" name="timetable_file" accept=".xlsx" id="fileInput" required>
+            <div class="dz-icon">
+              <span class="material-icons" style="font-size:2.4rem; color:var(--tms);">table_chart</span>
+            </div>
+            <div class="dz-title">Drop your Excel (.xlsx) file here</div>
+            <div class="dz-sub">Or click to browse. Only .xlsx files supported.</div>
+            <div class="dz-file-name" id="dzFileName"></div>
+          </div>
+
+          <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="upload-status" id="uploadStatus">Parsing timetable...</div>
+
+          <div style="height:20px;"></div>
+
+          <!-- FORM FIELDS -->
+          <div class="form-grid">
+            <div class="field">
+              <label>Timetable Label *</label>
+              <input type="text" name="label" placeholder="e.g. Timetable for Second Semester" required>
+              <span class="field-hint">This is what students will see as the timetable title.</span>
+            </div>
+            <div class="field">
+              <label>Version *</label>
+              <input type="text" name="version" placeholder="e.g. V1" required value="V1">
+              <span class="field-hint">Increment this when you update (V1 → V2 → V3).</span>
+            </div>
+            <div class="field">
+              <label>Semester *</label>
+              <select name="semester" required>
+                <option value="">Select semester</option>
+                <option value="First Semester">First Semester</option>
+                <option value="Second Semester" selected>Second Semester</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Academic Year *</label>
+              <input type="text" name="academic_year" placeholder="e.g. 2025/2026" required value="2025/2026">
+            </div>
+          </div>
+
+          <!-- SET AS ACTIVE -->
+          <div style="display:flex; align-items:center; gap:10px; margin-top:18px; padding:14px 18px; background:var(--tms-bg); border-radius:12px; border:1px solid var(--tms-bd);">
+            <input type="checkbox" name="set_active" id="setActive" checked
+              style="width:18px; height:18px; accent-color:var(--tms); cursor:pointer; flex-shrink:0;">
+            <label for="setActive" style="font-size:0.88rem; font-weight:600; color:var(--tms-text); cursor:pointer;">
+              Publish immediately — make this the active timetable students see
+            </label>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">
+            <button type="reset" class="btn btn-ghost">
+              <span class="material-icons">refresh</span> Reset
+            </button>
+            <button type="submit" class="btn btn-tms" id="submitBtn">
+              <span class="material-icons">cloud_upload</span> Upload & Parse Timetable
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="card">
+        <div class="card-head"><h2>How It Works</h2></div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
+          <div style="text-align:center; padding:16px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:var(--tms-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+              <span class="material-icons" style="color:var(--tms);">upload_file</span>
+            </div>
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:4px;">1. Upload Excel</div>
+            <div style="font-size:0.78rem;color:var(--gray-3);">Upload the UNEX timetable .xlsx file. Must match the standard format.</div>
+          </div>
+          <div style="text-align:center; padding:16px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+              <span class="material-icons" style="color:var(--green);">auto_fix_high</span>
+            </div>
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:4px;">2. Auto-Parse</div>
+            <div style="font-size:0.78rem;color:var(--gray-3);">The system automatically extracts all courses, times, venues, and days.</div>
+          </div>
+          <div style="text-align:center; padding:16px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+              <span class="material-icons" style="color:var(--blue);">people</span>
+            </div>
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:4px;">3. Students See It</div>
+            <div style="font-size:0.78rem;color:var(--gray-3);">Students filter by department and level. Their personal timetable appears instantly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB 2: EDIT LABEL -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-label">
+      <div class="card a a4">
+        <div class="card-head"><h2>Edit Timetable Label &amp; Version</h2></div>
+        <p style="font-size:0.84rem; color:var(--gray-3); margin-bottom:22px;">
+          This is the text displayed at the top of every student's timetable page. Change the version when you push an update so students notice it changed.
+        </p>
+
+        {% if active_upload %}
+        <form method="POST" action="{{ url_for('admin_tms_label') }}">
+          <input type="hidden" name="upload_id" value="{{ active_upload.id }}">
+          <div class="form-grid">
+            <div class="field">
+              <label>Label Text *</label>
+              <input type="text" name="label" value="{{ active_upload.label }}" required>
+            </div>
+            <div class="field">
+              <label>Version *</label>
+              <input type="text" name="version" value="{{ active_upload.version }}" required>
+            </div>
+          </div>
+
+          <!-- LIVE PREVIEW -->
+          <div class="label-preview" id="labelPreview">
+            <div class="lp-dot"></div>
+            <div class="lp-text" id="previewText">{{ active_upload.label }}</div>
+            <div class="lp-ver" id="previewVer">{{ active_upload.version }}</div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+            <button type="submit" class="btn btn-tms">
+              <span class="material-icons">save</span> Save Label
+            </button>
+          </div>
+        </form>
+        {% else %}
+        <div class="empty-state">
+          <span class="material-icons">info</span>
+          <p>No active timetable. Upload one first before editing the label.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB 3: VENUE IMAGES -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-venues">
+      <div class="card a a4">
+        <div class="card-head">
+          <h2>Venue Image Manager</h2>
+          <p>{{ venues_with_images }}/{{ total_venues }} venues have images</p>
+        </div>
+        <p style="font-size:0.84rem; color:var(--gray-3); margin-bottom:22px;">
+          Upload images for each venue. If no image is uploaded, the venue image section simply won't appear on the student timetable.
+        </p>
+
+        {% if venues %}
+        <div class="venue-grid">
+          {% for venue in venues %}
+          <div class="venue-card" id="vc-{{ venue.id }}">
+            <div class="venue-img">
+              {% if venue.image_url %}
+              <img src="{{ venue.image_url }}" alt="{{ venue.name }}" id="vi-{{ venue.id }}">
+              {% else %}
+              <div class="venue-img-placeholder" id="vi-{{ venue.id }}">
+                <span class="material-icons">image_not_supported</span>
+                <span>No image</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="venue-info">
+              <div class="venue-name">{{ venue.name }}</div>
+              <div class="venue-cap">Capacity: {{ venue.capacity or '—' }}</div>
+              <div class="venue-actions">
+                <label class="venue-upload-label">
+                  <span class="material-icons">add_photo_alternate</span>
+                  {{ 'Change' if venue.image_url else 'Upload Image' }}
+                  <input type="file" accept="image/*" onchange="uploadVenueImage(this, {{ venue.id }})">
+                </label>
+                {% if venue.image_url %}
+                <button class="venue-del-btn" onclick="deleteVenueImage({{ venue.id }})">
+                  <span class="material-icons">delete</span>
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <span class="material-icons">location_off</span>
+          <p>No venues found. Upload a timetable first — venues are auto-detected from it.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB 4: VIEW ENTRIES -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-entries">
+      <div class="card a a4">
+        <div class="preview-bar">
+          <h3>Timetable Entries <span class="badge badge-tms" id="entriesCount">—</span></h3>
+          <input class="search-input" type="text" placeholder="Search course, venue…" id="entrySearch" oninput="filterEntries()">
+          <select class="filter-select" id="dayFilter" onchange="filterEntries()">
+            <option value="">All Days</option>
+            <option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option>
+            <option>THURSDAY</option><option>FRIDAY</option>
+          </select>
+          <select class="filter-select" id="levelFilter" onchange="filterEntries()">
+            <option value="">All Levels</option>
+            <option>100</option><option>200</option><option>300</option><option>400</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table id="entriesTable">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Course Code</th>
+                <th>Venue</th>
+                <th>Dept</th>
+                <th>Level</th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody">
+              <tr><td colspan="6" style="text-align:center; padding:40px; color:var(--gray-4);">
+                <span class="material-icons" style="display:block;font-size:2rem;margin-bottom:8px;">sync</span>
+                Loading entries…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB 5: UPLOAD HISTORY -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-history">
+      <div class="card a a4">
+        <div class="card-head"><h2>Upload History</h2></div>
+
+        {% if uploads %}
+        <div class="history-list">
+          {% for upload in uploads %}
+          <div class="history-item">
+            <div class="hi-icon"><span class="material-icons">table_chart</span></div>
+            <div class="hi-info">
+              <div class="hi-label">{{ upload.label }} <span class="badge badge-tms" style="margin-left:6px;">{{ upload.version }}</span> {% if upload.is_active %}<span class="badge badge-green" style="margin-left:4px;">Active</span>{% endif %}</div>
+              <div class="hi-meta">{{ upload.semester }} · {{ upload.academic_year }} · {{ upload.entry_count }} entries · {{ upload.uploaded_at }}</div>
+            </div>
+            <div class="hi-actions">
+              {% if not upload.is_active %}
+              <form method="POST" action="{{ url_for('admin_tms_activate', upload_id=upload.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-tms btn-sm">
+                  <span class="material-icons">publish</span> Activate
+                </button>
+              </form>
+              {% endif %}
+              <button class="btn btn-red btn-sm" onclick="confirmDelete({{ upload.id }})">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <span class="material-icons">history</span>
+          <p>No uploads yet. Upload your first timetable to get started.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <!-- DEACTIVATE MODAL -->
+  <div class="modal-backdrop" id="deactivateModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Deactivate Timetable?</h3>
+        <button class="modal-close" onclick="closeModal('deactivateModal')"><span class="material-icons">close</span></button>
+      </div>
+      <p style="font-size:0.88rem; color:var(--gray-2);">This will hide the timetable from all students immediately. You can reactivate it at any time from Upload History.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('deactivateModal')">Cancel</button>
+        <form method="POST" action="{{ url_for('admin_tms_deactivate') }}" style="display:inline;">
+          <button type="submit" class="btn btn-red"><span class="material-icons">unpublished</span> Deactivate</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Delete Upload?</h3>
+        <button class="modal-close" onclick="closeModal('deleteModal')"><span class="material-icons">close</span></button>
+      </div>
+      <p style="font-size:0.88rem; color:var(--gray-2);">This permanently deletes the upload and all its timetable entries. This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
+        <form method="POST" id="deleteForm" style="display:inline;">
+          <button type="submit" class="btn btn-red"><span class="material-icons">delete_forever</span> Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    // ── TABS ──
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+      btn.classList.add('active');
+      if (name === 'entries') loadEntries();
+    }
+
+    // ── LABEL LIVE PREVIEW ──
+    const labelInput = document.querySelector('[name="label"]');
+    const verInput   = document.querySelector('[name="version"]');
+    if (labelInput) {
+      labelInput.addEventListener('input', () => {
+        const el = document.getElementById('previewText');
+        if (el) el.textContent = labelInput.value;
+      });
+    }
+    if (verInput) {
+      verInput.addEventListener('input', () => {
+        const el = document.getElementById('previewVer');
+        if (el) el.textContent = verInput.value;
+      });
+    }
+
+    // ── FILE DROP ZONE ──
+    const dz        = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const dzName    = document.getElementById('dzFileName');
+    if (fileInput) {
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) {
+          dzName.textContent = '📄 ' + fileInput.files[0].name;
+          dzName.style.display = 'block';
+        }
+      });
+    }
+    if (dz) {
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+      dz.addEventListener('drop', e => {
+        e.preventDefault(); dz.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) {
+          fileInput.files = e.dataTransfer.files;
+          dzName.textContent = '📄 ' + e.dataTransfer.files[0].name;
+          dzName.style.display = 'block';
+        }
+      });
+    }
+
+    // ── UPLOAD PROGRESS SIMULATION ──
+    document.getElementById('uploadForm')?.addEventListener('submit', function() {
+      const bar    = document.getElementById('progressBar');
+      const fill   = document.getElementById('progressFill');
+      const status = document.getElementById('uploadStatus');
+      const btn    = document.getElementById('submitBtn');
+      bar.style.display = 'block';
+      status.style.display = 'block';
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Parsing...';
+      let p = 0;
+      const iv = setInterval(() => {
+        p = Math.min(p + Math.random() * 15, 90);
+        fill.style.width = p + '%';
+        if (p > 30) status.textContent = 'Extracting course data...';
+        if (p > 60) status.textContent = 'Inserting into database...';
+        if (p > 80) status.textContent = 'Almost done...';
+      }, 300);
+      window._uploadInterval = iv;
+    });
+
+    // ── ENTRIES TABLE ──
+    let allEntries = [];
+    async function loadEntries() {
+      const body = document.getElementById('entriesBody');
+      try {
+        const res  = await fetch('{{ url_for("admin_tms_entries") }}');
+        const data = await res.json();
+        allEntries = data.entries || [];
+        renderEntries(allEntries);
+      } catch(e) {
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--red);">Failed to load entries.</td></tr>';
+      }
+    }
+
+    function renderEntries(entries) {
+      const body = document.getElementById('entriesBody');
+      document.getElementById('entriesCount').textContent = entries.length;
+      if (!entries.length) {
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-4);">No entries found.</td></tr>';
+        return;
+      }
+      const dayClass = {MONDAY:'MON',TUESDAY:'TUE',WEDNESDAY:'WED',THURSDAY:'THU',FRIDAY:'FRI'};
+      body.innerHTML = entries.map(e => `
+        <tr>
+          <td><span class="day-chip day-${dayClass[e.day]||'MON'}">${e.day.slice(0,3)}</span></td>
+          <td><span class="time-chip">${e.start_time}–${e.end_time}</span></td>
+          <td class="td-course">${e.course_code}</td>
+          <td class="td-venue">${e.venue}</td>
+          <td><span class="badge badge-gray">${e.dept_prefix||'—'}</span></td>
+          <td><span class="badge badge-tms">${e.level||'—'}</span></td>
+        </tr>`).join('');
+    }
+
+    function filterEntries() {
+      const q     = document.getElementById('entrySearch').value.toLowerCase();
+      const day   = document.getElementById('dayFilter').value;
+      const level = document.getElementById('levelFilter').value;
+      const filtered = allEntries.filter(e => {
+        const matchQ     = !q || e.course_code.toLowerCase().includes(q) || e.venue.toLowerCase().includes(q);
+        const matchDay   = !day   || e.day === day;
+        const matchLevel = !level || e.level === level;
+        return matchQ && matchDay && matchLevel;
+      });
+      renderEntries(filtered);
+    }
+
+    // ── VENUE IMAGE UPLOAD ──
+    async function uploadVenueImage(input, venueId) {
+      if (!input.files[0]) return;
+      const formData = new FormData();
+      formData.append('image', input.files[0]);
+      formData.append('venue_id', venueId);
+      try {
+        showToast('info', 'Uploading image…');
+        const res  = await fetch('{{ url_for("admin_tms_venue_image") }}', { method:'POST', body:formData });
+        const data = await res.json();
+        if (data.success) {
+          // Update the card image immediately
+          const vi = document.getElementById('vi-' + venueId);
+          if (vi) {
+            vi.outerHTML = `<img src="${data.image_url}" alt="venue" id="vi-${venueId}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+          }
+          showToast('success', 'Image uploaded successfully!');
+        } else {
+          showToast('error', data.error || 'Upload failed.');
+        }
+      } catch(e) {
+        showToast('error', 'Upload failed. Check your connection.');
+      }
+    }
+
+    async function deleteVenueImage(venueId) {
+      if (!confirm('Remove this venue image?')) return;
+      try {
+        const res  = await fetch(`/admin/tms/venue/image/delete/${venueId}`, { method:'POST' });
+        const data = await res.json();
+        if (data.success) {
+          const vi = document.getElementById('vi-' + venueId);
+          if (vi) {
+            vi.outerHTML = `<div class="venue-img-placeholder" id="vi-${venueId}"><span class="material-icons">image_not_supported</span><span>No image</span></div>`;
+          }
+          showToast('success', 'Image removed.');
+        } else {
+          showToast('error', data.error || 'Failed to remove image.');
+        }
+      } catch(e) {
+        showToast('error', 'Request failed.');
+      }
+    }
+
+    // ── MODALS ──
+    function confirmDeactivate() { document.getElementById('deactivateModal').classList.add('open'); }
+    function confirmDelete(id) {
+      document.getElementById('deleteForm').action = `/admin/tms/delete/${id}`;
+      document.getElementById('deleteModal').classList.add('open');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal-backdrop').forEach(b => {
+      b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
+    });
+
+    // ── TOASTS ──
+    function showToast(cat, msg) {
+      const icons = { success:'check_circle', error:'error_outline', info:'info' };
+      const el = document.createElement('div');
+      el.className = `toast ${cat}`;
+      el.innerHTML = `<span class="material-icons">${icons[cat]||'info'}</span><span>${msg}</span>`;
+      document.getElementById('toastWrap').appendChild(el);
+      setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),320); }, 4200);
+    }
+
+    // Flash messages from Flask
+    (function(){
+      try {
+        JSON.parse(document.getElementById('fd').dataset.messages)
+          .forEach(([cat,msg],i) => setTimeout(()=>showToast(cat,msg), i*280));
+      } catch(e){}
+    })();
+
+    // Spin animation
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(style);
+  </script>
+</body>
+  </html>
