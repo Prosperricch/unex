@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-NEX • My Timetable</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --orange:    #f97316;
+      --orange-dk: #ea580c;
+      --bg:        #f9fafb;
+      --white:     #ffffff;
+      --dark:      #111827;
+      --gray-2:    #4b5563;
+      --gray-3:    #6b7280;
+      --gray-4:    #9ca3af;
+      --gray-5:    #d1d5db;
+      --gray-6:    #e5e7eb;
+      --gray-7:    #f3f4f6;
+      --green:     #22c55e;
+      --green-bg:  #f0fdf4;
+      --red:       #ef4444;
+      --blue:      #3b82f6;
+      --tms:       #8b5cf6;
+      --tms-dk:    #7c3aed;
+      --tms-bg:    #f5f3ff;
+      --tms-bd:    #ddd6fe;
+      --tms-text:  #6d28d9;
+      --wa-green:  #25D366;
+      --wa-dark:   #128C7E;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--dark);
+      min-height: 100vh; line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── TOP NAV ── */
+    .topbar {
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: 64px; background: var(--white);
+      border-bottom: 1px solid var(--gray-6);
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center;
+      padding: 0 5vw; gap: 14px;
+    }
+    .tb-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1.2px; color: var(--dark); margin-right: auto; }
+    .tb-logo span { color: var(--orange); }
+    .tb-avatar {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange) 0%, #d97706 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 12px rgba(249,115,22,0.28); flex-shrink: 0;
+    }
+    .burger {
+      width: 36px; height: 36px; border-radius: 10px;
+      border: 1.5px solid var(--gray-6); background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--gray-3); flex-shrink: 0;
+      transition: background .18s, color .18s;
+    }
+    .burger:hover { background: var(--gray-7); color: var(--dark); }
+    .burger .material-icons { font-size: 1.1rem; }
+
+    /* ── DRAWER ── */
+    .backdrop { display:none; position:fixed; inset:0; z-index:600; background:rgba(0,0,0,0.42); backdrop-filter:blur(3px); }
+    .backdrop.open { display:block; }
+    .drawer {
+      position: fixed; top:0; right:-320px; bottom:0;
+      width: 300px; z-index:700; background: var(--white);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.14);
+      display: flex; flex-direction: column;
+      transition: right .42s cubic-bezier(.4,0,.2,1);
+    }
+    .drawer.open { right:0; }
+    .drawer-head { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-6); }
+    .drawer-logo { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.8px; }
+    .drawer-logo span { color: var(--orange); }
+    .drawer-close { width:30px;height:30px;border-radius:8px;background:var(--gray-7);border:1px solid var(--gray-6);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray-3); }
+    .drawer-close:hover { background:var(--gray-6); }
+    .drawer-close .material-icons { font-size:0.95rem; }
+    .drawer-nav { flex:1;padding:18px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto; }
+    .d-link { display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;font-size:0.92rem;font-weight:500;color:var(--gray-2);transition:background .18s,color .18s; }
+    .d-link:hover { background:var(--gray-7);color:var(--dark); }
+    .d-link.active { background:var(--tms-bg);color:var(--tms);font-weight:600; }
+    .d-link .material-icons { font-size:1.1rem; flex-shrink:0; }
+    .d-divider { height:1px;background:var(--gray-6);margin:8px 4px; }
+    .drawer-foot { padding:14px;border-top:1px solid var(--gray-6); }
+    .d-logout { display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:0.92rem;font-weight:500;color:var(--red);background:var(--red-bg,#fef2f2);border:1px solid #fecaca;cursor:pointer;transition:background .18s; }
+    .d-logout:hover { background:#fee2e2; }
+    .d-logout .material-icons { font-size:1.1rem; }
+
+    /* ── PAGE ── */
+    .page {
+      padding-top: 80px; max-width: 1040px;
+      margin: 0 auto; padding-left: 5vw; padding-right: 5vw; padding-bottom: 120px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header { padding-top: 36px; margin-bottom: 24px; }
+    .ph-eyebrow { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--tms); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .ph-eyebrow::before { content:''; width:20px; height:3px; background:var(--tms); border-radius:2px; }
+    .ph-title { font-size: clamp(1.7rem,4vw,2.4rem); font-weight: 800; letter-spacing: -0.8px; }
+
+    /* ── VERSION BANNER ── */
+    .ver-banner {
+      position: relative; overflow: hidden;
+      background: #1e2026; border-radius: 18px;
+      padding: 20px 24px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: var(--shadow-md);
+    }
+    .ver-banner::before {
+      content:''; position:absolute; top:-40px; right:-40px;
+      width:160px; height:160px; border-radius:50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .vb-dot { width:10px;height:10px;border-radius:50%;background:var(--tms);flex-shrink:0;box-shadow:0 0 8px var(--tms);animation:pulse 2.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px var(--tms)} 50%{opacity:.6;box-shadow:0 0 16px var(--tms)} }
+    .vb-info { flex:1; position:relative; z-index:1; }
+    .vb-title { font-size:0.95rem;font-weight:700;color:#eef0f6; }
+    .vb-sub { font-size:0.75rem;color:rgba(238,240,246,0.45);margin-top:2px; }
+    .vb-ver {
+      flex-shrink:0; position:relative; z-index:1;
+      background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.3);
+      color:#a78bfa; font-size:0.72rem; font-weight:700;
+      padding:4px 12px; border-radius:100px; letter-spacing:0.1em; text-transform:uppercase;
+    }
+
+    /* ── NO TIMETABLE STATE ── */
+    .no-timetable {
+      text-align:center; padding:80px 24px;
+      background:var(--white); border-radius:20px;
+      border:1px solid var(--gray-6); box-shadow:var(--shadow-sm);
+    }
+    .no-timetable .material-icons { font-size:3.5rem; color:var(--gray-5); display:block; margin-bottom:16px; }
+    .no-timetable h2 { font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+    .no-timetable p { font-size:0.88rem; color:var(--gray-3); }
+
+    /* ── FILTER CARD ── */
+    .filter-card {
+      background: var(--white); border: 1px solid var(--gray-6);
+      border-radius: 18px; padding: 20px 22px; margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-label-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+    .filter-label-row::before { content:''; width:4px; height:18px; background:var(--tms); border-radius:2px; }
+    .filter-label-row h3 { font-size:0.9rem; font-weight:700; }
+    .filter-label-row span { font-size:0.75rem; color:var(--gray-4); margin-left:auto; }
+    .filter-grid { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:12px; align-items:end; }
+    .f-field { display:flex; flex-direction:column; gap:5px; }
+    .f-label { font-size:0.72rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--gray-3); }
+    .f-select, .f-input {
+      padding: 10px 13px; border-radius:10px;
+      border:1.5px solid var(--gray-5); font-size:0.88rem; color:var(--dark);
+      background:var(--white); font-family:inherit;
+      transition:border-color .18s, box-shadow .18s;
+    }
+    .f-select:focus, .f-input:focus { outline:none; border-color:var(--tms); box-shadow:0 0 0 3px rgba(139,92,246,0.10); }
+    .f-select.autofilled { background:var(--tms-bg); border-color:var(--tms-bd); }
+    .autofill-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:0.65rem; font-weight:700; letter-spacing:0.06em;
+      background:var(--tms-bg); border:1px solid var(--tms-bd); color:var(--tms-text);
+      padding:2px 7px; border-radius:100px;
+    }
+    .autofill-badge .material-icons { font-size:0.6rem; }
+    .btn-filter {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:11px 20px; border-radius:11px;
+      background:var(--tms); color:#fff; font-size:0.88rem; font-weight:600;
+      border:none; cursor:pointer; font-family:inherit;
+      box-shadow:0 4px 14px rgba(139,92,246,0.28);
+      transition:background .18s, transform .12s;
+    }
+    .btn-filter:hover { background:var(--tms-dk); transform:translateY(-1px); }
+    .btn-filter .material-icons { font-size:0.95rem; }
+
+    /* ── ACTION BUTTONS ── */
+    .actions-bar {
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-bottom:22px; align-items:center;
+    }
+    .action-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 18px; border-radius:11px;
+      font-size:0.84rem; font-weight:600; cursor:pointer;
+      border:none; font-family:inherit;
+      transition:transform .12s, box-shadow .18s, background .18s;
+    }
+    .action-btn:hover { transform:translateY(-2px); }
+    .action-btn .material-icons { font-size:1rem; }
+    .btn-pdf {
+      background:var(--orange); color:#fff;
+      box-shadow:0 4px 14px rgba(249,115,22,0.28);
+    }
+    .btn-pdf:hover { background:var(--orange-dk); box-shadow:0 8px 24px rgba(249,115,22,0.38); }
+    .btn-copy-wa {
+      background:#fff; color:var(--wa-dark);
+      border:2px solid var(--wa-green) !important;
+      box-shadow:0 4px 14px rgba(37,211,102,0.16);
+    }
+    .btn-copy-wa:hover { background:var(--green-bg); box-shadow:0 8px 24px rgba(37,211,102,0.24); }
+    .btn-share-wa {
+      background:var(--wa-green); color:#fff;
+      box-shadow:0 4px 14px rgba(37,211,102,0.32);
+    }
+    .btn-share-wa:hover { background:var(--wa-dark); box-shadow:0 8px 24px rgba(37,211,102,0.42); }
+    .actions-meta { margin-left:auto; font-size:0.78rem; color:var(--gray-4); }
+
+    /* ── TIMETABLE CARD ── */
+    .tt-card {
+      background:var(--white); border:1px solid var(--gray-6);
+      border-radius:20px; box-shadow:var(--shadow-sm); overflow:hidden;
+      margin-bottom:24px;
+    }
+    .tt-card-head {
+      padding:18px 24px; border-bottom:1px solid var(--gray-6);
+      display:flex; align-items:center; gap:12px;
+    }
+    .tt-card-head h3 { font-size:0.95rem; font-weight:700; }
+    .tt-count { font-size:0.75rem; color:var(--gray-4); margin-left:auto; }
+
+    /* Day sections */
+    .day-section { border-bottom:1px solid var(--gray-6); }
+    .day-section:last-child { border-bottom:none; }
+    .day-header {
+      display:flex; align-items:center; gap:12px;
+      padding:14px 24px;
+      background:var(--gray-7); border-bottom:1px solid var(--gray-6);
+      position:sticky; top:64px; z-index:10;
+    }
+    .day-pill {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 14px; border-radius:100px;
+      font-size:0.78rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase;
+      color:#fff;
+    }
+    .day-pill.MON { background:linear-gradient(135deg,#f97316,#ea580c); }
+    .day-pill.TUE { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+    .day-pill.WED { background:linear-gradient(135deg,#22c55e,#16a34a); }
+    .day-pill.THU { background:linear-gradient(135deg,#3b82f6,#2563eb); }
+    .day-pill.FRI { background:linear-gradient(135deg,#ec4899,#db2777); }
+    .day-pill .material-icons { font-size:0.85rem; }
+    .day-course-count { font-size:0.78rem; color:var(--gray-4); }
+
+    /* Class rows */
+    .class-row {
+      display:grid; grid-template-columns:140px 1fr auto;
+      padding:16px 24px; gap:16px; align-items:start;
+      border-bottom:1px solid var(--gray-6); transition:background .12s;
+    }
+    .class-row:last-child { border-bottom:none; }
+    .class-row:hover { background:var(--tms-bg); }
+    .cr-time { display:flex; flex-direction:column; gap:4px; }
+    .cr-time-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:var(--gray-7); border:1px solid var(--gray-6);
+      padding:5px 11px; border-radius:9px;
+      font-size:0.74rem; font-weight:700; color:var(--gray-2);
+      font-family:monospace; white-space:nowrap; width:fit-content;
+    }
+    .cr-time-badge .material-icons { font-size:0.78rem; color:var(--tms); }
+    .cr-body { min-width:0; }
+    .cr-course {
+      font-size:1rem; font-weight:800; letter-spacing:-0.2px;
+      color:var(--dark); margin-bottom:4px; font-family:monospace;
+    }
+    .cr-venue { font-size:0.82rem; color:var(--gray-3); display:flex; align-items:center; gap:5px; }
+    .cr-venue .material-icons { font-size:0.85rem; color:var(--tms); }
+    .cr-dept-badge {
+      display:inline-flex; align-items:center;
+      padding:3px 9px; border-radius:7px;
+      font-size:0.7rem; font-weight:700;
+      background:var(--tms-bg); border:1px solid var(--tms-bd); color:var(--tms-text);
+      margin-top:5px; width:fit-content;
+    }
+    .cr-image { flex-shrink:0; }
+    .cr-venue-img {
+      width:80px; height:60px; border-radius:10px;
+      object-fit:cover; border:1.5px solid var(--gray-6);
+      box-shadow:var(--shadow-sm);
+      transition:transform .18s, box-shadow .18s;
+      cursor:pointer;
+    }
+    .cr-venue-img:hover { transform:scale(1.06); box-shadow:var(--shadow-md); }
+
+    /* Empty day */
+    .empty-day {
+      padding:24px; text-align:center; color:var(--gray-4); font-size:0.82rem;
+    }
+
+    /* ── NO RESULTS ── */
+    .no-results {
+      background:var(--white); border:1px solid var(--gray-6);
+      border-radius:20px; padding:60px 24px; text-align:center;
+      box-shadow:var(--shadow-sm);
+    }
+    .no-results .material-icons { font-size:3rem; color:var(--gray-5); display:block; margin-bottom:12px; }
+    .no-results h3 { font-size:1rem; font-weight:700; margin-bottom:6px; }
+    .no-results p { font-size:0.84rem; color:var(--gray-3); }
+
+    /* ── IMAGE LIGHTBOX ── */
+    .lightbox {
+      display:none; position:fixed; inset:0; z-index:900;
+      background:rgba(0,0,0,0.88); backdrop-filter:blur(6px);
+      align-items:center; justify-content:center; padding:24px;
+    }
+    .lightbox.open { display:flex; }
+    .lb-img { max-width:90vw; max-height:80vh; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .lb-close {
+      position:fixed; top:20px; right:20px; width:40px; height:40px;
+      background:rgba(255,255,255,0.15); border-radius:50%; border:none;
+      color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    }
+    .lb-close .material-icons { font-size:1.2rem; }
+    .lb-caption { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.7); font-size:0.84rem; text-align:center; }
+
+    /* ── WHATSAPP PREVIEW MODAL ── */
+    .wa-modal {
+      display:none; position:fixed; inset:0; z-index:800;
+      background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .wa-modal.open { display:flex; }
+    .wa-box {
+      background:#fff; border-radius:20px; max-width:520px; width:100%;
+      box-shadow:var(--shadow-lg); display:flex; flex-direction:column; max-height:80vh;
+      animation:modalIn .28s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:none} }
+    .wa-head {
+      padding:20px 22px; border-bottom:1px solid var(--gray-6);
+      display:flex; align-items:center; gap:12px;
+    }
+    .wa-head-icon { width:36px;height:36px;border-radius:50%;background:var(--wa-green);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0; }
+    .wa-head-icon .material-icons { font-size:1.1rem; }
+    .wa-head h3 { font-size:0.95rem; font-weight:700; }
+    .wa-head p { font-size:0.75rem; color:var(--gray-3); }
+    .wa-head-close { margin-left:auto; width:30px;height:30px;border-radius:8px;background:var(--gray-7);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray-3); flex-shrink:0; }
+    .wa-preview-area {
+      flex:1; overflow-y:auto; padding:20px 22px;
+      background:#e5ddd5;
+    }
+    .wa-bubble {
+      background:#fff; border-radius:12px 12px 12px 4px;
+      padding:14px 16px; font-size:0.82rem; line-height:1.7;
+      max-width:100%; box-shadow:0 2px 6px rgba(0,0,0,0.08);
+      white-space:pre-wrap; font-family:'Courier New', monospace; color:#222;
+      word-break:break-word;
+    }
+    .wa-actions { padding:16px 22px; border-top:1px solid var(--gray-6); display:flex; gap:10px; }
+    .wa-btn {
+      flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+      padding:11px; border-radius:11px; font-size:0.84rem; font-weight:600;
+      border:none; cursor:pointer; font-family:inherit; transition:background .18s;
+    }
+    .wa-btn .material-icons { font-size:1rem; }
+    .wa-btn-copy { background:var(--gray-7); color:var(--dark); border:1px solid var(--gray-6) !important; }
+    .wa-btn-copy:hover { background:var(--gray-6); }
+    .wa-btn-share { background:var(--wa-green); color:#fff; }
+    .wa-btn-share:hover { background:var(--wa-dark); }
+    .wa-copied { color:var(--green)!important; }
+
+    /* ── TOAST ── */
+    .toast-wrap { position:fixed; top:78px; right:5vw; z-index:999; display:flex; flex-direction:column; gap:10px; pointer-events:none; max-width:340px; }
+    .toast { background:var(--white); border:1px solid var(--gray-6); border-radius:14px; padding:14px 16px; font-size:0.88rem; color:var(--gray-2); display:flex; align-items:flex-start; gap:10px; pointer-events:all; box-shadow:var(--shadow-lg); border-left:4px solid var(--gray-5); animation:toastIn .32s cubic-bezier(.22,1,.36,1); }
+    .toast.success { border-left-color:var(--green); }
+    .toast.error   { border-left-color:var(--red); }
+    .toast.info    { border-left-color:var(--tms); }
+    .toast .material-icons { font-size:1.05rem; flex-shrink:0; margin-top:1px; }
+    .toast.success .material-icons { color:var(--green); }
+    .toast.error   .material-icons { color:var(--red); }
+    .toast.info    .material-icons { color:var(--tms); }
+    @keyframes toastIn { from{opacity:0;transform:translateX(16px) scale(.96)} to{opacity:1;transform:none} }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position:fixed; inset:0; z-index:700; background:rgba(249,250,251,0.88);
+      display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    }
+    .loading-overlay.show { display:flex; }
+    .spinner { width:40px;height:40px;border:3px solid var(--tms-bd);border-top-color:var(--tms);border-radius:50%;animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-text { font-size:0.88rem; color:var(--gray-3); font-weight:500; }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      .topbar, .burger, .drawer, .backdrop, .filter-card, .actions-bar, .ver-banner, .toast-wrap, .loading-overlay { display:none!important; }
+      .page { padding:0; max-width:100%; }
+      .page-header { padding-top:10px; margin-bottom:10px; }
+      .tt-card { box-shadow:none; border:1px solid #ccc; }
+      .day-header { background:#f0f0f0!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .class-row:hover { background:transparent!important; }
+    }
+
+    /* ── ANIMATIONS ── */
+    .a { opacity:0; transform:translateY(16px); animation:up .44s cubic-bezier(.22,1,.36,1) forwards; }
+    .a1{animation-delay:.04s} .a2{animation-delay:.10s} .a3{animation-delay:.16s} .a4{animation-delay:.22s} .a5{animation-delay:.28s}
+    @keyframes up { to { opacity:1; transform:none; } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:720px) {
+      .topbar { padding:0 4vw; }
+      .page { padding-left:4vw; padding-right:4vw; }
+      .filter-grid { grid-template-columns:1fr 1fr; }
+      .filter-grid .btn-filter { grid-column:1/-1; justify-content:center; }
+      .class-row { grid-template-columns:1fr; gap:10px; }
+      .cr-image { display:none; }
+      .actions-bar { gap:8px; }
+      .action-btn { flex:1; justify-content:center; font-size:0.8rem; padding:10px 12px; }
+      .actions-meta { width:100%; text-align:center; margin-left:0; }
+    }
+    @media (max-width:440px) {
+      .filter-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fd" data-messages='{{ get_flashed_messages(with_categories=true) | tojson }}' style="display:none"></div>
+
+  <!-- TOP NAV -->
+  <header class="topbar">
+    <div class="tb-logo">U-<span>NEX</span></div>
+    <a href="{{ url_for('user_settings_page') }}" class="tb-avatar" title="Settings">{{ student_name[0]|upper }}</a>
+    <button class="burger" id="burgerBtn" aria-label="Open menu">
+      <span class="material-icons">menu</span>
+    </button>
+  </header>
+
+  <!-- DRAWER -->
+  <div class="backdrop" id="backdrop"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <span class="drawer-logo">U-<span>NEX</span></span>
+      <button class="drawer-close" id="drawerClose"><span class="material-icons">close</span></button>
+    </div>
+    <nav class="drawer-nav">
+      <a class="d-link" href="{{ url_for('user_dashboard') }}"><span class="material-icons">dashboard</span> Dashboard</a>
+      <a class="d-link" href="{{ url_for('user_notes') }}"><span class="material-icons">menu_book</span> Notes</a>
+      <a class="d-link" href="{{ url_for('quiz_setup') }}"><span class="material-icons">quiz</span> Quizzes</a>
+      <a class="d-link active" href="{{ url_for('user_tms') }}"><span class="material-icons">calendar_month</span> Timetable</a>
+      <a class="d-link" href="{{ url_for('quiz_history') }}"><span class="material-icons">insights</span> Progress</a>
+      <div class="d-divider"></div>
+      <a class="d-link" href="{{ url_for('sponsors_page') }}"><span class="material-icons">handshake</span> Sponsors</a>
+      <a class="d-link" href="{{ url_for('user_settings_page') }}"><span class="material-icons">settings</span> Settings</a>
+    </nav>
+    <div class="drawer-foot">
+      <a class="d-logout" href="{{ url_for('user_logout') }}" onclick="return confirm('Log out of U-NEX?')">
+        <span class="material-icons">logout</span> Log out
+      </a>
+    </div>
+  </div>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="page-header a a1">
+      <div class="ph-eyebrow">Timetable Management System</div>
+      <h1 class="ph-title">My Timetable</h1>
+    </div>
+
+    {% if active_upload %}
+
+    <!-- VERSION BANNER -->
+    <div class="ver-banner a a2">
+      <div class="vb-dot"></div>
+      <div class="vb-info">
+        <div class="vb-title">{{ active_upload.label }}</div>
+        <div class="vb-sub">{{ active_upload.semester }} · {{ active_upload.academic_year }} · Last updated {{ active_upload.uploaded_at }}</div>
+      </div>
+      <div class="vb-ver">{{ active_upload.version }}</div>
+    </div>
+
+    <!-- FILTER CARD -->
+    <div class="filter-card a a3">
+      <div class="filter-label-row">
+        <h3>Your Filter</h3>
+        <span><span class="autofill-badge"><span class="material-icons">auto_fix_high</span>Auto-filled from your profile</span> — you can change it</span>
+      </div>
+      <form id="filterForm" onsubmit="applyFilter(event)">
+        <div class="filter-grid">
+          <div class="f-field">
+            <label class="f-label">Department</label>
+            <input class="f-input f-select autofilled" type="text" id="deptInput"
+              value="{{ student_dept | title }}" placeholder="e.g. Computer Science" list="dept-list">
+            <datalist id="dept-list">
+              {% for d in departments %}
+              <option value="{{ d | title }}">
+              {% endfor %}
+            </datalist>
+          </div>
+          <div class="f-field">
+            <label class="f-label">Level</label>
+            <select class="f-select autofilled" id="levelSelect">
+              <option value="">All Levels</option>
+              {% for lvl in ['100','200','300','400'] %}
+              <option value="{{ lvl }}" {{ 'selected' if student_level == lvl }}>{{ lvl }} Level</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="f-field">
+            <label class="f-label">Day</label>
+            <select class="f-select" id="daySelect">
+              <option value="">All Days</option>
+              {% for day in ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'] %}
+              <option>{{ day }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn-filter">
+            <span class="material-icons">search</span> Apply
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ACTION BUTTONS (shown after timetable loads) -->
+    <div class="actions-bar a a4" id="actionsBar" style="display:none;">
+      <button class="action-btn btn-pdf" onclick="savePDF()">
+        <span class="material-icons">picture_as_pdf</span> Save as PDF
+      </button>
+      <button class="action-btn btn-copy-wa" onclick="openWAModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Copy for WhatsApp
+      </button>
+      <button class="action-btn btn-share-wa" onclick="shareWhatsApp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Share to WhatsApp
+      </button>
+      <span class="actions-meta" id="resultsMeta"></span>
+    </div>
+
+    <!-- TIMETABLE OUTPUT -->
+    <div id="timetableOutput" class="a a5"></div>
+
+    {% else %}
+
+    <!-- NO ACTIVE TIMETABLE -->
+    <div class="no-timetable a a3">
+      <span class="material-icons">event_busy</span>
+      <h2>No Timetable Available</h2>
+      <p>The admin hasn't published a timetable yet. Check back soon!</p>
+    </div>
+
+    {% endif %}
+
+  </div><!-- /page -->
+
+  <!-- IMAGE LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lb-close" onclick="closeLightbox()"><span class="material-icons">close</span></button>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <div class="lb-caption" id="lbCaption"></div>
+  </div>
+
+  <!-- WHATSAPP MODAL -->
+  <div class="wa-modal" id="waModal">
+    <div class="wa-box">
+      <div class="wa-head">
+        <div class="wa-head-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </div>
+        <div>
+          <h3>WhatsApp Preview</h3>
+          <p>Copy and share this formatted timetable</p>
+        </div>
+        <button class="wa-head-close" onclick="closeWAModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="wa-preview-area">
+        <div class="wa-bubble" id="waBubble"></div>
+      </div>
+      <div class="wa-actions">
+        <button class="wa-btn wa-btn-copy" id="waCopyBtn" onclick="copyWAText()">
+          <span class="material-icons">content_copy</span> Copy Text
+        </button>
+        <button class="wa-btn wa-btn-share" onclick="shareWhatsApp()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Open in WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading your timetable…</div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    // ── DRAWER ──
+    const burger   = document.getElementById('burgerBtn');
+    const drawer   = document.getElementById('drawer');
+    const backdrop = document.getElementById('backdrop');
+    const dClose   = document.getElementById('drawerClose');
+    const openD    = () => { drawer.classList.add('open'); backdrop.classList.add('open'); };
+    const closeD   = () => { drawer.classList.remove('open'); backdrop.classList.remove('open'); };
+    if (burger)   burger.addEventListener('click', openD);
+    if (dClose)   dClose.addEventListener('click', closeD);
+    if (backdrop) backdrop.addEventListener('click', closeD);
+
+    // ── GLOBAL STATE ──
+    let currentEntries = []; // raw entries for WhatsApp generation
+    let currentFilters = {
+      dept:  '{{ student_dept | title }}',
+      level: '{{ student_level }}',
+      day:   ''
+    };
+
+    // ── APPLY FILTER ──
+    async function applyFilter(e) {
+      if (e) e.preventDefault();
+      const dept  = document.getElementById('deptInput')?.value.trim() || '';
+      const level = document.getElementById('levelSelect')?.value || '';
+      const day   = document.getElementById('daySelect')?.value || '';
+      currentFilters = { dept, level, day };
+
+      showLoading(true);
+      try {
+        const params = new URLSearchParams({ dept, level, day });
+        const res    = await fetch(`/api/tms/entries?${params}`);
+        const data   = await res.json();
+        currentEntries = data.entries || [];
+        renderTimetable(currentEntries);
+        document.getElementById('actionsBar').style.display = 'flex';
+        const meta = document.getElementById('resultsMeta');
+        if (meta) meta.textContent = `${currentEntries.length} class${currentEntries.length !== 1 ? 'es' : ''} found`;
+      } catch(err) {
+        showToast('error', 'Failed to load timetable. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ── RENDER TIMETABLE ──
+    const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'];
+    const DAY_ABBR = { MONDAY:'MON',TUESDAY:'TUE',WEDNESDAY:'WED',THURSDAY:'THU',FRIDAY:'FRI' };
+    const DAY_ICONS = { MONDAY:'wb_sunny',TUESDAY:'filter_2',WEDNESDAY:'filter_3',THURSDAY:'filter_4',FRIDAY:'weekend' };
+
+    function renderTimetable(entries) {
+      const out = document.getElementById('timetableOutput');
+
+      if (!entries.length) {
+        out.innerHTML = `
+          <div class="no-results">
+            <span class="material-icons">search_off</span>
+            <h3>No Classes Found</h3>
+            <p>No classes match your filter. Try changing your department or level.</p>
+          </div>`;
+        return;
+      }
+
+      // Group by day
+      const byDay = {};
+      DAYS.forEach(d => byDay[d] = []);
+      entries.forEach(e => { if (byDay[e.day] !== undefined) byDay[e.day].push(e); });
+
+      // Sort each day by start time
+      Object.keys(byDay).forEach(day => {
+        byDay[day].sort((a,b) => timeToMin(a.start_time) - timeToMin(b.start_time));
+      });
+
+      const totalClasses = entries.length;
+      let html = `
+        <div class="tt-card">
+          <div class="tt-card-head">
+            <span class="material-icons" style="color:var(--tms);font-size:1.2rem;">calendar_month</span>
+            <h3>Weekly Timetable</h3>
+            <span class="tt-count">${totalClasses} class${totalClasses!==1?'es':''} · ${Object.values(byDay).filter(d=>d.length).length} days</span>
+          </div>`;
+
+      DAYS.forEach(day => {
+        const rows = byDay[day];
+        html += `<div class="day-section">
+          <div class="day-header">
+            <span class="day-pill ${DAY_ABBR[day]}">
+              <span class="material-icons">${DAY_ICONS[day]}</span> ${day}
+            </span>
+            <span class="day-course-count">${rows.length ? rows.length + ' class' + (rows.length>1?'es':'') : 'No classes'}</span>
+          </div>`;
+
+        if (!rows.length) {
+          html += `<div class="empty-day">No classes scheduled on ${day}</div>`;
+        } else {
+          rows.forEach(e => {
+            const imgHtml = e.venue_image
+              ? `<div class="cr-image"><img class="cr-venue-img" src="${escHtml(e.venue_image)}" alt="${escHtml(e.venue)}" onclick="openLightbox('${escHtml(e.venue_image)}','${escHtml(e.venue)}')" title="Click to enlarge"></div>`
+              : '';
+            html += `
+              <div class="class-row">
+                <div class="cr-time">
+                  <div class="cr-time-badge">
+                    <span class="material-icons">schedule</span>
+                    ${e.start_time} – ${e.end_time}
+                  </div>
+                </div>
+                <div class="cr-body">
+                  <div class="cr-course">${escHtml(e.course_code)}</div>
+                  <div class="cr-venue"><span class="material-icons">location_on</span> ${escHtml(e.venue)}</div>
+                  ${e.dept_prefix ? `<div class="cr-dept-badge">${escHtml(e.dept_prefix)} · Level ${escHtml(e.level||'—')}</div>` : ''}
+                </div>
+                ${imgHtml}
+              </div>`;
+          });
+        }
+        html += `</div>`;
+      });
+
+      html += `</div>`;
+      out.innerHTML = html;
+    }
+
+    function timeToMin(t) {
+      if (!t) return 0;
+      const [h,m] = t.split(':').map(Number);
+      return h*60 + (m||0);
+    }
+
+    function escHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── WHATSAPP TEXT GENERATOR ──
+    function generateWAText() {
+      const { dept, level, day } = currentFilters;
+      const upload = {
+        label: '{{ active_upload.label if active_upload else "" }}',
+        version: '{{ active_upload.version if active_upload else "" }}',
+        semester: '{{ active_upload.semester if active_upload else "" }}',
+        academic_year: '{{ active_upload.academic_year if active_upload else "" }}'
+      };
+
+      const divider = '━━━━━━━━━━━━━━━━━━━━━━━━';
+      let text = '';
+
+      // Header
+      text += `🎓 *MADUKA UNIVERSITY*\n`;
+      text += `📅 *${upload.label} ${upload.version}*\n`;
+      text += `_${upload.semester} · ${upload.academic_year}_\n`;
+      if (dept)  text += `🏛 *Department:* _${dept}_\n`;
+      if (level) text += `📚 *Level:* _${level} Level_\n`;
+      text += `\n${divider}\n`;
+
+      // Group by day
+      const byDay = {};
+      DAYS.forEach(d => byDay[d] = []);
+      currentEntries.forEach(e => { if (byDay[e.day]!==undefined) byDay[e.day].push(e); });
+      Object.keys(byDay).forEach(d => byDay[d].sort((a,b)=>timeToMin(a.start_time)-timeToMin(b.start_time)));
+
+      const dayEmoji = { MONDAY:'🌅',TUESDAY:'⚡',WEDNESDAY:'🌿',THURSDAY:'💙',FRIDAY:'🎉' };
+
+      DAYS.forEach(d => {
+        const rows = byDay[d];
+        if (!rows.length) return;
+
+        text += `\n${dayEmoji[d]} *${d}*\n`;
+        text += `${divider}\n`;
+        rows.forEach((e, i) => {
+          text += `\n*${i+1}. ${e.course_code}*\n`;
+          text += `   ⏰ _${e.start_time} – ${e.end_time}_\n`;
+          text += `   📍 ${e.venue}\n`;
+        });
+      });
+
+      // Footer
+      text += `\n${divider}\n`;
+      text += `\n_Generated by U-NEX · unex.onrender.com_\n`;
+      text += `_${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}_`;
+
+      return text;
+    }
+
+    // ── WA MODAL ──
+    function openWAModal() {
+      if (!currentEntries.length) { showToast('error','Apply a filter first to load your timetable.'); return; }
+      const text = generateWAText();
+      document.getElementById('waBubble').textContent = text;
+      document.getElementById('waModal').classList.add('open');
+    }
+    function closeWAModal() { document.getElementById('waModal').classList.remove('open'); }
+    document.getElementById('waModal')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('waModal')) closeWAModal();
+    });
+
+    // ── COPY WA TEXT ──
+    async function copyWAText() {
+      const text = generateWAText();
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('waCopyBtn');
+        btn.innerHTML = '<span class="material-icons">check_circle</span> Copied!';
+        btn.classList.add('wa-copied');
+        showToast('success', 'Timetable copied! Paste it in WhatsApp.');
+        setTimeout(() => {
+          btn.innerHTML = '<span class="material-icons">content_copy</span> Copy Text';
+          btn.classList.remove('wa-copied');
+        }, 2500);
+      } catch {
+        showToast('error', 'Copy failed. Please select the text manually.');
+      }
+    }
+
+    // ── SHARE TO WHATSAPP ──
+    function shareWhatsApp() {
+      if (!currentEntries.length) { showToast('error','Apply a filter first.'); return; }
+      const text = generateWAText();
+      const url  = 'https://wa.me/?text=' + encodeURIComponent(text);
+      window.open(url, '_blank');
+    }
+
+    // ── SAVE AS PDF ──
+    function savePDF() {
+      if (!currentEntries.length) { showToast('error','Apply a filter first to load your timetable.'); return; }
+      window.print();
+    }
+
+    // ── LIGHTBOX ──
+    function openLightbox(src, caption) {
+      document.getElementById('lbImg').src = src;
+      document.getElementById('lbCaption').textContent = caption;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeWAModal(); }});
+
+    // ── LOADING ──
+    function showLoading(show) {
+      const el = document.getElementById('loadingOverlay');
+      if (show) el.classList.add('show');
+      else el.classList.remove('show');
+    }
+
+    // ── TOASTS ──
+    function showToast(cat, msg) {
+      const icons = { success:'check_circle', error:'error_outline', info:'info' };
+      const el = document.createElement('div');
+      el.className = `toast ${cat}`;
+      el.innerHTML = `<span class="material-icons">${icons[cat]||'info'}</span><span>${msg}</span>`;
+      document.getElementById('toastWrap').appendChild(el);
+      setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),320); }, 4600);
+    }
+
+    // Flask flash messages
+    (function(){
+      try {
+        JSON.parse(document.getElementById('fd').dataset.messages)
+          .forEach(([cat,msg],i) => setTimeout(()=>showToast(cat,msg), i*280));
+      } catch(e){}
+    })();
+
+    // ── AUTO-LOAD ON PAGE OPEN if timetable available ──
+    {% if active_upload %}
+    window.addEventListener('DOMContentLoaded', () => {
+      // Auto-apply filter with pre-filled values
+      setTimeout(() => applyFilter(null), 400);
+    });
+    {% endif %}
+  </script>
+</body>
+</html>
